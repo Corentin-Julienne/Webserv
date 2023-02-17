@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/16 18:37:13 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/16 21:10:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ CustomSocket::~CustomSocket()
 void	CustomSocket::startServer(void)
 {
 	ssize_t		valread;
+	std::string	output("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!");
 	
 	while (true)
 	{
@@ -45,8 +46,8 @@ void	CustomSocket::startServer(void)
 		{
 			// handle error there
 		}
-		std::cout << buffer << std::endl; // print buffer content in terminal
-		write (this->_new_socket_fd, buffer, strlen(buffer));
+		//std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
+		write(this->_new_socket_fd, output.c_str(), output.size());
 		// suppress the new socket
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
 		this->_closeSocket(this->_new_socket_fd);
