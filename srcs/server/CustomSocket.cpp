@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/16 21:10:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/19 12:33:58 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ CustomSocket::~CustomSocket()
 }
 
 // main function to start a socket
-
 void	CustomSocket::startServer(void)
 {
 	ssize_t		valread;
@@ -44,9 +43,11 @@ void	CustomSocket::startServer(void)
 		valread = read(this->_new_socket_fd, buffer, 1024);
 		if (valread < 0)
 		{
+			std::cerr << "read operation : failure" << std::endl;
+			exit(EXIT_FAILURE);
 			// handle error there
 		}
-		//std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
+		std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
 		write(this->_new_socket_fd, output.c_str(), output.size());
 		// suppress the new socket
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
@@ -55,7 +56,6 @@ void	CustomSocket::startServer(void)
 }
 
 // private helper functions
-
 void	CustomSocket::_bindSocket(void)
 {
 	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr)); // make sure struct is empty
@@ -66,6 +66,8 @@ void	CustomSocket::_bindSocket(void)
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
 	{
+		std::cerr << "bind operation : failure" << std::endl;
+		exit(EXIT_FAILURE);
 		// handle error there
 	}
 }
@@ -74,6 +76,8 @@ void	CustomSocket::_enableSocketListening(void)
 {
 	if (listen(this->_socket_fd, this->_backlog) < 0)
 	{
+		std::cerr << "listen operation : failure" << std::endl;
+		exit(EXIT_FAILURE);
 		// handle error there
 	}
 }
@@ -83,6 +87,8 @@ void	CustomSocket::_acceptConnection(void)
 	if ((this->_new_socket_fd = accept(this->_socket_fd, (struct sockaddr *)&this->_sockaddr,
 		(socklen_t*)&this->_sockaddr)) < 0)
 	{
+		std::cerr << "accept operation : failure" << std::endl;
+		exit(EXIT_FAILURE);
 		// handle error here
 	}
 }
@@ -91,6 +97,8 @@ void	CustomSocket::_closeSocket(int socket_fd)
 {
 	if (close(socket_fd) < 0)
 	{
+		std::cerr << "close operation : failure" << std::endl;
+		exit(EXIT_FAILURE);
 		// handle error there
 	}
 }
