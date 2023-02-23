@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/19 12:33:58 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/23 02:19:41 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,7 @@ CustomSocket::CustomSocket(void) : _domain(AF_INET), _type(SOCK_STREAM), _protoc
 _backlog(10), _new_socket_fd(-1)
 {
 	this->_socket_fd = socket(_domain, _type, _protocol);
-	if (this->_socket_fd < 0)
-		; // add function to handle errors
+	if (this->_socket_fd < 0) {} // add function to handle errors
 	this->_bindSocket();
 	this->_enableSocketListening();
 }
@@ -84,8 +83,8 @@ void	CustomSocket::_enableSocketListening(void)
 
 void	CustomSocket::_acceptConnection(void)
 {
-	if ((this->_new_socket_fd = accept(this->_socket_fd, (struct sockaddr *)&this->_sockaddr,
-		(socklen_t*)&this->_sockaddr)) < 0)
+	socklen_t socketLen = sizeof(this->_sockaddr);
+	if ((this->_new_socket_fd = accept(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, &socketLen)) < 0)
 	{
 		std::cerr << "accept operation : failure" << std::endl;
 		exit(EXIT_FAILURE);
