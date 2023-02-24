@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/24 12:22:45 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/02/24 14:57:54 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,14 @@ void	CustomSocket::startServer(void)
 		size_t	start = buff.find(' ');
 		size_t	end = buff.find(' ', start + 1);
 		std::string	filePath = buff.substr(start, end - start);
-		output = this->_GET(filePath); // GET method
+		if (buff.substr(0, 4) == "GET ")
+			output = this->_GET(filePath);
+		else if (buff.substr(0, 5) == "POST ")
+			output = this->_POST();
+		else if (buff.substr(0, 7) == "DELETE ")
+			output = this->_DELETE();
+		else
+			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 
 		write(this->_new_socket_fd, output.c_str(), output.size());
 		// suppress the new socket
@@ -136,4 +143,14 @@ std::string	CustomSocket::_GET(std::string filePath)
 		content << "HTTP/1.1 200 OK" << "\nContent-Type: text/html" << "\nContent-Length: " << buff.str().length() << "\n\n" << buff.str();
 	}
 	return (content.str());
+}
+
+std::string	CustomSocket::_POST()
+{
+	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 4\n\nPOST");
+}
+
+std::string	CustomSocket::_DELETE()
+{
+	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 6\n\nDELETE");
 }

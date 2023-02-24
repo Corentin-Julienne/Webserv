@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/24 12:19:46 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/02/24 14:57:28 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ class CustomSocket
 		void	_acceptConnection(void);
 		void	_closeSocket(int socket_fd);
 		std::string	_GET(std::string filePath);
+		std::string	_POST();
+		std::string	_DELETE();
 
 	private:
 	
