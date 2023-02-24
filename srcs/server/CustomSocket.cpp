@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/23 02:19:41 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/02/24 12:22:45 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,16 @@ void	CustomSocket::startServer(void)
 			// handle error there
 		}
 		std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
+
+		std::string	buff = buffer;
+		size_t	start = buff.find(' ');
+		size_t	end = buff.find(' ', start + 1);
+		std::string	filePath = buff.substr(start, end - start);
+		output = this->_GET(filePath); // GET method
+
 		write(this->_new_socket_fd, output.c_str(), output.size());
 		// suppress the new socket
+
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
 		this->_closeSocket(this->_new_socket_fd);
 	}
@@ -100,4 +108,32 @@ void	CustomSocket::_closeSocket(int socket_fd)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
+}
+
+#include <sstream>
+#include <fstream>
+#include <unistd.h>
+
+std::string	CustomSocket::_GET(std::string filePath)
+{
+	filePath.erase(0, 2);
+	std::string			ret;
+	std::ifstream		ifs;
+	std::stringstream	content;
+	ifs.open(filePath);
+	if (!ifs.is_open())
+	{
+		if (access(filePath.c_str(), F_OK) != 0)
+			content << "HTTP/1.1 404 Not Found";
+		else if (access(filePath.c_str(), R_OK) != 0)
+			content << "HTTP/1.1 403 Forbidden";
+	}
+	else
+	{
+		std::stringstream	buff;
+		buff << ifs.rdbuf();
+		ifs.close();
+		content << "HTTP/1.1 200 OK" << "\nContent-Type: text/html" << "\nContent-Length: " << buff.str().length() << "\n\n" << buff.str();
+	}
+	return (content.str());
 }
