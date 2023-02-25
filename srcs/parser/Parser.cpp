@@ -6,31 +6,33 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/22 17:37:44 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 12:46:35 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
-Parser::Parser(char *argv) // to test
+Parser::Parser(char *config_file) // to test
 {
-	this->_openFile(argv);
+	this->_openFile(config_file);
 	this->_isFileValid();
 	this->_serv_num = this->_server_blocks.size();
 	for (std::size_t i = 0; i < this->_serv_num; i++)
 	{
 			this->_servers.push_back(ServConf()); // add a new Config to the linked list to be able to fulfill it
-		this->_processServerBlock(this->_server_blocks[i], i);
+		this->_processBlock(this->_server_blocks[i], i);
 	}
 }
 
 Parser::~Parser() {}
 
-void	Parser::_openFile(char *argv) // to test
+
+
+void	Parser::_openFile(char *config_file) // to test
 {
 	std::ifstream		conf_file;
 
-	conf_file.open(argv, std::ios_base::in);
+	conf_file.open(config_file, std::ios_base::in);
 	if (!conf_file.is_open())
 	{
 		std::cerr << "failure to open the conf file" << std::endl;
@@ -181,129 +183,57 @@ bool	Parser::_isServerBlockValid(std::string substr) // to test
 	return ((num_open_par == num_close_par) ? true : false && num_open_par > 0);
 }
 
-/* process the text of config for every server block. 
-No server directive is present in the block, neither trailing whitespaces or initial { and } */
-void	Parser::_processServerBlock(std::string block, int server_index)
-{
-	int				i = 0;
-	int				dir_type;
-	std::string		directive;
-
-	while (i < block.size())
-	{
-		if (!std::isspace(block[i]) && !std::isalnum(block[i])) // check if invalid char
-		{
-			std::cerr << "invalid char during block iteration" << std::endl;
-			exit(EXIT_FAILURE); // handle error there
-		}
-		if (std::isalnum(block[i])) // if beggining of an instructions
-		{
-			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find(' '))); // test this
-			if (dir_type == BAD_INSTR)
-			{
-				std::cerr << "invalid instruction provided" << std::endl;
-				exit(EXIT_FAILURE); // error, instruction does not exists
-			}
-			else
-				i += this->_dispatchInstructionProcessing(dir_type, block.substr(i), server_index);
-		}
-		i++;
-	}
-}
-
-int	Parser::_processLocationBlock(std::string directive, int server_index)
-{
-	if (!this->_isLocationBlockValid(directive))
-	{
-		std::cerr << "location block syntax is invalid" << std::endl;
-		exit(EXIT_FAILURE); // handle error there
-	}
-	// continue there, extract every block
-	
-}
-
-/* check whether the location block is valid syntaxically have equal number of { and }
-should be equal to 2 unless you have another nested location block */
-int	Parser::_isLocationBlockValid(std::string block) // to test
-{
-	int		i = 8; // size of the std::string "location"
-	int		errors = 0;
-	int		open_brack = 0;
-	int		close_brack = 0;
-
-	while (std::isspace(block[i]) && i < block.size()) // trailing whitespace
-		i++;
-	if (block[i] != '{') // check whether the block start by '{'
-		return (1);
-	else
-		open_brack++;
-	if (i < block.size() - 1)
-		i++;
-	while (i < block.size() && block[i] != '}')
-	{	
-		if (block[i] == 'l' && !block.substr(i, 8).compare("location")) // case another nested location block
-			errors += this->_isLocationBlockValid(block.substr(i)); 	
-		i++;
-	}
-	if (i < block.size() && block[i] == '}')
-		close_brack++;
-	if (close_brack != open_brack || open_brack != 1)
-		errors++;
-	return (errors);
-}
-
-int	Parser::_processListenDirective(std::string directive, int server_index)
-{
-	std::string		instr;
-
-	instr = directive.substr(0, directive.find(';')); // check that
-	// implement
-
-	return (instr.size());
-}
-
 int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int server_index) // to test
 {
+	std::vector<int>	size_and_args;
+	
+	if (type == LOCATION)
+		return (this->_processLocationBlock(directive, server_index));
+
+	size_and_args = this->_isDirectiveValid(directive);
+	if (size_and_args[0] == -1)
+	{
+		std::cerr << "invalid directive format" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	switch (type)
 	{
-		case (LOCATION):
-			return (this->_processLocationBlock(directive, server_index));
-			break ;
 		case (LISTEN):
-			return (this->_processListenDirective(directive, server_index));
+			this->_processListenDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (SERV_NAME):
-			return ();
+			this->_processServerNameDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (ERR_PAGE):
-			return ();
+			this->_processErrorPageDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (CLIENT_BODY_SIZE):
-			return ();
+			this->_processBodySizeDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (ALLOW_HTTP_METHOD):
-			return ();
+			this->_processAllowDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (REWRITE):
-			return ();
+			this->_processRewriteDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (ROOT):
-			return ();
+			this->_processRootDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (AUTOINDEX):
-			return ();
+			this->_processAutoindexDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (INDEX):
-			return ();
+			this->_processIndexDirective(directive, server_index, size_and_args[1]);
 			break ;
 		case (CGI):
-			return ();
+			this->_processCgiDirective(directive, server_index, size_and_args[1]);
 			break ;
 		default:
 			std::cerr << "instruction unknown" << std::endl;
-			break;
+			exit(EXIT_FAILURE);
+			break ;
 	}
-	return (-1);
+	return (size_and_args[0]);
 }
 
 int	Parser::_rtnInstructionType(std::string directive) // to test

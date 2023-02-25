@@ -6,11 +6,15 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/22 14:48:59 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 12:48:58 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ServConf.hpp"
+#ifndef PARSER_HPP
+# define PARSER_HPP
+
+#include "./structs/ServConf.hpp"
+#include "./structs/Location.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -37,13 +41,13 @@ class Parser
 {
 	public:
 	
-		Parser(char *argv);
+		Parser(char *config_file);
 		~Parser();
 
 	private:
 	
 		// ops on conf file
-		void	_openFile(char *argv);
+		void	_openFile(char *config_file);
 		bool	_isFileValid(void);
 		void	_ifstreamToStr(void);
 		// separating std::string on different server blocks
@@ -52,19 +56,37 @@ class Parser
 		bool	_isBlockSyntaxValid(void);
 		bool	_isServerBlockValid(std::string substr);
 		// process instructions
-		void	_processServerBlock(std::string block, int server_index);
 		int		_rtnInstructionType(std::string directive);
 		int		_dispatchInstructionProcessing(int type, std::string directive, int server_index);
 		int		_processInstruction(std::string directive);
-		// process locations
-		int		_processLocationBlock(std::string directive, int server_index);
-		int		_isLocationBlockValid(std::string block);
-		// process various instructions
-		int		_processListenDirective(std::string directive, int server_index);
 		
-		std::ifstream				_conf_file;
-		std::string					_conf_str;
-		std::vector<std::string>	_server_blocks;
-		int							_serv_num;
-		std::vector<ServConf>		_servers;
+		/* ProcessBlocks.cpp */	
+		void						_processBlock(std::string block, int server_index, bool is_loc = false);
+		int							_processLocationBlock(std::string directive, int server_index);
+		void						_enforceInheritance(Location& loc, int server_index);
+		std::vector<std::string>	_cutArgs(std::string directive);
+		std::vector<int>			_isLocationBlockValid(std::string block);
+		std::vector<int>			_isDirectiveValid(std::string directive);
+
+		/* ParseDirectives.cpp */
+		void	_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void	_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		
+	private:
+		
+		std::ifstream					_conf_file;
+		std::string						_conf_str;
+		std::vector<std::string>		_server_blocks;
+		int								_serv_num;
+		std::vector<ServConf>			_servers;
 };
+
+#endif
