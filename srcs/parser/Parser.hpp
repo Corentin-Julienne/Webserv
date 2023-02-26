@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 17:00:05 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 13:14:04 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,13 @@ class Parser
 		void	_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
 		void	_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
 		void	_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+
+		/* test features */
+
+	public:
+		
+		void	displayParsing(void);	
+		void	displayLocation(Location& loc);
 		
 	private:
 		
