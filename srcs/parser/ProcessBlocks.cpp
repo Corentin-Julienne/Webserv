@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 15:53:51 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 19:17:01 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,13 @@
 /* process the text of config for every block (location or server block). 
 No server or location directive is present in the block, 
 neither trailing whitespaces or initial { and } */
-void	Parser::_processBlock(std::string block, int server_index, bool is_loc = false)
+void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 {
-	int				i = 0;
+	std::size_t		i = 0;
 	int				dir_type;
 	std::string		directive;
 
+	std::cout << "go till there motherfucker" << std::endl;
 	while (i < block.size())
 	{
 		if (!std::isspace(block[i]) && !std::isalnum(block[i])) // check if invalid char
@@ -50,11 +51,11 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc = fa
 
 /* check if the syntax of the location block is valid or not, then extract the location block into
 std::string block and process it after enforcing inheritance */
-int	Parser::_processLocationBlock(std::string directive, int server_index)
+std::size_t	Parser::_processLocationBlock(std::string directive, int server_index)
 {
-	std::vector<int>		nums;
-	std::string				block;
-	Location				loc;
+	std::vector<std::size_t>		nums;
+	std::string						block;
+	Location						loc;
 	
 	nums = this->_isLocationBlockValid(directive);
 	if (nums[0] == 0)
@@ -64,11 +65,9 @@ int	Parser::_processLocationBlock(std::string directive, int server_index)
 	}
 	block = directive.substr(nums[2] + 1, nums[1] - 1);	
 	this->_servers[server_index]._locs.push_back(loc);
-	this->_enforceInheritance(loc, server_index);
-	
-	int		loc_index = this->_servers[server_index]._locs.size() - 1;
-	
+	this->_enforceInheritance(loc, server_index);	
 	this->_processBlock(block, server_index, true);
+	return (nums[1]);
 }
 
 /* Copy the values of a server block to the Location struct loc, to enforce inheritance principle */
@@ -107,9 +106,9 @@ std::vector<std::string>	Parser::_cutArgs(std::string directive) // to test
 /* check whether the location block is valid syntaxically have one { and one }
 does not support nested location block like nginx !!!
 return 0 if not the case, length of the location block otherwise */
-std::vector<int>	Parser::_isLocationBlockValid(std::string block) // to test
+std::vector<std::size_t>	Parser::_isLocationBlockValid(std::string block) // to test
 {
-	std::vector<int>		nums;
+	std::vector<std::size_t>		nums;
 
 	nums.push_back(1); // boolean if valid or not
 	nums.push_back(8); // iterator starting after "location" substring
@@ -131,21 +130,22 @@ std::vector<int>	Parser::_isLocationBlockValid(std::string block) // to test
 }
 
 /* check if directive is valid and the number of arguments */
-std::vector<int>	Parser::_isDirectiveValid(std::string directive) // to test
+std::vector<std::size_t>	Parser::_isDirectiveValid(std::string directive) // to test
 {
-	std::vector<int>		vals(2, 0); // first value is length of directive and second is num of arguments
-	std::string				arg;
+	std::vector<std::size_t>		vals(3, 0); // first value is length of directive and second is num of arguments
+	std::string						arg;
 
+	vals[2] = 1; // 
 	while (vals[0] < directive.size() && directive[vals[0]] != ';')
 	{
 		while (std::isspace(directive[vals[0]])) // trailing whitespaces
 			vals[0]++;
 		arg = directive.substr(vals[0], directive.substr(vals[0]).find(' ')); // test that
-		for (int i = 0; i < arg.size(); i++)
+		for (std::size_t i = 0; i < arg.size(); i++)
 		{
 			if (!std::isalpha(arg[i]) && arg[i] != '_') // case wrong argument syntax
 			{
-				vals[0] = -1;
+				vals[2] = 0;
 				return (vals);
 			}		
 		}
@@ -153,6 +153,6 @@ std::vector<int>	Parser::_isDirectiveValid(std::string directive) // to test
 		vals[0] += arg.size();	
 	}
 	if (vals[0] == directive.size()) // case reach EOF without finding a ';'
-		vals[0] = -1;
+		vals[2] = 0;
 	return (vals);
 }

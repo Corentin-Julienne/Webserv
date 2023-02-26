@@ -6,13 +6,13 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 11:40:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 14:58:18 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 17:36:27 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
-#include "./structs/Location.hpp"
-#include "./structs/ServConf.hpp"
+#include "Location.hpp"
+#include "ServConf.hpp"
 
 #include <iostream>
 

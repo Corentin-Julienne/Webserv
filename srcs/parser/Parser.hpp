@@ -6,15 +6,15 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 13:14:04 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 17:29:23 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PARSER_HPP
 # define PARSER_HPP
 
-#include "./structs/ServConf.hpp"
-#include "./structs/Location.hpp"
+#include "ServConf.hpp"
+#include "Location.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -53,7 +53,7 @@ class Parser
 	
 		// ops on conf file
 		void	_openFile(char *config_file);
-		bool	_isFileValid(void);
+		void	_processFile(void);
 		void	_ifstreamToStr(void);
 		// separating std::string on different server blocks
 		void	_iterateThroughStr(void);
@@ -67,11 +67,11 @@ class Parser
 		
 		/* ProcessBlocks.cpp */	
 		void						_processBlock(std::string block, int server_index, bool is_loc = false);
-		int							_processLocationBlock(std::string directive, int server_index);
+		std::size_t					_processLocationBlock(std::string directive, int server_index);
 		void						_enforceInheritance(Location& loc, int server_index);
 		std::vector<std::string>	_cutArgs(std::string directive);
-		std::vector<int>			_isLocationBlockValid(std::string block);
-		std::vector<int>			_isDirectiveValid(std::string directive);
+		std::vector<std::size_t>	_isLocationBlockValid(std::string block);
+		std::vector<std::size_t>	_isDirectiveValid(std::string directive);
 
 		/* ParseDirectives.cpp */
 		void	_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);

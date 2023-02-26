@@ -6,13 +6,13 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 16:53:45 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 15:42:13 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
-void	Parser::_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false)
+void	Parser::_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>		args;
 
@@ -50,7 +50,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	}
 }
 
-void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {	
 	std::vector<std::string>		args;
 	
@@ -65,11 +65,11 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 		exit(EXIT_FAILURE);
 	}
 	args = this->_cutArgs(directive);
-	for (int i = 1; i < args.size(); i++)
+	for (std::size_t i = 1; i < args.size(); i++)
 		this->_servers[serv_idx]._server_name.push_back(args[i]);	
 }
 
-void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	new_err_dir;
@@ -79,16 +79,16 @@ void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int
 		std::cerr << "error_page directive accept at least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 1; i < args.size(); i++)
+	args = this->_cutArgs(directive);
+	for (std::size_t i = 1; i < args.size(); i++)
 		new_err_dir.push_back(args[i]);
-
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._error_pages.push_back(new_err_dir);
 	else
 		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);
 }
 
-void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string>	args;
 	
@@ -109,7 +109,7 @@ void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int 
 		this->_servers[serv_idx]._client_max_body_size = body_size;
 }
 
-void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string> 	args;
 
@@ -119,7 +119,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 		exit(EXIT_FAILURE);
 	}
 	args = this->_cutArgs(directive);
-	for (int i = 1; i < args.size(); i++)
+	for (std::size_t i = 1; i < args.size(); i++)
 	{	
 		if (args[i].compare("GET") && args[i].compare("POST") && args[i].compare("DELETE"))
 		{
@@ -133,7 +133,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 	}
 }
 
-void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string>		args;
 	std::vector<std::string>		new_redir;
@@ -152,7 +152,7 @@ void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int a
 		this->_servers[serv_idx]._rewrite.push_back(new_redir);
 }
 
-void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string>	args;
 
@@ -168,7 +168,7 @@ void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_
 		this->_servers[serv_idx]._root = args[1];
 }
 
-void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	bool						switch_autoindex = false;
 	std::vector<std::string>	args;
@@ -187,7 +187,7 @@ void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int
 		this->_servers[serv_idx]._autoindex = switch_autoindex;
 }
 
-void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // to test
+void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	index_values;
@@ -197,7 +197,8 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 		std::cerr << "index directive take at least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	for (int i = 1; i < args.size(); i++)
+	args = this->_cutArgs(directive);
+	for (std::size_t i = 1; i < args.size(); i++)
 		index_values.push_back(args[i]);
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index = index_values;
@@ -205,9 +206,21 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 		this->_servers[serv_idx]._index = index_values;
 }
 
-void	Parser::_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false) // implement later
+void	Parser::_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // implement later
 {
-	// IMPLEMENT LATER
-	std::cerr << "feature not yet implemented" << std::endl;
-	exit(EXIT_FAILURE);
+	std::vector<std::string>	args;
+	std::vector<std::string>	cgi_values;
+	
+	if (arg_num < 2)
+	{
+		std::cerr << "cgi directive take a least one argument" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	args = this->_cutArgs(directive);
+	for (std::size_t i = 1; i < args.size(); i++)
+		cgi_values.push_back(args[i]);
+	if (is_loc)
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._cgi = cgi_values;
+	else
+		this->_servers[serv_idx]._cgi = cgi_values;
 }

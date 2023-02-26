@@ -6,14 +6,14 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 15:54:49 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 13:05:18 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 17:19:11 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVCONF_HPP
 # define SERVCONF_HPP
 
-#include "./Location.hpp"
+#include "Location.hpp"
 // check if everything is necessary
 #include <iostream>
 #include <fstream>

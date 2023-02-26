@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 14:57:44 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/26 19:16:19 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,25 +15,24 @@
 Parser::Parser(char *config_file) // to test
 {
 	this->_openFile(config_file);
-	this->_isFileValid();
-	this->_serv_num = this->_server_blocks.size();
-	for (std::size_t i = 0; i < this->_serv_num; i++)
+	this->_processFile();
+	this->_serv_num = this->_server_blocks.size();	
+	for (int i = 0; i < this->_serv_num; i++)
 	{
-			this->_servers.push_back(ServConf()); // add a new Config to the linked list to be able to fulfill it
+		this->_servers.push_back(ServConf()); // add a new Config to the linked list to be able to fulfill it
 		this->_processBlock(this->_server_blocks[i], i);
 	}
 }
 
 Parser::~Parser() {}
 
-Parser::Parser(const Parser& original) : _conf_file(original._conf_file), _conf_str(original._conf_str),
-_server_blocks(original._server_blocks), _serv_num(original._serv_num), _servers(original._servers) {}
+Parser::Parser(const Parser& original) : _conf_str(original._conf_str), _server_blocks(original._server_blocks),
+_serv_num(original._serv_num), _servers(original._servers) {}
 
 Parser&	Parser::operator=(const Parser &original)
 {
 	if (this != &original)
 	{
-		this->_conf_file = original._conf_file;
 		this->_conf_str = original._conf_str;
 		this->_server_blocks = original._server_blocks;
 		this->_serv_num = original._serv_num;
@@ -42,27 +41,21 @@ Parser&	Parser::operator=(const Parser &original)
 	return *this;
 }
 
-
-
-
 void	Parser::_openFile(char *config_file) // to test
 {
-	std::ifstream		conf_file;
-
-	conf_file.open(config_file, std::ios_base::in);
-	if (!conf_file.is_open())
+	this->_conf_file.open(config_file, std::ios_base::in);
+	if (!this->_conf_file.is_open())
 	{
 		std::cerr << "failure to open the conf file" << std::endl;
 		exit(EXIT_FAILURE); // handle error there
 	}
-	this->_conf_file = conf_file;
 }
 
 /* check whether the file is in valid format or not. Includes : 
 => file is not empty
 => there is at least a server part
 => */
-bool	Parser::_isFileValid(void) // to test
+void	Parser::_processFile(void) // to test
 {
 	// case file is empty
 	if (this->_conf_file.peek() == std::ifstream::traits_type::eof())
@@ -92,12 +85,12 @@ void	Parser::_ifstreamToStr(void) // to test
 /* check till EOF that there is a matching number of { and } and that the first is { */
 bool	Parser::_isBlockSyntaxValid(void)
 {
-	int		i = 0;
-	int		num_open_par = 0;
-	int		num_close_par = 0;
-	bool	first_bracket = false;
+	std::size_t		i = 0;
+	int				num_open_par = 0;
+	int				num_close_par = 0;
+	bool			first_bracket = false;
 
-	while (this->_conf_str[i] < this->_conf_str.size())
+	while (i < this->_conf_str.size())
 	{
 		if (!first_bracket && this->_conf_str[i] == '{')
 			first_bracket = true;
@@ -117,7 +110,7 @@ void	Parser::_iterateThroughStr(void) // to test
 {
 	std::string			block;
 	std::string 		auth_char(" \ns");
-	int					i = 0;
+	std::size_t			i = 0;
 	
 	while (i < this->_conf_str.size())
 	{
@@ -128,7 +121,7 @@ void	Parser::_iterateThroughStr(void) // to test
 		}
 		if (this->_conf_str[i] == 's') // if s is the beginning of the keyword server
 		{
-			if (this->_conf_str.compare(i, 6, "server") == 0) // check whether there is only whitespace before '{'
+			if (!this->_conf_str.compare(i, 6, "server")) // check whether there is only whitespace before '{'
 			{
 				i += 6;
 				while (this->_conf_str[i] != '{')
@@ -140,7 +133,7 @@ void	Parser::_iterateThroughStr(void) // to test
 					}
 					i++;
 				}
-				i += this->_splitServerBlock(i);
+				i += this->_splitServerBlock(i) - 1;
 			}
 			else
 			{
@@ -157,37 +150,37 @@ int	Parser::_splitServerBlock(int i) // to test
 	std::size_t		start;
 	std::string 	substr;
 	int				size;
-	
+		
 	start = this->_conf_str.find("server", i);
-	if (start = std::string::npos) // case server block is the last
+	while ((start < this->_conf_str.size() && this->_conf_str[start + 6] == '_') ||
+	(start > 0 && this->_conf_str[start - 1] == '_') ) // case it is a server_name directive	
+		start = this->_conf_str.find("server", i + start + 6);
+	if (start == std::string::npos) // case server block is the last
 		substr = this->_conf_str.substr(i);
 	else // case server block is not the last one
 		substr = this->_conf_str.substr(i, start - i);
 	if (!this->_isServerBlockValid(substr))
 	{
 		std::cerr << "wrong format detected" << std::endl;
-		exit(EXIT_FAILURE);
-		//handle error
+		exit(EXIT_FAILURE); //handle error
 	}
 	size = substr.size();
-	// need to trail whitespace and { and }
 	while (std::isspace(substr[0])) // trim whitespace before
-		substr = substr.substr(1, substr.size() - 1);	
+		substr = substr.substr(1, substr.size() - 1);
 	while (std::isspace(substr[substr.size() - 1])) // trim whitespaces after
 		substr = substr.substr(0, substr.size() - 1);
 	substr = substr.substr(1, substr.size() - 2); // remove {}
-	// then push it back
-	this->_server_blocks.push_back(substr); // should push back server block without 'server', whitesapce,
-	// and opening and closing brackets
+	this->_server_blocks.push_back(substr); /* should push back server block without 'server', whitespace,
+	and opening and closing brackets */
 	return (size);
 }
 
 /* check whether there is the same number of {} in the string */
 bool	Parser::_isServerBlockValid(std::string substr) // to test
 {
-	int		num_open_par = 0;
-	int		num_close_par = 0;
-	int		i = 0;
+	int				num_open_par = 0;
+	int				num_close_par = 0;
+	std::size_t		i = 0;
 
 	while (i < substr.size())
 	{
@@ -200,15 +193,16 @@ bool	Parser::_isServerBlockValid(std::string substr) // to test
 	return ((num_open_par == num_close_par) ? true : false && num_open_par > 0);
 }
 
-int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int serv_idx, bool is_loc = false) // to test
+int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int serv_idx, bool is_loc) // to test
 {
-	std::vector<int>	size_and_args;
+	std::vector<std::size_t>	size_and_args;
 	
 	if (type == LOCATION)
+	{
 		return (this->_processLocationBlock(directive, serv_idx));
-
+	}
 	size_and_args = this->_isDirectiveValid(directive);
-	if (size_and_args[0] == -1)
+	if (size_and_args[2] == 1)
 	{
 		std::cerr << "invalid directive format" << std::endl;
 		exit(EXIT_FAILURE);
@@ -285,7 +279,7 @@ int	Parser::_rtnInstructionType(std::string directive) // to test
 
 void	Parser::displayParsing(void)
 {
-	int		i = 0;
+	std::size_t		i = 0;
 	
 	std::cout << "displaying all server block in once in std::string format" << std::endl;
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
