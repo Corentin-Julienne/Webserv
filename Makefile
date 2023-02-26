@@ -6,7 +6,7 @@
 #    By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/16 12:16:41 by cjulienn          #+#    #+#              #
-#    Updated: 2023/02/16 18:30:33 by cjulienn         ###   ########.fr        #
+#    Updated: 2023/02/26 11:39:40 by cjulienn         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,7 @@ CFLAGS := -Wall -Wextra -Werror -std=c++98
 
 SRC_DIR := srcs
 OBJ_DIR := objs
-SUB_DIRS := server # update this when adding new subdir
+SUB_DIRS := parser # update this when adding new subdir
 SOURCEDIRS := $(foreach dir, $(SUB_DIRS), $(addprefix $(SRC_DIR)/, $(dir)))
 
 SRC_FILES := $(foreach dir,$(SOURCEDIRS),$(wildcard $(dir)/*.cpp))

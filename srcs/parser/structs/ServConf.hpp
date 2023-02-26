@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 15:54:49 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 12:09:24 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 13:05:18 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ struct ServConf
 
 		ServConf(void);
 		~ServConf();
+		ServConf(const ServConf &original);
+		ServConf&	operator=(const ServConf &original);
 		
 	public:
 

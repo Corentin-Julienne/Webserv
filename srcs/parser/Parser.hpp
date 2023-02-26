@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 12:48:58 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 17:00:05 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,11 @@ class Parser
 	
 		Parser(char *config_file);
 		~Parser();
+		Parser(const Parser& original);
+
+		Parser& operator=(const Parser& original);
+
+		const Parser&	getParsingInfos(void) const;
 
 	private:
 	
@@ -57,7 +62,7 @@ class Parser
 		bool	_isServerBlockValid(std::string substr);
 		// process instructions
 		int		_rtnInstructionType(std::string directive);
-		int		_dispatchInstructionProcessing(int type, std::string directive, int server_index);
+		int		_dispatchInstructionProcessing(int type, std::string directive, int serv_idx, bool is_loc = false);
 		int		_processInstruction(std::string directive);
 		
 		/* ProcessBlocks.cpp */	

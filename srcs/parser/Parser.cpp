@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 12:46:35 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 16:59:04 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,23 @@ Parser::Parser(char *config_file) // to test
 
 Parser::~Parser() {}
 
+Parser::Parser(const Parser& original) : _conf_file(original._conf_file), _conf_str(original._conf_str),
+_server_blocks(original._server_blocks), _serv_num(original._serv_num), _servers(original._servers) {}
+
+Parser&	Parser::operator=(const Parser &original)
+{
+	if (this != &original)
+	{
+		this->_conf_file = original._conf_file;
+		this->_conf_str = original._conf_str;
+		this->_server_blocks = original._server_blocks;
+		this->_serv_num = original._serv_num;
+		this->_servers = original._servers;
+	}
+	return *this;
+}
+
+
 
 
 void	Parser::_openFile(char *config_file) // to test
@@ -39,29 +56,6 @@ void	Parser::_openFile(char *config_file) // to test
 		exit(EXIT_FAILURE); // handle error there
 	}
 	this->_conf_file = conf_file;
-}
-
-/* check till EOF that there is a matching number of { and } and that the first is { */
-bool	Parser::_isBlockSyntaxValid(void)
-{
-	int		i = 0;
-	int		num_open_par = 0;
-	int		num_close_par = 0;
-	bool	first_bracket = false;
-
-	while (this->_conf_str[i] < this->_conf_str.size())
-	{
-		if (!first_bracket && this->_conf_str[i] == '{')
-			first_bracket = true;
-		if (!first_bracket && this->_conf_str[i] == '}')
-			return (false);
-		if (this->_conf_str[i] == '{')
-			num_open_par++;
-		if (this->_conf_str[i] == '}')
-			num_close_par++;
-		i++;
-	}
-	return (num_open_par > 0 && (num_open_par == num_close_par) ? true : false);
 }
 
 /* check whether the file is in valid format or not. Includes : 
@@ -93,6 +87,29 @@ void	Parser::_ifstreamToStr(void) // to test
 
 	buffer << this->_conf_file.rdbuf();
 	this->_conf_str = buffer.str();
+}
+
+/* check till EOF that there is a matching number of { and } and that the first is { */
+bool	Parser::_isBlockSyntaxValid(void)
+{
+	int		i = 0;
+	int		num_open_par = 0;
+	int		num_close_par = 0;
+	bool	first_bracket = false;
+
+	while (this->_conf_str[i] < this->_conf_str.size())
+	{
+		if (!first_bracket && this->_conf_str[i] == '{')
+			first_bracket = true;
+		if (!first_bracket && this->_conf_str[i] == '}')
+			return (false);
+		if (this->_conf_str[i] == '{')
+			num_open_par++;
+		if (this->_conf_str[i] == '}')
+			num_close_par++;
+		i++;
+	}
+	return (num_open_par > 0 && (num_open_par == num_close_par) ? true : false);
 }
 
 /* goal is to extract every server block within a vector and check if server conf is correct */
@@ -142,8 +159,8 @@ int	Parser::_splitServerBlock(int i) // to test
 	int				size;
 	
 	start = this->_conf_str.find("server", i);
-	if () // case server block is the last
-		;
+	if (start = std::string::npos) // case server block is the last
+		substr = this->_conf_str.substr(i);
 	else // case server block is not the last one
 		substr = this->_conf_str.substr(i, start - i);
 	if (!this->_isServerBlockValid(substr))
@@ -183,12 +200,12 @@ bool	Parser::_isServerBlockValid(std::string substr) // to test
 	return ((num_open_par == num_close_par) ? true : false && num_open_par > 0);
 }
 
-int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int server_index) // to test
+int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int serv_idx, bool is_loc = false) // to test
 {
 	std::vector<int>	size_and_args;
 	
 	if (type == LOCATION)
-		return (this->_processLocationBlock(directive, server_index));
+		return (this->_processLocationBlock(directive, serv_idx));
 
 	size_and_args = this->_isDirectiveValid(directive);
 	if (size_and_args[0] == -1)
@@ -199,34 +216,34 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 	switch (type)
 	{
 		case (LISTEN):
-			this->_processListenDirective(directive, server_index, size_and_args[1]);
+			this->_processListenDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (SERV_NAME):
-			this->_processServerNameDirective(directive, server_index, size_and_args[1]);
+			this->_processServerNameDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (ERR_PAGE):
-			this->_processErrorPageDirective(directive, server_index, size_and_args[1]);
+			this->_processErrorPageDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (CLIENT_BODY_SIZE):
-			this->_processBodySizeDirective(directive, server_index, size_and_args[1]);
+			this->_processBodySizeDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (ALLOW_HTTP_METHOD):
-			this->_processAllowDirective(directive, server_index, size_and_args[1]);
+			this->_processAllowDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (REWRITE):
-			this->_processRewriteDirective(directive, server_index, size_and_args[1]);
+			this->_processRewriteDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (ROOT):
-			this->_processRootDirective(directive, server_index, size_and_args[1]);
+			this->_processRootDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (AUTOINDEX):
-			this->_processAutoindexDirective(directive, server_index, size_and_args[1]);
+			this->_processAutoindexDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (INDEX):
-			this->_processIndexDirective(directive, server_index, size_and_args[1]);
+			this->_processIndexDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		case (CGI):
-			this->_processCgiDirective(directive, server_index, size_and_args[1]);
+			this->_processCgiDirective(directive, serv_idx, size_and_args[1], is_loc);
 			break ;
 		default:
 			std::cerr << "instruction unknown" << std::endl;

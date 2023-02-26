@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 12:32:33 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 15:53:51 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc = fa
 				exit(EXIT_FAILURE);
 			}
 			else
-				i += this->_dispatchInstructionProcessing(dir_type, block.substr(i), server_index);
+				i += this->_dispatchInstructionProcessing(dir_type, block.substr(i), server_index, is_loc);
 		}
 		i++;
 	}
