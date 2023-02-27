@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 19:17:01 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/27 19:40:19 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 	int				dir_type;
 	std::string		directive;
 
-	std::cout << "go till there motherfucker" << std::endl;
 	while (i < block.size())
 	{
 		if (!std::isspace(block[i]) && !std::isalnum(block[i])) // check if invalid char
@@ -31,6 +30,7 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 		}
 		if (std::isalnum(block[i])) // if beggining of an instructions
 		{
+			//std::cout << "item : |" << block.substr(i, block.substr(i).find(' ')) << "|" << std::endl;
 			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find(' '))); // test this
 			if (dir_type == BAD_INSTR)
 			{
@@ -129,30 +129,28 @@ std::vector<std::size_t>	Parser::_isLocationBlockValid(std::string block) // to 
 	return (nums);
 }
 
-/* check if directive is valid and the number of arguments */
-std::vector<std::size_t>	Parser::_isDirectiveValid(std::string directive) // to test
+/* check if directive is valid, returns also the lenght used and the number of arguments 
+the vector val contains 3 std::size_t values : 
+[0] = lenght of the directive
+[1] = num of arguments
+[2] = pseudo-boolean : 0 is valid, 1 is invalid */
+std::vector<std::size_t>	Parser::_isDirectiveValid(std::string directive) // seems quite ok
 {
-	std::vector<std::size_t>		vals(3, 0); // first value is length of directive and second is num of arguments
+	std::vector<std::size_t>		vals(3, 0);
 	std::string						arg;
-
-	vals[2] = 1; // 
+	int								last_char = 0;
+ 
 	while (vals[0] < directive.size() && directive[vals[0]] != ';')
 	{
 		while (std::isspace(directive[vals[0]])) // trailing whitespaces
 			vals[0]++;
-		arg = directive.substr(vals[0], directive.substr(vals[0]).find(' ')); // test that
-		for (std::size_t i = 0; i < arg.size(); i++)
-		{
-			if (!std::isalpha(arg[i]) && arg[i] != '_') // case wrong argument syntax
-			{
-				vals[2] = 0;
-				return (vals);
-			}		
-		}
+		while (!std::isspace(directive[vals[0] + last_char]) && (directive[vals[0] + last_char]) != ';')
+			last_char++;
+		arg = directive.substr(vals[0], last_char);
 		vals[1]++;
-		vals[0] += arg.size();	
+		vals[0] += arg.size();
 	}
 	if (vals[0] == directive.size()) // case reach EOF without finding a ';'
-		vals[2] = 0;
+		vals[2] = 1;
 	return (vals);
 }

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 19:16:19 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/27 18:54:43 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,11 +197,12 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 {
 	std::vector<std::size_t>	size_and_args;
 	
+	//std::cout << "directive = " << directive << std::endl;
+	
 	if (type == LOCATION)
-	{
 		return (this->_processLocationBlock(directive, serv_idx));
-	}
 	size_and_args = this->_isDirectiveValid(directive);
+	std::cout << "size is : " << size_and_args[0] << "and args = " << size_and_args[1] << std::endl;
 	if (size_and_args[2] == 1)
 	{
 		std::cerr << "invalid directive format" << std::endl;

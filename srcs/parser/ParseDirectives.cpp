@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 15:42:13 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/27 10:31:53 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,19 +27,22 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 		exit(EXIT_FAILURE);
 	}
 	args = this->_cutArgs(directive);
+	for (std::size_t i = 0; i < args.size(); i++)
+	{
+		//std::cout << "args[" << i << "] = |" << args[i] << "|" << std::endl;
+	}
 	
 	// finish this
 	if (args[1].find(':') != std::string::npos)
 	{
 		this->_servers[serv_idx]._ip_address = args[1].substr(0, ':'); // test this
-		
+		//std::cout << "|" << this->_servers[serv_idx]._ip_address << "|" << std::endl;
 	}
 	else
 	{
 		
 	}
-	
-	if (arg_num == 3) // case there is a default server
+	if (arg_num == 3) // case there is a default_server directive
 	{
 		if (args[2].compare("default_server"))
 		{
