@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/24 14:57:54 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/02/28 12:05:53 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,20 +29,25 @@ CustomSocket::~CustomSocket()
 // main function to start a socket
 void	CustomSocket::startServer(void)
 {
-	ssize_t		valread;
-	std::string	output("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!");
+	ssize_t			valret;
+	struct pollfd	pfd;
+	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	
 	while (true)
 	{
 		std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
 		this->_acceptConnection(); // use accept to wait for a connection
+		pfd.fd = this->_new_socket_fd;
 
 		// read and write procedure
+		pfd.events = POLLIN;
+		poll(&pfd, 1, -1); // is the socket ready to be read?
 		char	buffer[1024]; // create a buffer to be used by read
-		valread = read(this->_new_socket_fd, buffer, 1024);
-		if (valread < 0)
+		if (pfd.revents == POLLIN) // if case might be useless since read should fail if revents is not POLLIN
+			valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC); // manage case when len > 1024
+		if (pfd.revents != POLLIN || valret < 0)
 		{
-			std::cerr << "read operation : failure" << std::endl;
+			std::cerr << "read operation: failure" << std::endl;
 			exit(EXIT_FAILURE);
 			// handle error there
 		}
@@ -61,10 +66,20 @@ void	CustomSocket::startServer(void)
 		else
 			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 
-		write(this->_new_socket_fd, output.c_str(), output.size());
-		// suppress the new socket
+		pfd.events = POLLOUT;
+		poll(&pfd, 1, -1); // is the socket ready for writing?
+		if (pfd.revents == POLLOUT)
+			valret = send(this->_new_socket_fd, output.c_str(), output.length(), 0);
+		else
+		{
+			std::cerr << "write operation: failure" << std::endl;
+			exit(EXIT_FAILURE);
+			// handle error here
+		}
 
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
+
+		// suppress the new socket
 		this->_closeSocket(this->_new_socket_fd);
 	}
 }

@@ -6,15 +6,16 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/24 14:57:28 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/02/28 12:08:20 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <sys/socket.h> // for sockets in general
-#include <netinet/in.h> // for the struct sockaddr_in
-#include <string.h> // for memset
-#include <arpa/inet.h> // for htonl and similar
-#include <unistd.h> // for close
+#include <sys/socket.h>	// for sockets in general
+#include <netinet/in.h>	// for the struct sockaddr_in
+#include <string.h>		// for memset
+#include <arpa/inet.h>	// for htonl and similar
+#include <unistd.h>		// for close
+#include <poll.h>		// for poll
 #include <iostream>
 #include <stdlib.h>
 
