@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/28 12:11:22 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/02/28 12:58:42 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ CustomSocket::~CustomSocket()
 void	CustomSocket::startServer(void)
 {
 	ssize_t			valret;
+	int				errret;
 	struct pollfd	pfd;
 	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	
@@ -41,11 +42,11 @@ void	CustomSocket::startServer(void)
 
 		// read and write procedure
 		pfd.events = POLLIN;
-		poll(&pfd, 1, -1); // is the socket ready to be read?
+		errret = poll(&pfd, 1, -1); // is the socket ready to be read?
 		char	buffer[1024]; // create a buffer to be used by read
-		if (pfd.revents == POLLIN) // if case might be useless since read should fail if revents is not POLLIN
+		if (errret != -1 && pfd.revents == POLLIN) // if case might be useless since read should fail if revents is not POLLIN
 			valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC | MSG_DONTWAIT); // manage case when len > 1024
-		if (pfd.revents != POLLIN || valret < 0)
+		if (errret == -1 || pfd.revents != POLLIN || valret < 0)
 		{
 			std::cerr << "read operation: failure" << std::endl;
 			exit(EXIT_FAILURE);
@@ -67,8 +68,8 @@ void	CustomSocket::startServer(void)
 			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 
 		pfd.events = POLLOUT;
-		poll(&pfd, 1, -1); // is the socket ready for writing?
-		if (pfd.revents == POLLOUT)
+		errret = poll(&pfd, 1, -1); // is the socket ready for writing?
+		if (errret != -1 && pfd.revents == POLLOUT)
 			valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT);
 		else
 		{
