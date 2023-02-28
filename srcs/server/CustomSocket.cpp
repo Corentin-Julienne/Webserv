@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/28 12:05:53 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/02/28 12:11:22 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	CustomSocket::startServer(void)
 		poll(&pfd, 1, -1); // is the socket ready to be read?
 		char	buffer[1024]; // create a buffer to be used by read
 		if (pfd.revents == POLLIN) // if case might be useless since read should fail if revents is not POLLIN
-			valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC); // manage case when len > 1024
+			valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC | MSG_DONTWAIT); // manage case when len > 1024
 		if (pfd.revents != POLLIN || valret < 0)
 		{
 			std::cerr << "read operation: failure" << std::endl;
@@ -69,7 +69,7 @@ void	CustomSocket::startServer(void)
 		pfd.events = POLLOUT;
 		poll(&pfd, 1, -1); // is the socket ready for writing?
 		if (pfd.revents == POLLOUT)
-			valret = send(this->_new_socket_fd, output.c_str(), output.length(), 0);
+			valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT);
 		else
 		{
 			std::cerr << "write operation: failure" << std::endl;
