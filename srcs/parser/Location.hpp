@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/25 12:06:49 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 13:04:31 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ struct Location
 
 		Location(void);
 		~Location();
+		Location(const Location& original);
+		Location&	operator=(const Location &original);
 
 	public:
 
