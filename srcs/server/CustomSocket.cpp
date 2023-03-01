@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 14:30:00 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/01 20:17:37 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,24 +59,16 @@ void	CustomSocket::startServer(void)
 		}
 		std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
 
-		std::string	buff = buffer;
-		size_t	start_path = buff.find(' ');
-		size_t	end_path = buff.find(' ', start_path + 1);
-		std::string	filePath = buff.substr(start_path, end_path - start_path);
-		size_t	start_body = 0;
-		size_t	tmp = buff.find("\n\n");
-		while (tmp != buff.npos)
-		{
-			start_body = tmp;
-			tmp = buff.find("\n\n");
-		}
-		start_body += 2; // if start_body + 2 == npos?
-		if (buff.substr(0, 4) == "GET ")
-			output = this->_GET(filePath);
-		else if (buff.substr(0, 5) == "POST ")
-			output = this->_POST(filePath, buff.substr(start_body));
-		else if (buff.substr(0, 7) == "DELETE ")
-			output = this->_DELETE(filePath, buff.substr(start_body));
+		std::string							buff = buffer;
+		std::string							reqType, uri, body;
+		std::map<std::string, std::string>	headers;
+		this->_parseRequest(buff, reqType, uri, headers, body);
+		if (reqType == "GET")
+			output = this->_GET(uri);
+		else if (reqType == "POST")
+			output = this->_POST(uri, body);
+		else if (reqType == "DELETE")
+			output = this->_DELETE(uri, body);
 		else
 			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 
@@ -95,6 +87,48 @@ void	CustomSocket::startServer(void)
 		// suppress the new socket
 		this->_closeSocket(this->_new_socket_fd);
 	}
+}
+
+void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body)
+{
+	if (req.substr(0, 4) == "GET ")
+		reqType = "GET";
+	else if (req.substr(0, 5) == "POST ")
+		reqType = "POST";
+	else if (req.substr(0, 7) == "DELETE ")
+		reqType = "DELETE";
+	else
+	{
+		reqType = "UNDEFINED";
+		return ;
+	}
+	size_t	i = req.find(" /") + 2;
+	uri = req.substr(i, req.find(" ", i) - i);
+	i = req.find("\n") + 1;
+	while (i < req.length() && req[i] != '\n')
+	{
+		size_t		end_line_idx = req.find("\n", i);
+		std::string	line = req.substr(i, end_line_idx - i);
+		size_t		sep_idx = line.find(": ");
+		if (sep_idx != line.npos)
+		{
+			std::string	key = line.substr(0, sep_idx);
+			std::string	value = line.substr(sep_idx + 2);
+			headers.insert(std::make_pair(key, value));
+		}
+		i = end_line_idx + 1;
+	}
+	if (++i < req.length())
+		body = req.substr(i);
+/*
+	std::cout << "----------------------- PARSING --------------------\n";
+	std::cout << "type: " << reqType << "\n";
+	std::cout << "body: " << body << "\n";
+	std::cout << "headers:\n";
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
+		std::cout << "\tkey: " << it->first << "\n\tvalue: " << it->second << "\n\n";
+	std::cout << "----------------------------------------------------\n";
+*/
 }
 
 // private helper functions
@@ -151,7 +185,6 @@ void	CustomSocket::_closeSocket(int socket_fd)
 
 std::string	CustomSocket::_GET(std::string filePath)
 {
-	filePath.erase(0, 2);
 	std::string			ret;
 	std::ifstream		ifs;
 	std::stringstream	content;
@@ -175,12 +208,12 @@ std::string	CustomSocket::_GET(std::string filePath)
 
 std::string	CustomSocket::_POST(std::string filePath, std::string body)
 {
-	std::string s = "POST\n\t at" + filePath + "\nbody:\n" + body;
+	std::string s = "POST\tat " + filePath + "\nbody:\n" + body;
 	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " + std::to_string(s.length()) + "\n\n" + s); // to_string is C++11
 }
 
 std::string	CustomSocket::_DELETE(std::string filePath, std::string body)
 {
-	std::string s = "DELETE\n\t at" + filePath + "\nbody:\n" + body;
+	std::string s = "DELETE\tat " + filePath + "\nbody:\n" + body;
 	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " + std::to_string(s.length()) + "\n\n" + s); // to_string is C++11
 }

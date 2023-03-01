@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 13:56:26 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/01 20:17:38 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <arpa/inet.h>	// for htonl and similar
 #include <unistd.h>		// for close
 #include <poll.h>		// for poll
+#include <map>
 #include <iostream>
 #include <stdlib.h>
 
@@ -35,6 +36,7 @@ class CustomSocket
 		void	_enableSocketListening(void);
 		void	_acceptConnection(void);
 		void	_closeSocket(int socket_fd);
+		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
 		std::string	_GET(std::string filePath);
 		std::string	_POST(std::string filePath, std::string body);
 		std::string	_DELETE(std::string filePath, std::string body);
