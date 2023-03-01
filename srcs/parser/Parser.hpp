@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 17:29:23 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:14:55 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Parser
 {
 	public:
 	
+		Parser(void);
 		Parser(char *config_file);
 		~Parser();
 		Parser(const Parser& original);
@@ -69,9 +70,9 @@ class Parser
 		void						_processBlock(std::string block, int server_index, bool is_loc = false);
 		std::size_t					_processLocationBlock(std::string directive, int server_index);
 		void						_enforceInheritance(Location& loc, int server_index);
-		std::vector<std::string>	_cutArgs(std::string directive);
-		std::vector<std::size_t>	_isLocationBlockValid(std::string block);
-		std::vector<std::size_t>	_isDirectiveValid(std::string directive);
+		std::vector<std::string>	_cutArgs(std::string directive, char delim);
+		bool						_isLocationBlockValid(std::string block);
+		bool						_isDirectiveValid(std::string directive);
 
 		/* ParseDirectives.cpp */
 		void	_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
@@ -91,6 +92,7 @@ class Parser
 		
 		void	displayParsing(void);	
 		void	displayLocation(Location& loc);
+		void	displayDummyParser(void);
 		
 	private:
 		

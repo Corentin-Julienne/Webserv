@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/27 10:31:53 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/28 13:59:10 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 		std::cerr << "listen directive between one and two arguments" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 0; i < args.size(); i++)
 	{
 		//std::cout << "args[" << i << "] = |" << args[i] << "|" << std::endl;
@@ -67,7 +67,7 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 		std::cerr << "server_name take at least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		this->_servers[serv_idx]._server_name.push_back(args[i]);	
 }
@@ -82,7 +82,7 @@ void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int
 		std::cerr << "error_page directive accept at least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		new_err_dir.push_back(args[i]);
 	if (is_loc)
@@ -100,7 +100,7 @@ void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int 
 		std::cerr << "client_max_body_size takes only one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 
 	/* value set to LONG_MAX if body_size superior to long max (see limits) */
 	char			*checker_long;
@@ -121,7 +121,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 		std::cerr << "allow directive needs at least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 	{	
 		if (args[i].compare("GET") && args[i].compare("POST") && args[i].compare("DELETE"))
@@ -146,7 +146,7 @@ void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int a
 		std::cerr << "rewrite directive should accept two arguments" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	new_redir.push_back(args[1]);
 	new_redir.push_back(args[2]);
 	if (is_loc)
@@ -164,7 +164,7 @@ void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_
 		std::cerr << "root directive takes one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._root = args[1];
 	else
@@ -181,7 +181,7 @@ void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int
 		std::cerr << "autoindex should only accept one arg : on or off" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	if (!args[1].compare("on"))
 		switch_autoindex = true;
 	if (is_loc)
@@ -200,7 +200,7 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 		std::cerr << "index directive take at least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		index_values.push_back(args[i]);
 	if (is_loc)
@@ -219,7 +219,7 @@ void	Parser::_processCgiDirective(std::string directive, int serv_idx, int arg_n
 		std::cerr << "cgi directive take a least one argument" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	args = this->_cutArgs(directive);
+	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		cgi_values.push_back(args[i]);
 	if (is_loc)
