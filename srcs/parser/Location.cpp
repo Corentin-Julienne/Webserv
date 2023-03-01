@@ -6,54 +6,40 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:39 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/20 15:26:22 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/02/25 15:19:19 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
-Location::Location(void) : prev(nullptr), next(nullptr), sub(nullptr), sup(nullptr), _nesting_lvl(0)
+Location::Location(void) : _error_pages(std::vector< std::vector<std::string> >()),
+_allowed_http_methods(std::vector<std::string>()), _rewrite(std::vector< std::vector<std::string> >()),
+_root(std::string()), _index(std::vector<std::string>()), _cgi(std::vector<std::string>()), _url(std::string())
 {
-	// add relevant info
-	
-	// increment nesting level if necessary
-	Location	*iterator = this;
-	
-	while (this->sup != nullptr)
+	this->_client_max_body_size = 1000000;
+	this->_autoindex = false;
+}
+
+Location::~Location() {}
+
+Location::Location(const Location& original) : _error_pages(original._error_pages), 
+_client_max_body_size(original._client_max_body_size), _allowed_http_methods(original._allowed_http_methods),
+_rewrite(original._rewrite), _root(original._root), _autoindex(original._autoindex),
+_index(original._index), _cgi(original._cgi), _url(original._url) {}
+
+Location&	Location::operator=(const Location& original)
+{
+	if (this != &original)
 	{
-		iterator = iterator->sup;
-		this->_nesting_lvl++;
+		this->_error_pages = original._error_pages;
+		this->_client_max_body_size = original._client_max_body_size;	
+		this->_allowed_http_methods = original._allowed_http_methods;
+		this->_rewrite = original._rewrite;
+		this->_root = original._root;
+		this->_autoindex = original._autoindex;
+		this->_index = original._index;
+		this->_cgi = original._cgi;
+		this->_url = original._url;
 	}
-	// enforce inheritance
-	this->enforceInheritance();
-}
-
-Location::~Location()
-{
-	
-}
-
-void	Location::addBack(void) // to test
-{
-	Location	*iterator = this;
-	Location	newLocation;
-
-	while (iterator->next != nullptr)
-		iterator = iterator->next;
-	iterator->next = &newLocation;
-	iterator->next->prev = iterator;
-}
-
-void	Location::addSub(int nesting_lvl) // to test
-{
-	Location	*iterator = this;
-	Location	newLocation;
-
-	while (iterator->next && iterator->_nesting_lvl != nesting_lvl)
-		iterator = iterator->next;
-}
-
-void	Location::enforceInheritance(void)
-{
-	// TODO
+	return *this;
 }
