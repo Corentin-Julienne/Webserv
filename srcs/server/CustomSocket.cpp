@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 20:17:37 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/03 16:09:14 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ _backlog(10), _new_socket_fd(-1)
 	if (this->_socket_fd < 0) {} // add function to handle errors
 	this->_bindSocket();
 	this->_enableSocketListening();
+	this->_createKq();
 }
 
 CustomSocket::~CustomSocket() 
@@ -30,27 +31,23 @@ CustomSocket::~CustomSocket()
 void	CustomSocket::startServer(void)
 {
 	ssize_t			valret;
-//	int				errret;
-//	struct pollfd	pfd[2];
 	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	
 	while (true)
 	{
 		std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
-		this->_acceptConnection(); // use accept to wait for a connection
-//		pfd[0].fd = this->_new_socket_fd;
-//		pfd[1].fd = this->_new_socket_fd;
+		struct kevent	events[2];
+		int				nevents = kevent(this->_kq, NULL, 0, events, 1, NULL); // protect
+		if (nevents < 0)
+			continue;
+		std::cout << "NUMBER OF EVENTS: " << nevents << "\n";
+		if (events[0].filter == EVFILT_READ)
+			this->_acceptConnection(); // use accept to wait for a connection
 
 		// read and write procedure
-//		pfd[0].events = POLLIN;
-//		pfd[1].events = POLLOUT;
-//		errret = poll(pfd, 1, -1); // is the socket ready for reading and writing?
-
 		char	buffer[1024]; // create a buffer to be used by read
 		memset(buffer, 0, sizeof(buffer));
-//		if (errret != -1 && pfd[0].revents & POLLIN) // if case might be useless since recv should fail if revents is not POLLIN
-		valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
-//		if (errret == -1 || !(pfd[0].revents & POLLIN) || valret < 0)
+		valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024 // poll
 		if (valret < 0)
 		{
 			std::cerr << "read operation: failure" << std::endl;
@@ -72,9 +69,7 @@ void	CustomSocket::startServer(void)
 		else
 			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 
-//		if (errret != -1 && pfd[1].revents & POLLOUT)
-		valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT);
-//		if (errret == -1 || !(pfd[1].revents & POLLOUT) || valret < 0)
+		valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT); // poll
 		if (valret < 0)
 		{
 			std::cerr << "write operation: failure" << std::endl;
@@ -156,6 +151,15 @@ void	CustomSocket::_enableSocketListening(void)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
+}
+
+void	CustomSocket::_createKq(void)
+{
+	// don't forget protections
+	this->_kq = kqueue();
+	struct kevent	kev;
+	EV_SET(&kev, this->_socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, 0);
+	kevent(this->_kq, &kev, 1, NULL, 0, NULL);
 }
 
 void	CustomSocket::_acceptConnection(void)
