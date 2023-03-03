@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 11:08:38 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/03 14:43:26 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,9 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 	{
 		if (std::isalnum(block[i])) // if beginning of an instruction
 		{
-			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find(' '))); // test this			
-			std::cout << "instruction = |" << block.substr(i, block.substr(i).find(' ')) << "|" << std::endl;
+			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find_first_of(" \t\n")));			
 			if (dir_type == BAD_INSTR)
 			{
-				std::cout << "go there" << std::endl;
 				std::cerr << "invalid instruction provided bro" << std::endl;
 				exit(EXIT_FAILURE); // error, instruction does not exists
 			}
@@ -37,14 +35,8 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 				std::cerr << "nested location feature not supported !!!" << std::endl;
 				exit(EXIT_FAILURE);
 			}
-			else //if (block.substr(i).find(';') != std::string::npos) // add a verif condition
-			{
-				std::cout << "block sent to dispatcher = ||" << std::endl << block.substr(i) << "||" << std::endl << std::endl;
+			else
 				i += this->_dispatchInstructionProcessing(dir_type, block.substr(i), server_index, is_loc);
-				std::cout << "block received by dispatcher = |||"  << std::endl << block.substr(i) << "|||" << std::endl << std::endl;
-			}
-			// else 
-			// 	break ;
 		}
 		i++;
 	}
@@ -70,7 +62,6 @@ std::size_t	Parser::_processLocationBlock(std::string directive, int server_inde
 	this->_servers[server_index]._locs.push_back(loc);
 	this->_enforceInheritance(loc, server_index);	
 	this->_processBlock(block, server_index, true);
-	std::cout << "went after process location block" << std::endl;
 	return (end_idx + 1);
 }
 
