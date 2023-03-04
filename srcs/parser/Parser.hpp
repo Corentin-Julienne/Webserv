@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 15:14:55 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:22:01 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <iterator>
 #include <sstream>
 #include <cctype>
+#include <stdexcept>
 
 #define BAD_INSTR			0
 #define LOCATION			1
@@ -36,6 +37,8 @@
 #define AUTOINDEX			9
 #define INDEX				10
 #define CGI					11
+
+#define MAX_PORT			65535
 
 class Parser
 {

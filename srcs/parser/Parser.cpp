@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/03 13:38:29 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:34:56 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,7 @@ void	Parser::_openFile(char *config_file) // to test
 {
 	this->_conf_file.open(config_file, std::ios_base::in);
 	if (!this->_conf_file.is_open())
-	{
-		std::cerr << "failure to open the conf file" << std::endl;
-		exit(EXIT_FAILURE); // handle error there
-	}
+		throw std::runtime_error("failure to open the conf file");
 }
 
 /* check whether the file is in valid format or not. Includes : 
@@ -57,19 +54,12 @@ void	Parser::_openFile(char *config_file) // to test
 => */
 void	Parser::_processFile(void) // to test
 {
-	// case file is empty
 	if (this->_conf_file.peek() == std::ifstream::traits_type::eof())
-	{
-		std::cerr << "conf file is empty !!!" << std::endl;
-		exit(EXIT_FAILURE); // case file is empty, handle error
-	}
+		throw std::runtime_error("conf file is empty !!!");
 	this->_ifstreamToStr();
-	this->_conf_file.close(); // handle possible errors there
-	if (!this->_isBlockSyntaxValid()) // maybe not useful
-	{
-		std::cerr << "syntax error in the number of parenthesis" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+	this->_conf_file.close();
+	if (!this->_isBlockSyntaxValid())
+		throw std::runtime_error("syntax error in the number of parenthesi");
 	this->_iterateThroughStr();
 }
 
@@ -115,10 +105,7 @@ void	Parser::_iterateThroughStr(void) // to test
 	while (i < this->_conf_str.size())
 	{
 		if (auth_char.find(this->_conf_str[i]) == std::string::npos) // check whether char is not a ' ', '\n' or 's'
-		{
-			std::cerr << "wrong format detected" << std::endl;
-			exit(EXIT_FAILURE); // handle error there
-		}
+			throw std::runtime_error("wrong format detected");
 		if (this->_conf_str[i] == 's') // if s is the beginning of the keyword server
 		{
 			if (!this->_conf_str.compare(i, 6, "server")) // check whether there is only whitespace before '{'
@@ -127,19 +114,13 @@ void	Parser::_iterateThroughStr(void) // to test
 				while (this->_conf_str[i] != '{')
 				{
 					if (!std::isspace(this->_conf_str[i]))
-					{
-						std::cerr << "wrong format detected" << std::endl;
-						exit(EXIT_FAILURE); // handle error there
-					}
+						throw std::runtime_error("wrong format detected");
 					i++;
 				}
 				i += this->_splitServerBlock(i) - 1;
 			}
 			else
-			{
-				std::cerr << "wrong format detected" << std::endl;
-				exit(EXIT_FAILURE); // handle error	
-			} 
+				throw std::runtime_error("wrong format detected");
 		}
 		i++;
 	}
@@ -160,10 +141,7 @@ int	Parser::_splitServerBlock(int i) // to test
 	else // case server block is not the last one
 		substr = this->_conf_str.substr(i, start - i);
 	if (!this->_isServerBlockValid(substr))
-	{
-		std::cerr << "wrong format detected" << std::endl;
-		exit(EXIT_FAILURE); //handle error
-	}
+		throw std::runtime_error("wrong format detected");
 	size = substr.size();
 	while (std::isspace(substr[0])) // trim whitespace before
 		substr = substr.substr(1, substr.size() - 1);
@@ -204,10 +182,7 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 	if (type == LOCATION)
 		return (this->_processLocationBlock(directive, serv_idx));
 	if (!this->_isDirectiveValid(directive))
-	{
-		std::cerr << "invalid directive format" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+		throw std::runtime_error("invalid directive format");
 	args_num = this->_cutArgs(directive, ';').size();
 	dir_len = directive.substr(0, directive.find(";")).size() + 1;
 	
@@ -244,8 +219,7 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 			this->_processCgiDirective(directive, serv_idx, args_num, is_loc);
 			break ;
 		default:
-			std::cerr << "instruction unknown" << std::endl;
-			exit(EXIT_FAILURE);
+			throw std::runtime_error("instruction unknown");
 			break ;
 	}
 	return (dir_len);

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/03 14:43:26 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:36:39 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,9 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 		{
 			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find_first_of(" \t\n")));			
 			if (dir_type == BAD_INSTR)
-			{
-				std::cerr << "invalid instruction provided bro" << std::endl;
-				exit(EXIT_FAILURE); // error, instruction does not exists
-			}
+				throw std::runtime_error("invalid instruction provided bro");
 			if (dir_type == LOCATION && is_loc == true)
-			{
-				std::cerr << "nested location feature not supported !!!" << std::endl;
-				exit(EXIT_FAILURE);
-			}
+				throw std::runtime_error("nested location feature not supported !!!");
 			else
 				i += this->_dispatchInstructionProcessing(dir_type, block.substr(i), server_index, is_loc);
 		}
@@ -52,10 +46,7 @@ std::size_t	Parser::_processLocationBlock(std::string directive, int server_inde
 	std::size_t						end_idx;
 	
 	if (!this->_isLocationBlockValid(directive))
-	{
-		std::cerr << "location block syntax is invalid" << std::endl;
-		exit(EXIT_FAILURE); // handle error there
-	}
+		throw std::runtime_error("location block syntax is invalid");
 	begin_idx = directive.find("{");
 	end_idx	= directive.find("}");
 	block = directive.substr(begin_idx + 1, end_idx - begin_idx - 1);	
@@ -120,54 +111,7 @@ bool	Parser::_isLocationBlockValid(std::string block) // to test
 	if (block.substr(start).find("}") == std::string::npos)
 		return (false);
 	return (true);
-	
-	// std::vector<std::size_t>		nums;
-
-	// nums.push_back(1); // boolean if valid or not
-	// nums.push_back(0);
-
-	// std::cout << "||" << block << "||" << std::endl;
-	// while (std::isspace(block[nums[1]]) && nums[1] < block.size())
-	// 	nums[1]++;
-	// if (block.substr(nums[1]).find("{") == std::string::npos
-	// || this->_cutArgs(block.substr(nums[1]), '{').size() != 2)
-	// {
-	// 	nums[0] = 0;
-	// 	return (nums);
-	// }
-	// nums.push_back(nums[1]); // position of '{'
-	// while (nums[1] < block.size() && block[nums[1]] != '}')
-	// 	nums[1]++;
-	// if (block[nums[1]] != '}')
-	// 	nums[2] = 0;
-	// return (nums);
 }
-
-/* check if directive is valid, returns also the lenght used and the number of arguments 
-the vector val contains 3 std::size_t values : 
-[0] = lenght of the directive
-[1] = num of arguments
-[2] = pseudo-boolean : 0 is valid, 1 is invalid */
-// std::vector<std::size_t>	Parser::_isDirectiveValid(std::string directive) // seems quite ok
-// {
-// 	std::vector<std::size_t>		vals(3, 0);
-// 	std::string						arg;
-// 	int								last_char = 0;
- 
-// 	while (vals[0] < directive.size() && directive[vals[0]] != ';')
-// 	{
-// 		while (std::isspace(directive[vals[0]])) // trailing whitespaces
-// 			vals[0]++;
-// 		while (!std::isspace(directive[vals[0] + last_char]) && (directive[vals[0] + last_char]) != ';')
-// 			last_char++;
-// 		arg = directive.substr(vals[0], last_char);
-// 		vals[1]++;
-// 		vals[0] += arg.size();
-// 	}
-// 	if (vals[0] == directive.size()) // case reach EOF without finding a ';'
-// 		vals[2] = 1;
-// 	return (vals);
-// }
 
 /* check whether there is at least an argument in the */
 bool	Parser::_isDirectiveValid(std::string directive)
