@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 11:40:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 14:24:22 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:48:18 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ int main(int argc, char **argv)
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
+		return (1);
 	}
 	std::cout << "ending parsing test" << std::endl;
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 14:22:01 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:50:39 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ class Parser
 	private:
 	
 		// ops on conf file
-		void	_openFile(char *config_file);
 		void	_processFile(void);
 		void	_ifstreamToStr(void);
 		// separating std::string on different server blocks

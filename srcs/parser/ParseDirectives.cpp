@@ -6,15 +6,16 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 14:47:01 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 16:39:21 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
 
-/* ParseDirectives.cpp contains all the specialized functions that  */
+/* ParseDirectives.cpp contains all the specialized functions that will store evry directive and 
+check if they are compliant with the syntaxic rules accepted by the server */
 
-void	Parser::_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // refacto
+void	Parser::_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>		args;
 	std::string						port_str;
@@ -29,35 +30,20 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	{
 		this->_servers[serv_idx]._ip_address = args[1].substr(0, args[1].find(":"));	
 		port_str = args[1].substr(args[1].find(":") + 1);
-		if (port_str.size() > 5)
-			throw std::runtime_error("port number should be between 0 and 65535");
-		for (std::size_t i = 0; i < port_str.size(); i++)
-		{
-			if (!std::isdigit(port_str[i]))
-				throw std::runtime_error("port number should be between 0 ans 65535");
-		}
-		port_int = atoi(port_str.c_str());
-		if (port_int > MAX_PORT)
-			throw std::runtime_error("port number should be between 0 ans 65535");
-		this->_servers[serv_idx]._port = port_int;
 	}
-	else // refacto that shit
+	else
+		port_str = args[1];
+	if (port_str.size() > 5)
+		throw std::runtime_error("port number should be between 0 and 65535");
+	for (std::size_t i = 0; i < port_str.size(); i++)
 	{
-		if (args[1].size() > 5)
-		{
-			throw std::runtime_error("port number should be between 0 and 65535");
-			exit(EXIT_FAILURE);
-		}
-		for (std::size_t i = 0; i < args[1].size(); i++)
-		{
-			if (!std::isdigit(args[1][i]))
-				throw std::runtime_error("port number should be between 0 ans 65535");
-		}
-		port_int = atoi(args[1].c_str());
-		if (port_int > MAX_PORT)
+		if (!std::isdigit(port_str[i]))
 			throw std::runtime_error("port number should be between 0 ans 65535");
-		this->_servers[serv_idx]._port = port_int;
 	}
+	port_int = atoi(port_str.c_str());
+	if (port_int > MAX_PORT)
+		throw std::runtime_error("port number should be between 0 ans 65535");
+	this->_servers[serv_idx]._port = port_int;
 	if (arg_num == 3) // case there is a default_server directive
 	{
 		if (args[2].compare("default_server"))
@@ -66,7 +52,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	}
 }
 
-void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {	
 	std::vector<std::string>		args;
 	
@@ -75,42 +61,66 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 	if (arg_num < 2)
 		throw std::runtime_error("server_name take at least one argument");
 	args = this->_cutArgs(directive, ';');
+	if (!this->_servers[serv_idx]._server_name.empty())
+		this->_servers[serv_idx]._server_name.clear();
 	for (std::size_t i = 1; i < args.size(); i++)
 		this->_servers[serv_idx]._server_name.push_back(args[i]);	
 }
 
-void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	new_err_dir;
 	
-	if (arg_num < 2)
-		throw std::runtime_error("error_page directive accept at least one argument");
+	if (arg_num < 3)
+		throw std::runtime_error("error_page directive accept at least two arguments");
 	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		new_err_dir.push_back(args[i]);
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._error_pages.push_back(new_err_dir);
 	else
-		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);
+		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);	
 }
 
 void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
 {
 	std::vector<std::string>	args;
+	int							multiplicator = 1;
 	
 	if (arg_num != 2)
 		throw std::runtime_error("client_max_body_size takes only one argument");
 	args = this->_cutArgs(directive, ';');
+	for (std::size_t i = 0; i < args[1].size(); i++)
+	{
+		if (!std::isdigit(args[1][i]) && i != args[1].size() - 1)
+			throw std::runtime_error("invalid syntax in directive client_max_body_size");
+		else if (!std::isdigit(args[1][i]) && i != args[1].size() - 1)
+		{
+			if (args[1][args.size() - 1] == 'M' || args[1][args.size() - 1] == 'm')
+			{
+				multiplicator = 1000000;
+				args[1] = args[1].substr(0, args[1].size() - 1);
+			}
+			else
+				throw std::runtime_error("invalid syntax in directive client_max_body_size");
+		}
+	}
 
-	/* value set to LONG_MAX if body_size superior to long max (see limits) */
-	char			*checker_long;
-	long long int	body_size = std::strtol(args[1].c_str(), &checker_long, 10);
-	
+	int				body_size_int;
+	long long int	body_size = std::strtol(args[1].c_str(), NULL, 10);
+
+	if (body_size == LONG_MAX)
+		throw std::runtime_error("client_max_body_size value is superior to max long");
+	if (body_size > (std::numeric_limits<int>::max() / multiplicator))
+		throw std::runtime_error("client_max_body_size value is superior to max int");
+	body_size_int = static_cast<int>(body_size);
+	body_size_int *= multiplicator;	
+
 	if (is_loc)
-		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._client_max_body_size = body_size;
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._client_max_body_size = body_size_int;
 	else	
-		this->_servers[serv_idx]._client_max_body_size = body_size;
+		this->_servers[serv_idx]._client_max_body_size = body_size_int;
 }
 
 void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
@@ -120,6 +130,10 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 	if (arg_num < 2)
 		throw std::runtime_error("allow directive needs at least one argument");
 	args = this->_cutArgs(directive, ';');
+
+	for (std::size_t i = 0; i < args.size(); i++)
+		std::cout << "args[" << i << "] = |" << args[i] << "|" << std::endl;
+	
 	for (std::size_t i = 1; i < args.size(); i++)
 	{	
 		if (args[i].compare("GET") && args[i].compare("POST") && args[i].compare("DELETE"))
