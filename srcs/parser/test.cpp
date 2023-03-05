@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 11:40:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 14:48:18 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 16:55:53 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,17 +20,22 @@ int main(int argc, char **argv)
 {	
 	std::cout << "Testing parsing process" << std::endl;
 	if (argc != 2)
+	{
 		std::cerr << "add a config file located at ./srcs/parser/test.conf" << std::endl;
+		return (1);
+	}
 	
 	try
 	{
 		Parser		test_parsing(argv[1]);
+
+		test_parsing.displayParsing();
+		std::cout << "ending parsing test" << std::endl;
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
-		return (1);
+		std::cout << "parsing tests inconclusive or worng syntax in conf file" << std::endl;
 	}
-	std::cout << "ending parsing test" << std::endl;
 	return (0);
 }

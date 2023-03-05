@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 16:39:21 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/04 16:59:42 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,10 +130,6 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 	if (arg_num < 2)
 		throw std::runtime_error("allow directive needs at least one argument");
 	args = this->_cutArgs(directive, ';');
-
-	for (std::size_t i = 0; i < args.size(); i++)
-		std::cout << "args[" << i << "] = |" << args[i] << "|" << std::endl;
-	
 	for (std::size_t i = 1; i < args.size(); i++)
 	{	
 		if (args[i].compare("GET") && args[i].compare("POST") && args[i].compare("DELETE"))
