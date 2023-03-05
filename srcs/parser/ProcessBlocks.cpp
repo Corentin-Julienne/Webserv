@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 15:28:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:08:20 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,6 @@ void	Parser::_enforceInheritance(Location& loc, int server_index) // to test
 	loc._error_pages = this->_servers[server_index]._error_pages;
 	loc._client_max_body_size = this->_servers[server_index]._client_max_body_size;
 	loc._allowed_http_methods = this->_servers[server_index]._allowed_http_methods;
-	loc._rewrite = this->_servers[server_index]._rewrite;
 	loc._root = this->_servers[server_index]._root;
 	loc._autoindex = this->_servers[server_index]._autoindex;
 	loc._index = this->_servers[server_index]._index;
@@ -139,8 +138,8 @@ bool	Parser::_isThereEnoughInfo(void)
 		if (this->_servers[serv_idx]._ip_address.empty() && this->_servers[serv_idx]._server_name.empty())
 			return (false);
 		// case no cgi instructions are provided
-		if (this->_servers[serv_idx]._cgi.empty())
-			return (false);	
+		// if (this->_servers[serv_idx]._cgi.empty())
+		// 	return (false);	
 		// check every location block
 		for (std::size_t j = 0; j < this->_servers[serv_idx]._locs.size(); j++)
 		{

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 12:10:56 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:02:26 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,15 +57,6 @@ void	Parser::displayDummyParser(void)
 		for (std::size_t j = 0; j < this->_servers[i]._allowed_http_methods.size(); j++)
 			std::cout << "http methods num " << j << " = " << this->_servers[i]._allowed_http_methods[j] << std::endl;			
 		std::cout << "----------------------------------------------" << std::endl;
-		
-		std::cout << "displaying rewrite directives below" << std::endl;	
-		for (std::size_t j = 0; j < this->_servers[i]._rewrite.size(); j++)
-		{
-			std::cout << "displaying rewrite directive num " << (j + 1) << std::endl;
-			for (std::size_t k = 0; k < this->_servers[i]._rewrite[j].size(); k++)
-				std::cout << "arg num " << k << " = " << this->_servers[i]._rewrite[j][k] << std::endl;
-		}
-		std::cout << "----------------------------------------------" << std::endl;	
 			
 		std::cout << "displaying root = " << this->_servers[i]._root << std::endl;
 		std::cout << "displaying autoindex = " << this->_servers[i]._autoindex << std::endl;
@@ -118,11 +109,6 @@ Parser::Parser(void) // to be used only with fake parsing infos
 
 	// allowed https methods
 	this->_servers[0]._allowed_http_methods.push_back("GET");
-	// rewrite
-	std::vector<std::string>		rewrite;
-	this->_servers[0]._rewrite.push_back(rewrite);
-	this->_servers[0]._rewrite[0].push_back("index.html");
-	this->_servers[0]._rewrite[0].push_back("index.php");
 	
 	// add a location block	
 	Location			loc;
@@ -135,7 +121,6 @@ Parser::Parser(void) // to be used only with fake parsing infos
 	this->_servers[0]._locs[0]._index = this->_servers[0]._index;
 	this->_servers[0]._locs[0]._root = this->_servers[0]._root;
 	this->_servers[0]._locs[0]._cgi = this->_servers[0]._cgi;
-	this->_servers[0]._locs[0]._rewrite = this->_servers[0]._rewrite;
 	this->_servers[0]._locs[0]._allowed_http_methods = this->_servers[0]._allowed_http_methods;
 	this->_servers[0]._locs[0]._url = "/";
 }
@@ -180,15 +165,6 @@ void	Parser::displayParsing(void)
 			std::cout << "http methods num " << j << " = " << this->_servers[i]._allowed_http_methods[j] << std::endl;			
 		std::cout << "----------------------------------------------" << std::endl;
 		
-		std::cout << "displaying rewrite directives below" << std::endl;	
-		for (std::size_t j = 0; j < this->_servers[i]._rewrite.size(); j++)
-		{
-			std::cout << "displaying rewrite directive num " << (j + 1) << std::endl;
-			for (std::size_t k = 0; k < this->_servers[i]._rewrite[j].size(); k++)
-				std::cout << "arg num " << k << " = " << this->_servers[i]._rewrite[j][k] << std::endl;
-		}
-		std::cout << "----------------------------------------------" << std::endl;	
-		
 		std::cout << "displaying root = " << this->_servers[i]._root << std::endl;
 		std::cout << "displaying autoindex = " << this->_servers[i]._autoindex << std::endl;
 		std::cout << RED << "displaying index directive : " << RESET << std::endl;
@@ -213,8 +189,6 @@ void	Parser::displayParsing(void)
 	std::cout << BLUE << "server display ended" << RESET << std::endl;
 }
 
-
-
 void	Parser::displayLocation(Location& loc, int loc_index)
 {
 	std::cout << "---------------------------------------------------------" << std::endl;
@@ -235,16 +209,6 @@ void	Parser::displayLocation(Location& loc, int loc_index)
 	std::cout << "displaying allow directives below : " << std::endl;
 	for (std::size_t i = 0; i < loc._allowed_http_methods.size(); i++)
 		std::cout << RED << "display allow directive num " << i << " = " << RESET << loc._allowed_http_methods[i] << std::endl;
-	std::cout << "---------------------------------------------------------" << std::endl;
-	
-	
-	std::cout << "displaying rewrite directives below : " << std::endl;
-	for (std::size_t i = 0; i < loc._rewrite.size(); i++)
-	{
-		std::cout << RED << "display set of rewrite directives num " << i << RESET << std::endl;
-		for (std::size_t j = 0; j < loc._rewrite[i].size(); j++)
-			std::cout << "rewrite arg " << j << " = " << loc._rewrite[i][j] << std::endl;
-	}
 	std::cout << "---------------------------------------------------------" << std::endl;
 	
 	std::cout << "display root = " << loc._root << std::endl;

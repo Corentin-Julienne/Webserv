@@ -1,0 +1,27 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    test_input.txt                                     :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2023/03/05 15:38:43 by cjulienn          #+#    #+#              #
+#    Updated: 2023/03/05 16:08:09 by cjulienn         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+this text files contains the input to test everything
+
+// testing wrong conf files
+I		./webserv ./srcs/parser/tests/wrong_config/
+II		./webserv ./srcs/parser/tests/wrong_config/
+III		./webserv ./srcs/parser/tests/wrong_config/
+IV		./webserv ./srcs/parser/tests/wrong_config/
+V		./webserv ./srcs/parser/tests/wrong_config/
+VI		./webserv ./srcs/parser/tests/wrong_config/
+VII		./webserv ./srcs/parser/tests/wrong_config/
+
+// testing accurate conf files
+I		./webserv ./srcs/parser/tests/all_infos.conf
+II		./webserv ./srcs/parser/tests/replace_dirs.conf
+III		./webserv ./srcs/parser/tests/std.conf

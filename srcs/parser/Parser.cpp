@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 15:11:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:03:51 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,9 +202,6 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 		case (ALLOW_HTTP_METHOD):
 			this->_processAllowDirective(directive, serv_idx, args_num, is_loc);
 			break ;
-		case (REWRITE):
-			this->_processRewriteDirective(directive, serv_idx, args_num, is_loc);
-			break ;
 		case (ROOT):
 			this->_processRootDirective(directive, serv_idx, args_num, is_loc);
 			break ;
@@ -238,8 +235,6 @@ int	Parser::_rtnInstructionType(std::string directive)
 		return (CLIENT_BODY_SIZE);
 	else if (!directive.compare("allow"))
 		return (ALLOW_HTTP_METHOD);
-	else if (!directive.compare("rewrite"))
-		return (REWRITE);
 	else if (!directive.compare("root"))
 		return (ROOT);
 	else if (!directive.compare("autoindex"))

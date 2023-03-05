@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 14:27:30 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:03:32 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,10 @@
 #define ERR_PAGE			4
 #define CLIENT_BODY_SIZE	5
 #define ALLOW_HTTP_METHOD	6
-#define REWRITE				7
-#define ROOT				8
-#define AUTOINDEX			9
-#define INDEX				10
-#define CGI					11
+#define ROOT				7
+#define AUTOINDEX			8
+#define INDEX				9
+#define CGI					10
 
 #define MAX_PORT			65535
 

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 11:40:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 14:57:07 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:06:18 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,14 @@
 
 #include <iostream>
 
-void	kill_the_leaks(void)
-{
-	system("leaks webserv");
-}
+// void	kill_the_leaks(void)
+// {
+// 	system("leaks webserv");
+// }
 
 int main(int argc, char **argv)
 {	
-	atexit(kill_the_leaks);
+	//atexit(kill_the_leaks);
 	
 	std::cout << "Testing parsing process" << std::endl;
 	if (argc != 2)

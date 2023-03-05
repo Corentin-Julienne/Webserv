@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 14:38:50 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:03:07 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,23 +180,6 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 		else
 			this->_servers[serv_idx]._allowed_http_methods.push_back(args[i]);
 	}
-}
-
-void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
-{
-	std::vector<std::string>		args;
-	std::vector<std::string>		new_redir;
-
-	if (arg_num != 3)
-		throw std::runtime_error("rewrite directive should accept two arguments");
-	args = this->_cutArgs(directive, ';');
-	new_redir.push_back(args[1]);
-	new_redir.push_back(args[2]);
-	
-	if (is_loc)
-		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._rewrite.push_back(new_redir);
-	else
-		this->_servers[serv_idx]._rewrite.push_back(new_redir);
 }
 
 void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
