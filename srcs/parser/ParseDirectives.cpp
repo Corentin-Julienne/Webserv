@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 19:35:51 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 21:43:41 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	}
 }
 
-void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // ok
+void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {	
 	std::vector<std::string>		args;
 	
@@ -122,7 +122,7 @@ void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int
 		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);	
 }
 
-void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
+void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
 	int							multiplicator = 1;
@@ -134,9 +134,9 @@ void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int 
 	{
 		if (!std::isdigit(args[1][i]) && i != args[1].size() - 1)
 			throw std::runtime_error("invalid syntax in directive client_max_body_size");
-		else if (!std::isdigit(args[1][i]) && i != args[1].size() - 1)
+		else if (!std::isdigit(args[1][i]) && i == args[1].size() - 1)
 		{
-			if (args[1][args.size() - 1] == 'M' || args[1][args.size() - 1] == 'm')
+			if (args[1][args[1].size() - 1] == 'M' || args[1][args.size() - 1] == 'm')
 			{
 				multiplicator = 1000000;
 				args[1] = args[1].substr(0, args[1].size() - 1);
@@ -162,7 +162,7 @@ void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int 
 		this->_servers[serv_idx]._client_max_body_size = body_size_int;
 }
 
-void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
+void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string> 	args;
 
@@ -188,7 +188,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 	}
 }
 
-void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
+void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
 
@@ -209,7 +209,7 @@ void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_
 		this->_servers[serv_idx]._root = args[1];
 }
 
-void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
+void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	bool						switch_autoindex = false;
 	std::vector<std::string>	args;
@@ -225,7 +225,7 @@ void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int
 		this->_servers[serv_idx]._autoindex = switch_autoindex;
 }
 
-void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
+void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	index_values;

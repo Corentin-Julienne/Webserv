@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 18:01:10 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 21:46:57 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ std::size_t	Parser::_processLocationBlock(std::string directive, int server_inde
 }
 
 /* Copy the values of a server block to the Location struct loc, to enforce inheritance principle */
-void	Parser::_enforceInheritance(Location& loc, int server_index) // to test
+void	Parser::_enforceInheritance(Location& loc, int server_index)
 {
 	loc._error_pages = this->_servers[server_index]._error_pages;
 	loc._client_max_body_size = this->_servers[server_index]._client_max_body_size;
@@ -75,7 +75,7 @@ void	Parser::_enforceInheritance(Location& loc, int server_index) // to test
 }
 
 /* Takes the directive that finish by char delim. Returns an vector containing the arguments */
-std::vector<std::string>	Parser::_cutArgs(std::string directive, char delim) // to test
+std::vector<std::string>	Parser::_cutArgs(std::string directive, char delim)
 {
 	std::vector<std::string>		args;
 	int								i = 0;
@@ -99,7 +99,7 @@ std::vector<std::string>	Parser::_cutArgs(std::string directive, char delim) // 
 
 /* check whether the location block have two arguments (location and the path)
 Checks also if there is one { and one } */
-bool	Parser::_isLocationBlockValid(std::string block) // to test
+bool	Parser::_isLocationBlockValid(std::string block)
 {
 	std::size_t			i = 0;
 	std::size_t			start;
