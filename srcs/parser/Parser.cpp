@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 16:53:53 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 15:11:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ Parser::Parser(char *config_file)
 		this->_servers.push_back(ServConf());
 		this->_processBlock(this->_server_blocks[i], i);
 	}
+	if (!this->_isThereEnoughInfo())
+		throw std::runtime_error("conf file does not provides enough information to be used correctly");
 }
 
 Parser::~Parser() {}

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 14:36:39 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 15:28:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,14 +44,20 @@ std::size_t	Parser::_processLocationBlock(std::string directive, int server_inde
 	Location						loc;
 	std::size_t						begin_idx;
 	std::size_t						end_idx;
+	std::vector<std::string>		args;
 	
 	if (!this->_isLocationBlockValid(directive))
-		throw std::runtime_error("location block syntax is invalid");
+		throw std::runtime_error("location block syntax is invalid");	
 	begin_idx = directive.find("{");
 	end_idx	= directive.find("}");
 	block = directive.substr(begin_idx + 1, end_idx - begin_idx - 1);	
 	this->_servers[server_index]._locs.push_back(loc);
-	this->_enforceInheritance(loc, server_index);	
+	args = this->_cutArgs(directive, '{');
+	if (args.size() != 2)
+		throw std::runtime_error("location block provided with wrong number of arguments");
+	this->_servers[server_index]._locs[this->_servers[server_index]._locs.size() - 1]._url = args[1];
+	this->_enforceInheritance(this->_servers[server_index]._locs[this->_servers[server_index]._locs.size() - 1],
+	server_index);
 	this->_processBlock(block, server_index, true);
 	return (end_idx + 1);
 }
@@ -120,5 +126,28 @@ bool	Parser::_isDirectiveValid(std::string directive)
 		return (false) ;
 	if (this->_cutArgs(directive, ';').size() < 2)
 		return (false);
+	return (true);
+}
+
+/*  checks every ServConf struct and its associated Location structs in order to find if
+there is enough info provided. Returns true if it is the case, false otherwise */
+bool	Parser::_isThereEnoughInfo(void)
+{
+	for (std::size_t serv_idx = 0; serv_idx < this->_servers.size(); serv_idx++)
+	{
+		// case no ip address and no server_name (can't find relevant info where to listen)
+		if (this->_servers[serv_idx]._ip_address.empty() && this->_servers[serv_idx]._server_name.empty())
+			return (false);
+		// case no cgi instructions are provided
+		if (this->_servers[serv_idx]._cgi.empty())
+			return (false);	
+		// check every location block
+		for (std::size_t j = 0; j < this->_servers[serv_idx]._locs.size(); j++)
+		{
+			// need both root and index to be functionnal
+			if (this->_servers[serv_idx]._locs[j]._root.empty() && this->_servers[serv_idx]._locs[j]._index.empty())
+				return (false);
+		}
+	}
 	return (true);
 }

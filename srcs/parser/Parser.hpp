@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 11:52:31 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 14:27:30 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,10 @@ class Parser
 		std::vector<std::string>	_cutArgs(std::string directive, char delim);
 		bool						_isLocationBlockValid(std::string block);
 		bool						_isDirectiveValid(std::string directive);
+		bool						_isThereEnoughInfo(void);
 
 		/* ParseDirectives.cpp */
+		bool	_isIpValid(std::string ip);
 		void	_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
 		void	_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
 		void	_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);

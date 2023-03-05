@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/04 16:59:42 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 14:38:50 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,34 @@
 
 /* ParseDirectives.cpp contains all the specialized functions that will store evry directive and 
 check if they are compliant with the syntaxic rules accepted by the server */
+
+bool	Parser::_isIpValid(std::string ip)
+{
+	std::string		delimiter = ".";
+	std::string		token;
+	std::size_t		pos = 0;
+	bool			stop = false;
+
+	if (!ip.compare("localhost"))
+		return (true);
+	while (!stop)
+	{
+		if ((pos = ip.find(delimiter)) == std::string::npos)
+			stop = true;
+		token = ip.substr(0, pos);
+		if (token.size() > 3)
+			return (false);
+		for (std::size_t j = 0; j < token.size(); j++)
+		{
+			if (!std::isdigit(token[j]))
+				return (false);
+		}
+		if (atoi(token.c_str()) > 255)
+			return (false);
+		ip.erase(0, pos + delimiter.length());
+	}
+	return (true);
+}
 
 void	Parser::_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
@@ -28,6 +56,8 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	args = this->_cutArgs(directive, ';');
 	if (args[1].find(':') != std::string::npos) // case there is a ip separated by : and then a port number
 	{
+		if (!this->_isIpValid(args[1].substr(0, args[1].find(":"))))
+			throw std::runtime_error("invalid format of IpV4 address provided in .conf file");
 		this->_servers[serv_idx]._ip_address = args[1].substr(0, args[1].find(":"));	
 		port_str = args[1].substr(args[1].find(":") + 1);
 	}
@@ -52,7 +82,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	}
 }
 
-void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
+void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {	
 	std::vector<std::string>		args;
 	
@@ -61,8 +91,11 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 	if (arg_num < 2)
 		throw std::runtime_error("server_name take at least one argument");
 	args = this->_cutArgs(directive, ';');
+
+	// clear the vector is there is already a std:string in the same server block or location block  
 	if (!this->_servers[serv_idx]._server_name.empty())
 		this->_servers[serv_idx]._server_name.clear();
+
 	for (std::size_t i = 1; i < args.size(); i++)
 		this->_servers[serv_idx]._server_name.push_back(args[i]);	
 }
@@ -83,7 +116,7 @@ void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int
 		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);	
 }
 
-void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {
 	std::vector<std::string>	args;
 	int							multiplicator = 1;
@@ -123,13 +156,21 @@ void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int 
 		this->_servers[serv_idx]._client_max_body_size = body_size_int;
 }
 
-void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {
 	std::vector<std::string> 	args;
 
 	if (arg_num < 2)
 		throw std::runtime_error("allow directive needs at least one argument");
 	args = this->_cutArgs(directive, ';');
+
+	// check if the directive as already been used, and clear it if it is the case
+	if (is_loc &&
+	!this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._allowed_http_methods.empty())
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._allowed_http_methods.clear();
+	else if (!this->_servers[serv_idx]._allowed_http_methods.empty())
+		this->_servers[serv_idx]._allowed_http_methods.clear();
+	
 	for (std::size_t i = 1; i < args.size(); i++)
 	{	
 		if (args[i].compare("GET") && args[i].compare("POST") && args[i].compare("DELETE"))
@@ -141,7 +182,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 	}
 }
 
-void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {
 	std::vector<std::string>		args;
 	std::vector<std::string>		new_redir;
@@ -151,26 +192,35 @@ void	Parser::_processRewriteDirective(std::string directive, int serv_idx, int a
 	args = this->_cutArgs(directive, ';');
 	new_redir.push_back(args[1]);
 	new_redir.push_back(args[2]);
+	
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._rewrite.push_back(new_redir);
 	else
 		this->_servers[serv_idx]._rewrite.push_back(new_redir);
 }
 
-void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {
 	std::vector<std::string>	args;
 
 	if (arg_num != 2)
 		throw std::runtime_error("root directive takes one argument");
 	args = this->_cutArgs(directive, ';');
+
+	// clear if lready present in the same server block or location
+	if (is_loc &&
+	!this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._root.empty())
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._root.clear();
+	else if (!this->_servers[serv_idx]._root.empty())
+		this->_servers[serv_idx]._root.clear();
+	
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._root = args[1];
 	else
 		this->_servers[serv_idx]._root = args[1];
 }
 
-void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {
 	bool						switch_autoindex = false;
 	std::vector<std::string>	args;
@@ -186,7 +236,7 @@ void	Parser::_processAutoindexDirective(std::string directive, int serv_idx, int
 		this->_servers[serv_idx]._autoindex = switch_autoindex;
 }
 
-void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // to test
+void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	index_values;
@@ -196,6 +246,14 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		index_values.push_back(args[i]);
+
+	// clear if lready present in the same server block or location
+	if (is_loc &&
+	!this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index.empty())
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index.clear();
+	else if (!this->_servers[serv_idx]._index.empty())
+		this->_servers[serv_idx]._index.clear();
+		
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index = index_values;
 	else
