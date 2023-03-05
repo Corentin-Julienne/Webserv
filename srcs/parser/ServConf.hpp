@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 15:54:49 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/26 17:19:11 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:10:49 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ struct ServConf
 		long long int								_client_max_body_size;
 		// used mostly for routes (location blocks, but can apply through everything using inheritance)
 		std::vector<std::string>					_allowed_http_methods;
-		std::vector< std::vector<std::string> >		_rewrite;
 		std::string									_root;
 		bool										_autoindex;
 		std::vector<std::string> 					_index;

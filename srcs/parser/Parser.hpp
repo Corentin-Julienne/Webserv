@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 15:14:55 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:03:32 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <iterator>
 #include <sstream>
 #include <cctype>
+#include <stdexcept>
 
 #define BAD_INSTR			0
 #define LOCATION			1
@@ -31,11 +32,12 @@
 #define ERR_PAGE			4
 #define CLIENT_BODY_SIZE	5
 #define ALLOW_HTTP_METHOD	6
-#define REWRITE				7
-#define ROOT				8
-#define AUTOINDEX			9
-#define INDEX				10
-#define CGI					11
+#define ROOT				7
+#define AUTOINDEX			8
+#define INDEX				9
+#define CGI					10
+
+#define MAX_PORT			65535
 
 class Parser
 {
@@ -53,7 +55,6 @@ class Parser
 	private:
 	
 		// ops on conf file
-		void	_openFile(char *config_file);
 		void	_processFile(void);
 		void	_ifstreamToStr(void);
 		// separating std::string on different server blocks
@@ -73,8 +74,10 @@ class Parser
 		std::vector<std::string>	_cutArgs(std::string directive, char delim);
 		bool						_isLocationBlockValid(std::string block);
 		bool						_isDirectiveValid(std::string directive);
+		bool						_isThereEnoughInfo(void);
 
 		/* ParseDirectives.cpp */
+		bool	_isIpValid(std::string ip);
 		void	_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
 		void	_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
 		void	_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
@@ -91,7 +94,7 @@ class Parser
 	public:
 		
 		void	displayParsing(void);	
-		void	displayLocation(Location& loc);
+		void	displayLocation(Location& loc, int loc_index);
 		void	displayDummyParser(void);
 		
 	private:
