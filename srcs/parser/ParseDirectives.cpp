@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:03:07 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 19:35:51 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	}
 }
 
-void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // alpha
+void	Parser::_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // ok
 {	
 	std::vector<std::string>		args;
 	
@@ -91,6 +91,12 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 	if (arg_num < 2)
 		throw std::runtime_error("server_name take at least one argument");
 	args = this->_cutArgs(directive, ';');
+
+	for (std::size_t i = 1; i < args.size(); i++)
+	{
+		if (args[i][0] == '"' && args[i][args[i].size() - 1] == '"')
+			args[i] = args[i].substr(1, args[i].size() - 2);
+	}
 
 	// clear the vector is there is already a std:string in the same server block or location block  
 	if (!this->_servers[serv_idx]._server_name.empty())

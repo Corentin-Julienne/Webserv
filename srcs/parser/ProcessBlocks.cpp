@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:08:20 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:01:10 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 		{
 			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find_first_of(" \t\n")));			
 			if (dir_type == BAD_INSTR)
-				throw std::runtime_error("invalid instruction provided bro");
+				throw std::runtime_error("invalid instruction provided");
 			if (dir_type == LOCATION && is_loc == true)
 				throw std::runtime_error("nested location feature not supported !!!");
 			else
@@ -141,6 +141,8 @@ bool	Parser::_isThereEnoughInfo(void)
 		// if (this->_servers[serv_idx]._cgi.empty())
 		// 	return (false);	
 		// check every location block
+		if (this->_servers[serv_idx]._locs.empty()) // no location provided
+			return (false);			
 		for (std::size_t j = 0; j < this->_servers[serv_idx]._locs.size(); j++)
 		{
 			// need both root and index to be functionnal

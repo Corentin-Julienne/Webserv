@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 11:40:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:06:18 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 19:35:05 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,13 @@ int main(int argc, char **argv)
 	{
 		Parser		test_parsing(argv[1]);
 
-		test_parsing.displayParsing();
+		//test_parsing.displayParsing();
 		std::cout << "ending parsing test" << std::endl;
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
-		std::cout << "parsing tests inconclusive or worng syntax in conf file" << std::endl;
+		std::cout << "parsing tests inconclusive or wrong syntax in conf file" << std::endl;
 	}
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:02:26 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:16:50 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,12 @@ void	Parser::displayParsing(void)
 		std::cout << "port = " << this->_servers[i]._port << std::endl;
 		std::cout << "ip address = " << this->_servers[i]._ip_address << std::endl;
 		std::cout << "default_server = " << std::boolalpha << this->_servers[i]._default_server << std::endl;
+		
+		std::cout << "---------------------------------------------------------" << std::endl;
+		std::cout << RED << "Displaying content of server_name" << RESET << std::endl;
+		for (std::size_t j = 0; j < this->_servers[i]._server_name.size(); j++)
+			std::cout << "server_name number " << j << " is = |" << this->_servers[i]._server_name[j] << "|" << std::endl;;
+		
 		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 		std::cout << "displaying error_pages directive below :" << std::endl;
 		for (std::size_t j = 0; j < this->_servers[i]._error_pages.size(); j++)
@@ -158,7 +164,7 @@ void	Parser::displayParsing(void)
 				std::cout << std::endl << "=> error page arg " << k << " = " << this->_servers[i]._error_pages[j][k] << std::endl;
 			std::cout << "----------------------------------------------" << std::endl;
 		}
-		std::cout << "client_max_blody_size = " << this->_servers[i]._client_max_body_size << std::endl;
+		std::cout << "client_max_body_size = " << this->_servers[i]._client_max_body_size << std::endl;
 		std::cout << "----------------------------------------------" << std::endl;
 		std::cout << RED << "displaying allowed_http_methods below:" << RESET << std::endl;
 		for (std::size_t j = 0; j < this->_servers[i]._allowed_http_methods.size(); j++)
