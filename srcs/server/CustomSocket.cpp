@@ -6,19 +6,20 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 03:50:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 06:03:02 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./CustomSocket.hpp"
+#include "CustomSocket.hpp"
 
-CustomSocket::CustomSocket(void) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _port(8080),
+CustomSocket::CustomSocket(int port) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _port(port),
 _backlog(10), _new_socket_fd(-1)
 {
 	this->_socket_fd = socket(_domain, _type, _protocol);
 	if (this->_socket_fd < 0) {} // add function to handle errors
 	this->_bindSocket();
 	this->_enableSocketListening();
+	std::cout << "- Socket created on port " << this->_port << std::endl;
 }
 
 CustomSocket::~CustomSocket() 
@@ -50,7 +51,7 @@ void	CustomSocket::_startServer(void)
 		char	buffer[1024]; // create a buffer to be used by read
 		memset(buffer, 0, sizeof(buffer));
 //		if (errret != -1 && pfd[0].revents & POLLIN) // if case might be useless since recv should fail if revents is not POLLIN
-		valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
+		valret = read(this->_new_socket_fd, buffer, 1024/* | MSG_DONTWAIT*/); // manage case when len > 1024
 //		if (errret == -1 || !(pfd[0].revents & POLLIN) || valret < 0)
 		if (valret < 0)
 		{
@@ -63,7 +64,9 @@ void	CustomSocket::_startServer(void)
 		std::string							buff = buffer;
 		std::string							reqType, uri, body;
 		std::map<std::string, std::string>	headers;
+		
 		this->_parseRequest(buff, reqType, uri, headers, body);
+
 		if (reqType == "GET")
 			output = this->_GET(uri);
 		else if (reqType == "POST")
@@ -180,10 +183,6 @@ void	CustomSocket::_closeSocket(int socket_fd)
 		// handle error there
 	}
 }
-
-#include <sstream>
-#include <fstream>
-#include <unistd.h>
 
 std::string	CustomSocket::_GET(std::string filePath)
 {

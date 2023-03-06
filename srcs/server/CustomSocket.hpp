@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 03:50:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 05:59:59 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <unistd.h>		// for close
 #include <poll.h>		// for poll
 #include <sstream>      // for to_string equivalent
+#include <fstream>
 #include <map>
 #include <iostream>
 #include <csignal>
@@ -27,7 +28,7 @@ class CustomSocket
 {
 	public:
 	
-		CustomSocket(void);
+		CustomSocket(int port);
 		~CustomSocket();
 
 		void	_startServer(void);
