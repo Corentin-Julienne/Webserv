@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+         #
+#    By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/16 12:16:41 by cjulienn          #+#    #+#              #
-#    Updated: 2023/02/26 11:39:40 by cjulienn         ###   ########.fr        #
+#    Updated: 2023/03/06 03:19:09 by mpeharpr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,7 @@ CFLAGS := -Wall -Wextra -Werror -std=c++98
 
 SRC_DIR := srcs
 OBJ_DIR := objs
-SUB_DIRS := parser # update this when adding new subdir
+SUB_DIRS := server parser # update this when adding new subdir
 SOURCEDIRS := $(foreach dir, $(SUB_DIRS), $(addprefix $(SRC_DIR)/, $(dir)))
 
 SRC_FILES := $(foreach dir,$(SOURCEDIRS),$(wildcard $(dir)/*.cpp))
