@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 05:59:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 13:06:13 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,14 +31,14 @@ class CustomSocket
 		CustomSocket(int port);
 		~CustomSocket();
 
-		void	_startServer(void);
+		void	startServer(void);
 
 	private:
 
-		void	_bindSocket(void);
-		void	_enableSocketListening(void);
-		void	_acceptConnection(void);
-		void	_closeSocket(int socket_fd);
+		void		_bindSocket(void);
+		void		_enableSocketListening(void);
+		void		_acceptConnection(void);
+		void		_closeSocket(int socket_fd);
 		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
 		std::string	_GET(std::string filePath);
 		std::string	_POST(std::string filePath, std::string body);
