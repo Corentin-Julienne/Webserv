@@ -2,9 +2,6 @@
 
 The goal of this project is to create a Web Server using the HTTPS protocol (see the subject PDF file for more information about the features).
 
-## useful resources about sockets in C++ :
-TODO
-
 ## Testing
 In the test folder, a stresser.sh bash script is available. You can use it this way:  
 > **./stresser.sh URL number_of_requests [number_of_simultaneous_connections]**
