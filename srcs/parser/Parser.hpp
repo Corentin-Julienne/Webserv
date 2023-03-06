@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:03:32 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/06 03:08:36 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@
 #include <sstream>
 #include <cctype>
 #include <stdexcept>
+#include <limits>
+#include <climits>
+#include <stdlib.h> // needed for atoi
 
 #define BAD_INSTR			0
 #define LOCATION			1
