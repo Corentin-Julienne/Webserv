@@ -1,0 +1,56 @@
+body {
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+.main-container {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	overflow-y: scroll;
+}
+
+.container-1, .container-2, .container-3, .container-4, .container-5, .container-6 {
+	height: 100vh;
+	width: 100vw;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	margin: 0;
+	padding: 0;
+}
+
+.container-1 {
+	background-image: url(../../images/tesla_model_s.jpeg);
+}
+
+.container-2 {
+	background-image: url(../../images/tesla_model_y.jpeg);
+}
+
+.container-3 {
+	background-image: url(../../images/tesla_model_3.jpeg);
+}
+
+.container-4 {
+	background-image: url(../../images/tesla_model_x.jpeg);
+}
+
+.container-5 {
+	background-image: url(../../images/tesla_solar_panels.jpeg);
+}
+
+.container-6 {
+	background-image: url(../../images/tesla_solar_roof.jpeg);
+}
+
+a {
+	text-decoration: none;
+	color: #181b21;
+}
