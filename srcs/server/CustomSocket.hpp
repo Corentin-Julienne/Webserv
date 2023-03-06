@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 03:48:41 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 03:50:59 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class CustomSocket
 		CustomSocket(void);
 		~CustomSocket();
 
-		void	startServer(void);
+		void	_startServer(void);
 
 	private:
 

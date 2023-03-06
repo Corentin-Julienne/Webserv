@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 03:48:14 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 03:50:59 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,6 @@ int main(void)
 	CustomSocket	test_server;
 	createdSocket = &test_server;
 
-	test_server.startServer();
+	test_server._startServer();
 	return (0);
 }

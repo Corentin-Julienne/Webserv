@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 03:48:54 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 03:50:59 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ CustomSocket::~CustomSocket()
 }
 
 // main function to start a socket
-void	CustomSocket::startServer(void)
+void	CustomSocket::_startServer(void)
 {
 	ssize_t			valret;
 //	int				errret;
