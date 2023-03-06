@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 20:17:38 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/06 03:48:41 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,10 @@
 #include <arpa/inet.h>	// for htonl and similar
 #include <unistd.h>		// for close
 #include <poll.h>		// for poll
+#include <sstream>      // for to_string equivalent
 #include <map>
 #include <iostream>
+#include <csignal>
 #include <stdlib.h>
 
 // used to create a socket and setup it to be used later

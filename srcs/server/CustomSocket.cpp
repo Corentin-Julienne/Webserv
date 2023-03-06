@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/01 20:17:37 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/06 03:48:54 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ _backlog(10), _new_socket_fd(-1)
 
 CustomSocket::~CustomSocket() 
 {
+	std::cout << "Closing socket" << std::endl;
 	this->_closeSocket(this->_socket_fd);
 }
 
@@ -91,6 +92,7 @@ void	CustomSocket::startServer(void)
 
 void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body)
 {
+	std::cout << req << std::endl;
 	if (req.substr(0, 4) == "GET ")
 		reqType = "GET";
 	else if (req.substr(0, 5) == "POST ")
@@ -188,7 +190,8 @@ std::string	CustomSocket::_GET(std::string filePath)
 	std::string			ret;
 	std::ifstream		ifs;
 	std::stringstream	content;
-	ifs.open(filePath);
+	
+	ifs.open(filePath.c_str());
 	if (!ifs.is_open())
 	{
 		if (access(filePath.c_str(), F_OK) != 0)
@@ -208,12 +211,18 @@ std::string	CustomSocket::_GET(std::string filePath)
 
 std::string	CustomSocket::_POST(std::string filePath, std::string body)
 {
+	std::stringstream ss;
 	std::string s = "POST\tat " + filePath + "\nbody:\n" + body;
-	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " + std::to_string(s.length()) + "\n\n" + s); // to_string is C++11
+
+	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
+	return (ss.str());
 }
 
 std::string	CustomSocket::_DELETE(std::string filePath, std::string body)
 {
+	std::stringstream ss;
 	std::string s = "DELETE\tat " + filePath + "\nbody:\n" + body;
-	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " + std::to_string(s.length()) + "\n\n" + s); // to_string is C++11
+
+	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
+	return (ss.str());
 }
