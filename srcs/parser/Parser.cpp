@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:03:51 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/06 05:54:41 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,12 @@ bool	Parser::_isServerBlockValid(std::string substr)
 		i++;
 	}	
 	return ((num_open_par == num_close_par) ? true : false && num_open_par > 0);
+}
+
+/* return parsing infos */
+const Parser::servers_array Parser::getServers(void) const
+{
+	return (this->_servers);
 }
 
 /* if directive refers to a location, triggers the specialized function. Otherwise, 

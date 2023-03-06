@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 03:08:36 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 05:54:30 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ class Parser
 {
 	public:
 	
+		typedef std::vector<ServConf>		servers_array;
+
 		Parser(void);
 		Parser(char *config_file);
 		~Parser();
@@ -53,7 +55,7 @@ class Parser
 
 		Parser& operator=(const Parser& original);
 
-		const Parser&	getParsingInfos(void) const;
+		const servers_array	getServers(void) const;
 
 	private:
 	
@@ -106,7 +108,7 @@ class Parser
 		std::string						_conf_str;
 		std::vector<std::string>		_server_blocks;
 		int								_serv_num;
-		std::vector<ServConf>			_servers;
+		servers_array					_servers;
 };
 
 #endif
