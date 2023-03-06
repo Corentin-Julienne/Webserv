@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 06:03:02 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/06 13:02:28 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ _backlog(10), _new_socket_fd(-1)
 	if (this->_socket_fd < 0) {} // add function to handle errors
 	this->_bindSocket();
 	this->_enableSocketListening();
-	std::cout << "- Socket created on port " << this->_port << std::endl;
+	std::cout << "Socket created on port " << this->_port << std::endl;
 }
 
 CustomSocket::~CustomSocket() 
