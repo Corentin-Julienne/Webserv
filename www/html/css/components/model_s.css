@@ -1,0 +1,40 @@
+@font-face {
+	font-family: Gotham_Medium;
+	src: url(../../fonts/Gotham_Medium/Gotham_Medium.otf)
+}
+
+.model-s {
+	height: 15vh;
+	display: flex;
+	text-align: center;
+	flex-direction: column;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+}
+
+.model-s-title {
+	/* display: flex; */
+	font-size: 40px;
+	font-family: Gotham_Medium, arial;
+	margin: 0;
+	padding: 0;
+	color: #393c41;
+}
+
+.model-s-order {
+	/* display: flex; */
+	font-size: 14px;
+	font-family: Gotham_Medium, arial;
+	color: #5c5d61;
+	margin: 0;
+	padding: 0;
+}
+
+.touchless {
+	color: #5c5d61;
+	font-size: 14px;
+	opacity: 0.7;
+	margin: 0;
+	padding: 0;
+}
