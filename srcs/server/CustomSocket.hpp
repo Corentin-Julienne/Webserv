@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/03 15:32:38 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/07 19:59:54 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <arpa/inet.h>	// for htonl and similar
 #include <unistd.h>		// for close
 #include <poll.h>		// for poll
+#include <fcntl.h>		// for O_NONBLOCK
 #include <map>
 #include <iostream>
 #include <stdlib.h>
@@ -33,11 +34,13 @@ class CustomSocket
 
 	private:
 
-		void	_bindSocket(void);
-		void	_enableSocketListening(void);
-		void	_createKq(void);
-		void	_acceptConnection(void);
-		void	_closeSocket(int socket_fd);
+		void		_bindSocket(void);
+		void		_enableSocketListening(void);
+		void		_createKq(void);
+		void		_acceptConnection(void);
+		void		_closeSocket(int socket_fd);
+		std::string	_read();
+		void		_write(std::string output);
 		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
 		std::string	_GET(std::string filePath);
 		std::string	_POST(std::string filePath, std::string body);

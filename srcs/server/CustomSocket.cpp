@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/03 16:09:14 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/10 11:15:54 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,57 +30,84 @@ CustomSocket::~CustomSocket()
 // main function to start a socket
 void	CustomSocket::startServer(void)
 {
-	ssize_t			valret;
 	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	
 	while (true)
 	{
 		std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
-		struct kevent	events[2];
+		struct kevent	events[1000];
 		int				nevents = kevent(this->_kq, NULL, 0, events, 1, NULL); // protect
 		if (nevents < 0)
 			continue;
-		std::cout << "NUMBER OF EVENTS: " << nevents << "\n";
 		if (events[0].filter == EVFILT_READ)
 			this->_acceptConnection(); // use accept to wait for a connection
 
 		// read and write procedure
-		char	buffer[1024]; // create a buffer to be used by read
-		memset(buffer, 0, sizeof(buffer));
-		valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024 // poll
-		if (valret < 0)
-		{
-			std::cerr << "read operation: failure" << std::endl;
-			exit(EXIT_FAILURE);
-			// handle error there
-		}
-		std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
+		EV_SET(&events[1], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, 0);
+		EV_SET(&events[2], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, 0);
+		kevent(this->_kq, &events[1], 2, NULL, 0, NULL);
 
-		std::string							buff = buffer;
-		std::string							reqType, uri, body;
-		std::map<std::string, std::string>	headers;
-		this->_parseRequest(buff, reqType, uri, headers, body);
-		if (reqType == "GET")
-			output = this->_GET(uri);
-		else if (reqType == "POST")
-			output = this->_POST(uri, body);
-		else if (reqType == "DELETE")
-			output = this->_DELETE(uri, body);
-		else
-			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
-
-		valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT); // poll
-		if (valret < 0)
+		usleep(300);
+		nevents = kevent(this->_kq, NULL, 0, &events[1], 999, NULL); // how can I separate events of new connections vs read?
+		for (int i = nevents; i > 0; --i)
+//		for (int i = 0; i < nevents; ++i)
 		{
-			std::cerr << "write operation: failure" << std::endl;
-			exit(EXIT_FAILURE);
-			// handle error here
+			std::cout << "I: " << i << "\t" << events[i].filter << " READ " << EVFILT_READ << " WRITE " << EVFILT_WRITE << "\n";
+			if (events[i].filter == EVFILT_READ)
+				output = this->_read();
+			if (events[i].filter == EVFILT_WRITE)
+				this->_write(output);
 		}
 
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
 
 		// suppress the new socket
 		this->_closeSocket(this->_new_socket_fd);
+	}
+}
+
+std::string	CustomSocket::_read()
+{
+	ssize_t	valret;
+
+
+	char	buffer[1024]; // create a buffer to be used by read
+	memset(buffer, 0, sizeof(buffer));
+	valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024 // poll
+	if (valret < 0)
+	{
+		std::cerr << "read operation: failure" << std::endl;
+		exit(EXIT_FAILURE);
+		// handle error there
+	}
+	std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
+
+	std::string							buff = buffer;
+	std::string							reqType, uri, body, output;
+	std::map<std::string, std::string>	headers;
+	this->_parseRequest(buff, reqType, uri, headers, body);
+	if (reqType == "GET")
+		output = this->_GET(uri);
+	else if (reqType == "POST")
+		output = this->_POST(uri, body);
+	else if (reqType == "DELETE")
+		output = this->_DELETE(uri, body);
+	else
+		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
+
+	return (output);
+}
+
+void	CustomSocket::_write(std::string output)
+{
+	ssize_t	valret;
+
+	valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT); // poll
+	if (valret < 0)
+	{
+		std::cerr << "write operation: failure" << std::endl;
+		exit(EXIT_FAILURE);
+		// handle error here
 	}
 }
 
