@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 18:07:21 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 18:12:41 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class CustomSocket
 	public:
 	
 		CustomSocket(void);
-		CustomSocket(int kq);
+		CustomSocket(ServConf server_conf, int kq);
 		~CustomSocket();
 
 		void		acceptConnection(void);
@@ -56,13 +56,6 @@ class CustomSocket
 
 		void		_bindSocket(void);
 		void		_enableSocketListening(void);
-		CustomSocket(ServConf server_conf);
-		~CustomSocket();
-
-		void			startServer(void);
-
-	private:
-
 		std::string _getAbsoluteURIPath(const std::string uri);
 		Location *	_getPathLocation(const std::string uri);
 		void		_tryToIndex(std::string &filePath);
