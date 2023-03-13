@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 17:55:47 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 18:06:16 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ bool isDirectory(const std::string &path)
 	return S_ISDIR(statbuf.st_mode);
 }
 
-CustomSocket::CustomSocket(ServConf server_config) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _backlog(10), _new_socket_fd(-1), _servconf(server_config)
+CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _backlog(10), _kq(kq), _new_socket_fd(-1), _servconf(server_config)
 {
 	_socket_fd = socket(_domain, _type, _protocol);
 	if (_socket_fd < 0) {} // add function to handle errors
@@ -97,80 +97,84 @@ void CustomSocket::_tryToIndex(std::string &filePath)
 	}
 }
 
-// main function to start a socket
+/*
 void	CustomSocket::startServer(void)
 {
-	ssize_t			valret;
 	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	
 	while (true)
 	{
 		std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
-		_acceptConnection();
 
-		char	buffer[1024];
-		memset(buffer, 0, sizeof(buffer));
-		
-		valret = read(_new_socket_fd, buffer, 1024); 
-		if (valret < 0)
+		// read and write procedure
+		struct kevent	events[1000];
+		struct kevent	new_event;
+		int				nevents = kevent(this->_kq, NULL, 0, events, 1000, NULL);
+		if (nevents < 0)
+			continue;
+		for (int i = 0; i < nevents; ++i)
 		{
-			std::cerr << "read operation: failure" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-		std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
-
-		std::string							buff = buffer;
-		std::string							reqType, uri, body;
-		std::map<std::string, std::string>	headers;
-		
-		_parseRequest(buff, reqType, uri, headers, body);
-
-		if (uri.substr(0, 1) != "/")
-			uri = "/" + uri;
-
-		// Check if the method used is allowed for this server
-		Location *loc = _getPathLocation(uri);
-		bool isAllowed = false;
-
-		if (loc)
-		{
-			for (size_t i = 0; i < loc->_allowed_http_methods.size(); i++)
+			if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)this->_socket_fd)
+				this->acceptConnection();
+			else if (events[i].filter == EVFILT_READ)
 			{
-				if (reqType == loc->_allowed_http_methods[i])
-				{
-					isAllowed = true;
-					break ;
-				}
+				output = this->read(events[i].ident);
+				EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, const_cast<char *>(output.c_str()));
+				kevent(this->_kq, &new_event, 1, NULL, 0, NULL);
+			}
+			else if (events[i].filter == EVFILT_WRITE)
+			{
+				this->write(events[i].ident, static_cast<char *>(events[i].udata));
+				this->closeSocket(events[i].ident);
 			}
 		}
 
-		if (isAllowed)
-		{
-			if (reqType == "GET")
-				output = _GET(uri);
-			else if (reqType == "POST")
-				output = _POST(uri, body);
-			else if (reqType == "DELETE")
-				output = _DELETE(uri, body);
-			else
-				output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
-		}
-		else
-		{
-			output = "HTTP/1.1 405 Method Not Allowed\nContent-Type: text/plain\nContent-Length: 0\n\n";
-		}
-
-		valret = send(_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT);
-		if (valret < 0)
-		{
-			std::cerr << "write operation: failure" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
+	}
+}
+*/
 
-		// suppress the new socket
-		_closeSocket(_new_socket_fd);
+std::string	CustomSocket::read(int fd)
+{
+	ssize_t	valret;
+
+	char	buffer[1024]; // create a buffer to be used by read
+	memset(buffer, 0, sizeof(buffer));
+	valret = recv(fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
+	if (valret < 0)
+	{
+		std::cerr << "read operation: failure" << std::endl;
+		exit(EXIT_FAILURE);
+		// handle error there
+	}
+	std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
+
+	std::string							buff = buffer;
+	std::string							reqType, uri, body, output;
+	std::map<std::string, std::string>	headers;
+	this->_parseRequest(buff, reqType, uri, headers, body);
+	if (reqType == "GET")
+		output = this->_GET(uri);
+	else if (reqType == "POST")
+		output = this->_POST(uri, body);
+	else if (reqType == "DELETE")
+		output = this->_DELETE(uri, body);
+	else
+		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
+
+	return (output);
+}
+
+void	CustomSocket::write(int fd, char const *output)
+{
+	ssize_t	valret;
+
+	valret = send(fd, output, strlen(output), MSG_DONTWAIT);
+	if (valret < 0)
+	{
+		std::cerr << "write operation: failure" << std::endl;
+		exit(EXIT_FAILURE);
+		// handle error here
 	}
 }
 
@@ -206,15 +210,6 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 	}
 	if (++i < req.length())
 		body = req.substr(i);
-/*
-	std::cout << "----------------------- PARSING --------------------\n";
-	std::cout << "type: " << reqType << "\n";
-	std::cout << "body: " << body << "\n";
-	std::cout << "headers:\n";
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
-		std::cout << "\tkey: " << it->first << "\n\tvalue: " << it->second << "\n\n";
-	std::cout << "----------------------------------------------------\n";
-*/
 }
 
 // private helper functions
@@ -242,9 +237,13 @@ void	CustomSocket::_enableSocketListening(void)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
+	// don't forget protections
+	struct kevent	kev;
+	EV_SET(&kev, this->_socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, 0);
+	kevent(this->_kq, &kev, 1, NULL, 0, NULL);
 }
 
-void	CustomSocket::_acceptConnection(void)
+void	CustomSocket::acceptConnection(void)
 {
 	socklen_t socketLen = sizeof(_sockaddr);
 	if ((_new_socket_fd = accept(_socket_fd, (struct sockaddr *)&_sockaddr, &socketLen)) < 0)
@@ -253,9 +252,14 @@ void	CustomSocket::_acceptConnection(void)
 		exit(EXIT_FAILURE);
 		// handle error here
 	}
+	fcntl(this->_new_socket_fd, F_SETFL, O_NONBLOCK);
+	struct kevent	events[2];
+	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, this);
+	EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE | EV_ONESHOT, 0, 0, this);
+	kevent(this->_kq, events, 2, NULL, 0, NULL);
 }
 
-void	CustomSocket::_closeSocket(int socket_fd)
+void	CustomSocket::closeSocket(int socket_fd)
 {
 	if (close(socket_fd) < 0)
 	{
@@ -331,4 +335,19 @@ std::string	CustomSocket::_DELETE(std::string filePath, std::string body)
 
 	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	return (ss.str());
+}
+
+int	CustomSocket::getSocketFd()
+{
+	return (this->_socket_fd);
+}
+
+char	*CustomSocket::getOutput()
+{
+	return (this->_output);
+}
+
+void	CustomSocket::setOutput(char *output)
+{
+	this->_output = output;
 }
