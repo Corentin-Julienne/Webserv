@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 14:52:07 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 16:31:30 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,11 +296,24 @@ std::string	CustomSocket::_POST(std::string filePath, std::string body)
 
 std::string	CustomSocket::_DELETE(std::string filePath, std::string body)
 {
-	std::stringstream ss;
-	std::string s = "DELETE\tat " + filePath + "\nbody:\n" + body;
+	std::stringstream 	ss;
+	std::ifstream		ifs;
+	std::string 		s = "DELETE\tat " + filePath + "\nbody:\n" + body;
 	
 	std::string			realFilePath = _getAbsoluteURIPath(filePath);
 	_tryToIndex(realFilePath);
+
+	ifs.open(realFilePath.c_str());
+	if (ifs.is_open())
+	{
+		// delete the file
+		ifs.close();
+		std::remove(realFilePath.c_str());
+	}
+	else
+	{
+		// file does not exist
+	}
 
 	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	return (ss.str());
