@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 15:24:27 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/13 17:48:53 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,23 @@ _backlog(10), _new_socket_fd(-1)
 	if (this->_socket_fd < 0) {} // add function to handle errors
 	this->_bindSocket();
 	this->_enableSocketListening();
-	this->_createKq();
+	this->_kq = kqueue();
+}
+
+CustomSocket::CustomSocket(int kq): _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _port(8080), _backlog(10), _kq(kq), _new_socket_fd(-1)
+{
+	this->_socket_fd = socket(_domain, _type, _protocol);
+	if (this->_socket_fd < 0) {} // add function to handle errors
+	this->_bindSocket();
+	this->_enableSocketListening();
 }
 
 CustomSocket::~CustomSocket() 
 {
-	this->_closeSocket(this->_socket_fd);
+	this->closeSocket(this->_socket_fd);
 }
 
-// main function to start a socket
+/*
 void	CustomSocket::startServer(void)
 {
 	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
@@ -45,25 +53,26 @@ void	CustomSocket::startServer(void)
 		for (int i = 0; i < nevents; ++i)
 		{
 			if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)this->_socket_fd)
-				this->_acceptConnection();
+				this->acceptConnection();
 			else if (events[i].filter == EVFILT_READ)
 			{
-				output = this->_read(events[i].ident);
+				output = this->read(events[i].ident);
 				EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, const_cast<char *>(output.c_str()));
 				kevent(this->_kq, &new_event, 1, NULL, 0, NULL);
 			}
 			else if (events[i].filter == EVFILT_WRITE)
 			{
-				this->_write(events[i].ident, static_cast<char *>(events[i].udata));
-				this->_closeSocket(events[i].ident);
+				this->write(events[i].ident, static_cast<char *>(events[i].udata));
+				this->closeSocket(events[i].ident);
 			}
 		}
 
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
 	}
 }
+*/
 
-std::string	CustomSocket::_read(int fd)
+std::string	CustomSocket::read(int fd)
 {
 	ssize_t	valret;
 
@@ -94,7 +103,7 @@ std::string	CustomSocket::_read(int fd)
 	return (output);
 }
 
-void	CustomSocket::_write(int fd, char *output)
+void	CustomSocket::write(int fd, char const *output)
 {
 	ssize_t	valret;
 
@@ -165,18 +174,13 @@ void	CustomSocket::_enableSocketListening(void)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
-}
-
-void	CustomSocket::_createKq(void)
-{
 	// don't forget protections
-	this->_kq = kqueue();
 	struct kevent	kev;
 	EV_SET(&kev, this->_socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, 0);
 	kevent(this->_kq, &kev, 1, NULL, 0, NULL);
 }
 
-void	CustomSocket::_acceptConnection(void)
+void	CustomSocket::acceptConnection(void)
 {
 	socklen_t socketLen = sizeof(this->_sockaddr);
 	if ((this->_new_socket_fd = accept(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, &socketLen)) < 0)
@@ -187,12 +191,12 @@ void	CustomSocket::_acceptConnection(void)
 	}
 	fcntl(this->_new_socket_fd, F_SETFL, O_NONBLOCK);
 	struct kevent	events[2];
-	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, 0);
-	EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE | EV_ONESHOT, 0, 0, 0);
+	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, this);
+	EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE | EV_ONESHOT, 0, 0, this);
 	kevent(this->_kq, events, 2, NULL, 0, NULL);
 }
 
-void	CustomSocket::_closeSocket(int socket_fd)
+void	CustomSocket::closeSocket(int socket_fd)
 {
 	if (close(socket_fd) < 0)
 	{
@@ -201,10 +205,6 @@ void	CustomSocket::_closeSocket(int socket_fd)
 		// handle error there
 	}
 }
-
-#include <sstream>
-#include <fstream>
-#include <unistd.h>
 
 std::string	CustomSocket::_GET(std::string filePath)
 {
@@ -239,4 +239,19 @@ std::string	CustomSocket::_DELETE(std::string filePath, std::string body)
 {
 	std::string s = "DELETE\tat " + filePath + "\nbody:\n" + body;
 	return ("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " + std::to_string(s.length()) + "\n\n" + s); // to_string is C++11
+}
+
+int	CustomSocket::getSocketFd()
+{
+	return (this->_socket_fd);
+}
+
+char	*CustomSocket::getOutput()
+{
+	return (this->_output);
+}
+
+void	CustomSocket::setOutput(char *output)
+{
+	this->_output = output;
 }
