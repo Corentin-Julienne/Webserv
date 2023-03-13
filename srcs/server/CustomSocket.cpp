@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/10 11:15:54 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/13 15:24:27 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,45 +35,41 @@ void	CustomSocket::startServer(void)
 	while (true)
 	{
 		std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
-		struct kevent	events[1000];
-		int				nevents = kevent(this->_kq, NULL, 0, events, 1, NULL); // protect
-		if (nevents < 0)
-			continue;
-		if (events[0].filter == EVFILT_READ)
-			this->_acceptConnection(); // use accept to wait for a connection
 
 		// read and write procedure
-		EV_SET(&events[1], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, 0);
-		EV_SET(&events[2], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, 0);
-		kevent(this->_kq, &events[1], 2, NULL, 0, NULL);
-
-		usleep(300);
-		nevents = kevent(this->_kq, NULL, 0, &events[1], 999, NULL); // how can I separate events of new connections vs read?
-		for (int i = nevents; i > 0; --i)
-//		for (int i = 0; i < nevents; ++i)
+		struct kevent	events[1000];
+		struct kevent	new_event;
+		int				nevents = kevent(this->_kq, NULL, 0, events, 1000, NULL);
+		if (nevents < 0)
+			continue;
+		for (int i = 0; i < nevents; ++i)
 		{
-			std::cout << "I: " << i << "\t" << events[i].filter << " READ " << EVFILT_READ << " WRITE " << EVFILT_WRITE << "\n";
-			if (events[i].filter == EVFILT_READ)
-				output = this->_read();
-			if (events[i].filter == EVFILT_WRITE)
-				this->_write(output);
+			if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)this->_socket_fd)
+				this->_acceptConnection();
+			else if (events[i].filter == EVFILT_READ)
+			{
+				output = this->_read(events[i].ident);
+				EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, const_cast<char *>(output.c_str()));
+				kevent(this->_kq, &new_event, 1, NULL, 0, NULL);
+			}
+			else if (events[i].filter == EVFILT_WRITE)
+			{
+				this->_write(events[i].ident, static_cast<char *>(events[i].udata));
+				this->_closeSocket(events[i].ident);
+			}
 		}
 
 		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
-
-		// suppress the new socket
-		this->_closeSocket(this->_new_socket_fd);
 	}
 }
 
-std::string	CustomSocket::_read()
+std::string	CustomSocket::_read(int fd)
 {
 	ssize_t	valret;
 
-
 	char	buffer[1024]; // create a buffer to be used by read
 	memset(buffer, 0, sizeof(buffer));
-	valret = recv(this->_new_socket_fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024 // poll
+	valret = recv(fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
 	if (valret < 0)
 	{
 		std::cerr << "read operation: failure" << std::endl;
@@ -98,11 +94,11 @@ std::string	CustomSocket::_read()
 	return (output);
 }
 
-void	CustomSocket::_write(std::string output)
+void	CustomSocket::_write(int fd, char *output)
 {
 	ssize_t	valret;
 
-	valret = send(this->_new_socket_fd, output.c_str(), output.length(), MSG_DONTWAIT); // poll
+	valret = send(fd, output, strlen(output), MSG_DONTWAIT);
 	if (valret < 0)
 	{
 		std::cerr << "write operation: failure" << std::endl;
@@ -142,15 +138,6 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 	}
 	if (++i < req.length())
 		body = req.substr(i);
-/*
-	std::cout << "----------------------- PARSING --------------------\n";
-	std::cout << "type: " << reqType << "\n";
-	std::cout << "body: " << body << "\n";
-	std::cout << "headers:\n";
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
-		std::cout << "\tkey: " << it->first << "\n\tvalue: " << it->second << "\n\n";
-	std::cout << "----------------------------------------------------\n";
-*/
 }
 
 // private helper functions
@@ -198,6 +185,11 @@ void	CustomSocket::_acceptConnection(void)
 		exit(EXIT_FAILURE);
 		// handle error here
 	}
+	fcntl(this->_new_socket_fd, F_SETFL, O_NONBLOCK);
+	struct kevent	events[2];
+	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, 0);
+	EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE | EV_ONESHOT, 0, 0, 0);
+	kevent(this->_kq, events, 2, NULL, 0, NULL);
 }
 
 void	CustomSocket::_closeSocket(int socket_fd)
