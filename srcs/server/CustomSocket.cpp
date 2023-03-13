@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 18:06:16 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 18:14:56 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _
 CustomSocket::~CustomSocket() 
 {
 	std::cout << "Closing socket" << std::endl;
-	_closeSocket(_socket_fd);
+	closeSocket(_socket_fd);
 }
 
 std::string CustomSocket::_getAbsoluteURIPath(const std::string uri)
@@ -55,8 +55,6 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 			location = &(_servconf._locs[i]);
 		}
 	}
-	std::cout << "URI is " << uri << std::endl;
-	std::cout << "Location found: " << (location ? location->_url : "NULL") << std::endl;
 	return (location);
 }
 
@@ -96,43 +94,6 @@ void CustomSocket::_tryToIndex(std::string &filePath)
 		}
 	}
 }
-
-/*
-void	CustomSocket::startServer(void)
-{
-	std::string		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-	
-	while (true)
-	{
-		std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
-
-		// read and write procedure
-		struct kevent	events[1000];
-		struct kevent	new_event;
-		int				nevents = kevent(this->_kq, NULL, 0, events, 1000, NULL);
-		if (nevents < 0)
-			continue;
-		for (int i = 0; i < nevents; ++i)
-		{
-			if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)this->_socket_fd)
-				this->acceptConnection();
-			else if (events[i].filter == EVFILT_READ)
-			{
-				output = this->read(events[i].ident);
-				EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, const_cast<char *>(output.c_str()));
-				kevent(this->_kq, &new_event, 1, NULL, 0, NULL);
-			}
-			else if (events[i].filter == EVFILT_WRITE)
-			{
-				this->write(events[i].ident, static_cast<char *>(events[i].udata));
-				this->closeSocket(events[i].ident);
-			}
-		}
-
-		std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
-	}
-}
-*/
 
 std::string	CustomSocket::read(int fd)
 {
