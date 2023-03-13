@@ -6,11 +6,13 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/02/22 12:44:53 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:00:49 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ServConf.hpp"
+#ifndef LOCATION_HPP
+# define LOCATION_HPP
+
 // check if everything is necessary
 #include <iostream>
 #include <fstream>
@@ -26,16 +28,22 @@ struct Location
 
 		Location(void);
 		~Location();
-
-		void	addBack(void);
-		void	addSub(int nesting_lvl);
-		void	enforceInheritance(void);
+		Location(const Location& original);
+		Location&	operator=(const Location &original);
 
 	public:
 
-		struct Location			*prev;
-		struct Location			*next;
-		struct Location			*sub;
-		struct Location			*sup;
-		int						_nesting_lvl;
+		// can be different from main server scope
+		std::vector< std::vector<std::string> >		_error_pages;
+		long long int								_client_max_body_size;
+		std::vector<std::string>					_allowed_http_methods;
+		//std::vector< std::vector<std::string> >		_rewrite;
+		std::string									_root;
+		bool										_autoindex;
+		std::vector<std::string> 					_index;
+		std::vector<std::string>					_cgi;	
+		// specific to Location
+		std::string									_url;
 };
+
+#endif
