@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 16:31:30 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 17:55:47 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ CustomSocket::CustomSocket(ServConf server_config) : _domain(AF_INET), _type(SOC
 	if (_socket_fd < 0) {} // add function to handle errors
 	_bindSocket();
 	_enableSocketListening();
-	std::cout << "Socket created on port " << _servconf._port << std::endl;
+	std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
 }
 
 CustomSocket::~CustomSocket() 
@@ -55,13 +55,25 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 			location = &(_servconf._locs[i]);
 		}
 	}
+	std::cout << "URI is " << uri << std::endl;
+	std::cout << "Location found: " << (location ? location->_url : "NULL") << std::endl;
 	return (location);
 }
 
 void CustomSocket::_tryToIndex(std::string &filePath)
 {
-	std::vector<std::string> 	indexes = _getPathLocation(filePath)->_index;
+	Location 					*location = _getPathLocation(filePath);
 	std::ifstream				fileStream;
+	std::vector<std::string> 	indexes;
+
+	if (location)
+		indexes = location->_index;
+	else
+		indexes = _servconf._index;
+
+	std::cout << "Indexes: " << std::endl;
+	for (size_t i = 0; i < indexes.size(); i++)
+		std::cout << indexes[i] << std::endl;
 
 	// First, check if the current filePath exists.
 	// If it's not a valid check, it may be a valid folder path, so add a / at the end to know it.
@@ -286,6 +298,8 @@ std::string	CustomSocket::_POST(std::string filePath, std::string body)
 {
 	std::stringstream ss;
 	std::string s = "POST\tat " + filePath + "\nbody:\n" + body;
+
+	std::cout << body << std::endl;
 	
 	std::string			realFilePath = _getAbsoluteURIPath(filePath);
 	_tryToIndex(realFilePath);

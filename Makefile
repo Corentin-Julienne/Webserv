@@ -6,7 +6,7 @@
 #    By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/16 12:16:41 by cjulienn          #+#    #+#              #
-#    Updated: 2023/03/06 03:19:09 by mpeharpr         ###   ########.fr        #
+#    Updated: 2023/03/13 17:10:35 by mpeharpr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ END			= \e[0m
 NAME := webserv
 
 CC := c++
-CFLAGS := -Wall -Wextra -Werror -std=c++98
+CFLAGS := -Wall -Wextra -Werror -std=c++98 -g
 
 SRC_DIR := srcs
 OBJ_DIR := objs

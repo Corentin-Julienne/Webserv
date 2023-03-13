@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/06 13:52:26 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 17:49:01 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,11 @@ int main(int argc, char *argv[])
 		while (it != ite)
 		{
 			std::cout << std::endl;
-			
+
+			// Temporary fix for biding error
+			srand(time(NULL));
+			it->_port = (rand() + 1) % 10000;
+
 			CustomSocket	*serverSocket = new CustomSocket(*it);
 			sockets.push_back(serverSocket);
 			
