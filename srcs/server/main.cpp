@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 18:08:10 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 18:20:53 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int	main(int argc, char **argv)
 
 		Parser						configParser(argv[1]);
 		int							kq = kqueue();
-		std::vector<CustomSocket>	sockets;
+		std::vector<CustomSocket *>	sockets;
 
 		Parser::servers_array servers = configParser.getServers();
 		Parser::servers_array::iterator it = servers.begin();
@@ -35,7 +35,7 @@ int	main(int argc, char **argv)
 
 		while (it != ite)
 		{
-			CustomSocket	serverSocket(*it, kq);
+			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
 			it++;
 		}
@@ -71,6 +71,16 @@ int	main(int argc, char **argv)
 			}
 	
 			std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
+		}
+
+		// Delete sockets
+		std::vector<CustomSocket *>::iterator it2 = sockets.begin();
+		std::vector<CustomSocket *>::iterator it2e = sockets.end();
+		
+		while (it2 != it2e)
+		{
+			delete *it2;
+			it2++;
 		}
 	}
 	catch(const std::exception& e)
