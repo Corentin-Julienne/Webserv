@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 18:12:41 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/13 18:14:27 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,7 @@ class CustomSocket
 		void		setOutput(char *output);
 
 	private:
-
-		void		_bindSocket(void);
-		void		_enableSocketListening(void);
+	
 		std::string _getAbsoluteURIPath(const std::string uri);
 		Location *	_getPathLocation(const std::string uri);
 		void		_tryToIndex(std::string &filePath);
