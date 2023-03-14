@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:03:32 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/14 18:28:53 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,48 +54,62 @@ class Parser
 
 	private:
 	
+		/* Parser.cpp */
+		
 		// ops on conf file
-		void	_processFile(void);
-		void	_ifstreamToStr(void);
+		void			_processFile(void);
+		void			_ifstreamToStr(void);
 		// separating std::string on different server blocks
-		void	_iterateThroughStr(void);
-		int		_splitServerBlock(int i);
-		bool	_isBlockSyntaxValid(void);
-		bool	_isServerBlockValid(std::string substr);
-		// process instructions
-		int		_rtnInstructionType(std::string directive);
-		int		_dispatchInstructionProcessing(int type, std::string directive, int serv_idx, bool is_loc = false);
-		int		_processInstruction(std::string directive);
+		void			_iterateThroughStr(void);
+		int				_splitServerBlock(int i);
+		bool			_isBlockSyntaxValid(void);
+		bool			_areBracketsPopulated(std::string content);
+		std::string		_extractBracketsBlock(std::string content);
+		bool			_isServerBlockValid(std::string substr);
 		
 		/* ProcessBlocks.cpp */	
-		void						_processBlock(std::string block, int server_index, bool is_loc = false);
-		std::size_t					_processLocationBlock(std::string directive, int server_index);
-		void						_enforceInheritance(Location& loc, int server_index);
-		std::vector<std::string>	_cutArgs(std::string directive, char delim);
-		bool						_isLocationBlockValid(std::string block);
-		bool						_isDirectiveValid(std::string directive);
-		bool						_isThereEnoughInfo(void);
+		void			_processBlock(std::string block, int server_index, bool is_loc = false);
+		std::size_t		_processLocationBlock(std::string directive, int server_index);
+		void			_enforceInheritance(Location& loc, int server_index);
+		bool			_isLocationBlockValid(std::string block);
+		bool			_isDirectiveValid(std::string directive);
+		bool			_isThereEnoughInfo(void);
 
 		/* ParseDirectives.cpp */
-		bool	_isIpValid(std::string ip);
-		void	_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processServerNameDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processAllowDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processRewriteDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processRootDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processAutoindexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processIndexDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
-		void	_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc = false);
+		void			_processListenDirective(std::string directive, int serv_idx, 
+							int arg_num, bool is_loc = false);
+		void			_processServerNameDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processErrorPageDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processBodySizeDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processAllowDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processRewriteDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processRootDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processAutoindexDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processIndexDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processCgiDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
 
-		/* test features */
+		/* Utils.cpp */
+		std::vector<std::string>	_cutArgs(std::string directive, char delim);
+		bool						_isIpValid(std::string ip);
+		int							_rtnInstructionType(std::string directive);
+		int							_dispatchInstructionProcessing(int type, std::string directive,
+										int serv_idx, bool is_loc = false);
 
 	public:
 		
-		void	displayParsing(void);	
-		void	displayLocation(Location& loc, int loc_index);
-		void	displayDummyParser(void);
+		/* test features */
+		void						displayParsing(void);	
+		void						displayLocation(Location& loc, int loc_index);
+		void						displayDummyParser(void);
 		
 	private:
 		

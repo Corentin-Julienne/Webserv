@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:03:51 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/14 18:22:06 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,8 @@ void	Parser::_ifstreamToStr(void)
 bool	Parser::_isBlockSyntaxValid(void)
 {
 	std::size_t		i = 0;
-	int				num_open_par = 0;
-	int				num_close_par = 0;
+	int				num_open_brack = 0;
+	int				num_close_brack = 0;
 	bool			first_bracket = false;
 
 	while (i < this->_conf_str.size())
@@ -86,24 +86,23 @@ bool	Parser::_isBlockSyntaxValid(void)
 		if (!first_bracket && this->_conf_str[i] == '}')
 			return (false);
 		if (this->_conf_str[i] == '{')
-			num_open_par++;
+			num_open_brack++;
 		if (this->_conf_str[i] == '}')
-			num_close_par++;
+			num_close_brack++;
 		i++;
 	}
-	return (num_open_par > 0 && (num_open_par == num_close_par) ? true : false);
+	return (num_open_brack > 0 && (num_open_brack == num_close_brack) ? true : false);
 }
 
 /* goal is to extract every server block within a vector and check if server conf is correct */
 void	Parser::_iterateThroughStr(void)
 {
 	std::string			block;
-	std::string 		auth_char(" \ns");
 	std::size_t			i = 0;
 	
 	while (i < this->_conf_str.size())
 	{
-		if (auth_char.find(this->_conf_str[i]) == std::string::npos)
+		if (!std::isspace(this->_conf_str[i]) && this->_conf_str[i] != 's')
 			throw std::runtime_error("wrong format detected");
 		if (this->_conf_str[i] == 's')
 		{
@@ -128,121 +127,100 @@ void	Parser::_iterateThroughStr(void)
 /* extract a server block of type std::string without the server keywork and the brackets */
 int	Parser::_splitServerBlock(int i)
 {
-	std::size_t		start;
-	std::string 	substr;
+	std::size_t		start = 0;
+	std::string 	block;
 	int				size;
-		
+
 	start = this->_conf_str.find("server", i);
-	while ((start < this->_conf_str.size() && this->_conf_str[start + 6] == '_') ||
-	(start > 0 && this->_conf_str[start - 1] == '_') ) // case it is a server_name directive	
-		start = this->_conf_str.find("server", i + start + 6);
+	while (start == this->_conf_str.find("server_name", i))
+		start = this->_conf_str.find("server_name", i) + 1; // new value
+	start = this->_conf_str.find("server", i + start);
+
 	if (start == std::string::npos) // case server block is the last
-		substr = this->_conf_str.substr(i);
+		block = this->_conf_str.substr(i);
 	else // case server block is not the last one
-		substr = this->_conf_str.substr(i, start - i);
-	if (!this->_isServerBlockValid(substr))
+		block = this->_conf_str.substr(i, start - i);
+	
+	if (!this->_isServerBlockValid(block))
 		throw std::runtime_error("wrong format detected");
-	size = substr.size();
-	while (std::isspace(substr[0])) // trim whitespace before
-		substr = substr.substr(1, substr.size() - 1);
-	while (std::isspace(substr[substr.size() - 1])) // trim whitespaces after
-		substr = substr.substr(0, substr.size() - 1);
-	substr = substr.substr(1, substr.size() - 2); // remove {}
-	this->_server_blocks.push_back(substr);
+	size = block.size();
+	while (std::isspace(block[0])) // trim whitespace before
+		block = block.substr(1, block.size() - 1);
+	while (std::isspace(block[block.size() - 1])) // trim whitespaces after
+		block = block.substr(0, block.size() - 1);
+	block = block.substr(1, block.size() - 2); // remove {}
+	if (!this->_areBracketsPopulated(block))
+	 	throw std::runtime_error("empty set of brackets detected");
+	this->_server_blocks.push_back(block);
 	return (size);
 }
 
-/* check whether there is the same number of {} in the string */
+/* extracts a set of brackets. Content should begin by char '{'
+and will extract {<content_between_brackets>}. It returns also the brackets */
+std::string	Parser::_extractBracketsBlock(std::string content)
+{
+	std::size_t			i = 1;
+	std::size_t			open_brack = 1;
+	std::size_t			close_brack = 0;
+	
+	while (i < content.size())
+	{	
+		if (content[i] == '{')
+			open_brack++;
+		if (content[i] == '}')
+		{
+			close_brack++;
+			if (open_brack == close_brack)
+				return (content.substr(0, i + 1));
+		}
+		i++;
+	}
+	throw std::runtime_error("unclose brackets on block");
+}
+
+/* are brackets populated takes a substring content and check whether it is empty
+used recursively when founding a nested set of brackets 
+String content should be trimmed from brackets */
+bool	Parser::_areBracketsPopulated(std::string content)
+{
+	std::size_t		i = 0;
+	std::size_t		non_space_char = 0;
+	std::string		subcontent;
+	
+	while (i < content.size())
+	{
+		if (!std::isspace(content[i]) && content[i] != '{')
+			non_space_char++;
+		if (content[i] == '{' && !non_space_char)
+			return (false);
+		else if (content[i] == '{' && non_space_char)
+		{
+			subcontent = this->_extractBracketsBlock(content.substr(i));
+			subcontent = subcontent.substr(1, subcontent.size() - 2); // trimming brackets
+			return this->_areBracketsPopulated(subcontent);
+		}
+		i++;
+	}
+	if (!non_space_char)
+		return (false);
+	return (true);
+}
+
+/* check whether there is the same number of {} in the string,
+plus returns false if there is nothing between brackets */
 bool	Parser::_isServerBlockValid(std::string substr)
 {
-	int				num_open_par = 0;
-	int				num_close_par = 0;
+	int				num_open_brack = 0;
+	int				num_close_brack = 0;
 	std::size_t		i = 0;
 
 	while (i < substr.size())
 	{
 		if (substr[i] == '{')
-			num_open_par++;
+			num_open_brack++;
 		if (substr[i] == '}')
-			num_close_par++;
+			num_close_brack++;
 		i++;
-	}	
-	return ((num_open_par == num_close_par) ? true : false && num_open_par > 0);
-}
-
-/* if directive refers to a location, triggers the specialized function. Otherwise, 
-check if the directive format is valid (have at least two arguments, is bounded by ';').
-Then, trigger relevant processing functions. Returns the length of chars used by the directive */
-int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int serv_idx, bool is_loc)
-{
-	std::size_t		args_num;
-	std::size_t		dir_len;
-		
-	if (type == LOCATION)
-		return (this->_processLocationBlock(directive, serv_idx));
-	if (!this->_isDirectiveValid(directive))
-		throw std::runtime_error("invalid directive format");
-	args_num = this->_cutArgs(directive, ';').size();
-	dir_len = directive.substr(0, directive.find(";")).size() + 1;
-	
-	switch (type)
-	{
-		case (LISTEN):
-			this->_processListenDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (SERV_NAME):
-			this->_processServerNameDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (ERR_PAGE):
-			this->_processErrorPageDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (CLIENT_BODY_SIZE):
-			this->_processBodySizeDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (ALLOW_HTTP_METHOD):
-			this->_processAllowDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (ROOT):
-			this->_processRootDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (AUTOINDEX):
-			this->_processAutoindexDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (INDEX):
-			this->_processIndexDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		case (CGI):
-			this->_processCgiDirective(directive, serv_idx, args_num, is_loc);
-			break ;
-		default:
-			throw std::runtime_error("instruction unknown");
-			break ;
 	}
-	return (dir_len);
-}
-
-int	Parser::_rtnInstructionType(std::string directive)
-{	
-	if (!directive.compare("location"))
-		return (LOCATION);
-	else if (!directive.compare("listen"))
-		return (LISTEN);
-	else if (!directive.compare("server_name"))
-		return (SERV_NAME);
-	else if (!directive.compare("error_page"))
-		return (ERR_PAGE);
-	else if (!directive.compare("client_max_body_size"))
-		return (CLIENT_BODY_SIZE);
-	else if (!directive.compare("allow"))
-		return (ALLOW_HTTP_METHOD);
-	else if (!directive.compare("root"))
-		return (ROOT);
-	else if (!directive.compare("autoindex"))
-		return (AUTOINDEX);
-	else if (!directive.compare("index"))
-		return (INDEX);
-	else if (!directive.compare("cgi"))
-		return (CGI);
-	else
-		return (BAD_INSTR);
+	return ((num_open_brack == num_close_brack) ? true : false && num_open_brack > 0);
 }

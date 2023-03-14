@@ -6,42 +6,11 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 21:43:41 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/14 18:20:37 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
-
-/* ParseDirectives.cpp contains all the specialized functions that will store evry directive and 
-check if they are compliant with the syntaxic rules accepted by the server */
-
-bool	Parser::_isIpValid(std::string ip)
-{
-	std::string		delimiter = ".";
-	std::string		token;
-	std::size_t		pos = 0;
-	bool			stop = false;
-
-	if (!ip.compare("localhost"))
-		return (true);
-	while (!stop)
-	{
-		if ((pos = ip.find(delimiter)) == std::string::npos)
-			stop = true;
-		token = ip.substr(0, pos);
-		if (token.size() > 3)
-			return (false);
-		for (std::size_t j = 0; j < token.size(); j++)
-		{
-			if (!std::isdigit(token[j]))
-				return (false);
-		}
-		if (atoi(token.c_str()) > 255)
-			return (false);
-		ip.erase(0, pos + delimiter.length());
-	}
-	return (true);
-}
 
 void	Parser::_processListenDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
@@ -236,7 +205,7 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 	for (std::size_t i = 1; i < args.size(); i++)
 		index_values.push_back(args[i]);
 
-	// clear if lready present in the same server block or location
+	// clear if already present in the same server block or location
 	if (is_loc &&
 	!this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index.empty())
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index.clear();
