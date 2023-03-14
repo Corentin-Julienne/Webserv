@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 18:19:43 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/14 18:54:17 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 		{
 			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find_first_of(" \t\n")));			
 			if (dir_type == BAD_INSTR)
-				throw std::runtime_error("invalid instruction provided");
+				throw std::runtime_error("invalid instruction provided in the server block");
 			if (dir_type == LOCATION && is_loc == true)
 				throw std::runtime_error("nested location feature not supported !!!");
 			else
@@ -47,7 +47,7 @@ std::size_t	Parser::_processLocationBlock(std::string directive, int server_inde
 	std::vector<std::string>		args;
 	
 	if (!this->_isLocationBlockValid(directive))
-		throw std::runtime_error("location block syntax is invalid");	
+		throw std::runtime_error("wrong arguments and/or bracket syntax error in location block");	
 	begin_idx = directive.find("{");
 	end_idx	= directive.find("}");
 	block = directive.substr(begin_idx + 1, end_idx - begin_idx - 1);	

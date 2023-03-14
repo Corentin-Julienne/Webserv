@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 18:22:06 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/14 20:24:58 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Parser::Parser(char *config_file)
 {
 	this->_conf_file.open(config_file, std::ios_base::in);
 	if (!this->_conf_file.is_open())
-		throw std::runtime_error("failure to open the conf file");
+		throw std::runtime_error("failure to open the conf file. Check that you provide the good path");
 	this->_processFile();
 	this->_serv_num = this->_server_blocks.size();	
 	for (int i = 0; i < this->_serv_num; i++)
@@ -58,7 +58,7 @@ void	Parser::_processFile(void)
 	this->_ifstreamToStr();
 	this->_conf_file.close();
 	if (!this->_isBlockSyntaxValid())
-		throw std::runtime_error("syntax error in the number of parenthesis");
+		throw std::runtime_error("syntax error : wrong number of brackets and/or invalid bracket order");
 	this->_iterateThroughStr();
 }
 
@@ -103,7 +103,7 @@ void	Parser::_iterateThroughStr(void)
 	while (i < this->_conf_str.size())
 	{
 		if (!std::isspace(this->_conf_str[i]) && this->_conf_str[i] != 's')
-			throw std::runtime_error("wrong format detected");
+			throw std::runtime_error("only server blocks are allowed in the main scope");
 		if (this->_conf_str[i] == 's')
 		{
 			if (!this->_conf_str.compare(i, 6, "server"))
@@ -112,13 +112,13 @@ void	Parser::_iterateThroughStr(void)
 				while (this->_conf_str[i] != '{')
 				{
 					if (!std::isspace(this->_conf_str[i]))
-						throw std::runtime_error("wrong format detected");
+						throw std::runtime_error("syntax error on the server directive");
 					i++;
 				}
 				i += this->_splitServerBlock(i) - 1;
 			}
 			else
-				throw std::runtime_error("wrong format detected");
+				throw std::runtime_error("only server blocks are allowed in the main scope");
 		}
 		i++;
 	}
@@ -128,13 +128,16 @@ void	Parser::_iterateThroughStr(void)
 int	Parser::_splitServerBlock(int i)
 {
 	std::size_t		start = 0;
+	std::size_t		offset = i;
 	std::string 	block;
 	int				size;
 
-	start = this->_conf_str.find("server", i);
-	while (start == this->_conf_str.find("server_name", i))
-		start = this->_conf_str.find("server_name", i) + 1; // new value
-	start = this->_conf_str.find("server", i + start);
+	start = this->_conf_str.find("server", offset);
+	while (start == this->_conf_str.find("server_name", offset) && start != std::string::npos)
+	{
+		offset++;
+		start = this->_conf_str.find("server", offset);
+	}
 
 	if (start == std::string::npos) // case server block is the last
 		block = this->_conf_str.substr(i);
@@ -142,7 +145,7 @@ int	Parser::_splitServerBlock(int i)
 		block = this->_conf_str.substr(i, start - i);
 	
 	if (!this->_isServerBlockValid(block))
-		throw std::runtime_error("wrong format detected");
+		throw std::runtime_error("invalid number of brackets in server block");
 	size = block.size();
 	while (std::isspace(block[0])) // trim whitespace before
 		block = block.substr(1, block.size() - 1);
