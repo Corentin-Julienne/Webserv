@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 21:46:57 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/14 18:54:17 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 		{
 			dir_type= this->_rtnInstructionType(block.substr(i, block.substr(i).find_first_of(" \t\n")));			
 			if (dir_type == BAD_INSTR)
-				throw std::runtime_error("invalid instruction provided");
+				throw std::runtime_error("invalid instruction provided in the server block");
 			if (dir_type == LOCATION && is_loc == true)
 				throw std::runtime_error("nested location feature not supported !!!");
 			else
@@ -47,7 +47,7 @@ std::size_t	Parser::_processLocationBlock(std::string directive, int server_inde
 	std::vector<std::string>		args;
 	
 	if (!this->_isLocationBlockValid(directive))
-		throw std::runtime_error("location block syntax is invalid");	
+		throw std::runtime_error("wrong arguments and/or bracket syntax error in location block");	
 	begin_idx = directive.find("{");
 	end_idx	= directive.find("}");
 	block = directive.substr(begin_idx + 1, end_idx - begin_idx - 1);	
@@ -72,29 +72,6 @@ void	Parser::_enforceInheritance(Location& loc, int server_index)
 	loc._autoindex = this->_servers[server_index]._autoindex;
 	loc._index = this->_servers[server_index]._index;
 	loc._cgi = this->_servers[server_index]._cgi;
-}
-
-/* Takes the directive that finish by char delim. Returns an vector containing the arguments */
-std::vector<std::string>	Parser::_cutArgs(std::string directive, char delim)
-{
-	std::vector<std::string>		args;
-	int								i = 0;
-	int								size_arg = 0;
-
-	while (directive[i] != delim)
-	{
-		while (std::isspace(directive[i]))
-			i++;
-		while (!std::isspace(directive[i + size_arg]) && directive[i + size_arg] != delim)
-			size_arg++;
-		if (size_arg > 1 || (size_arg == 1 && directive[i + size_arg] != delim))
-			args.push_back(directive.substr(i, size_arg));
-		else
-			break ;
-		i += size_arg;
-		size_arg = 0;
-	}
-	return (args);
 }
 
 /* check whether the location block have two arguments (location and the path)

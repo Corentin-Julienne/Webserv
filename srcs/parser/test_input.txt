@@ -6,22 +6,22 @@
 #    By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/05 15:38:43 by cjulienn          #+#    #+#              #
-#    Updated: 2023/03/05 18:25:53 by cjulienn         ###   ########.fr        #
+#    Updated: 2023/03/15 10:38:47 by cjulienn         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 this text files contains the input to test everything
 
 // testing wrong conf files
-I		./webserv ./srcs/parser/tests/wrong_configs/difficult.conf // pb there
+I		./webserv ./srcs/parser/tests/wrong_configs/difficult.conf // ok
 II		./webserv ./srcs/parser/tests/wrong_configs/empty_locs.conf // ok
 III		./webserv ./srcs/parser/tests/wrong_configs/empty_serv.conf // ok
 IV		./webserv ./srcs/parser/tests/wrong_configs/multiple_par.conf // ok
 V		./webserv ./srcs/parser/tests/wrong_configs/wrong_body_size_2.conf // ok
 VI		./webserv ./srcs/parser/tests/wrong_configs/wrong_body_size_3.conf // ok
-VII		./webserv ./srcs/parser/tests/wrong_configs/wrong_body_size.conf // pb there
+VII		./webserv ./srcs/parser/tests/wrong_configs/wrong_body_size.conf // ok
 VIII	./webserv ./srcs/parser/tests/wrong_configs/wrong_ip_2.conf // ok
-IV		./webserv ./srcs/parser/tests/wrong_configs/wrong_ip.conf // ok
+IX		./webserv ./srcs/parser/tests/wrong_configs/wrong_ip.conf // ok
 X		./webserv ./srcs/parser/tests/wrong_configs/wrong_loc.conf // ok
 XI		./webserv ./srcs/parser/tests/wrong_configs/wrong_port_2.conf // ok
 XII		./webserv ./srcs/parser/tests/wrong_configs/wrong_port.conf // ok
@@ -29,7 +29,7 @@ XIII	./webserv ./srcs/parser/tests/wrong_configs/wrong_serv.conf // ok
 
 // testing accurate conf files
 I		./webserv ./srcs/parser/tests/all_infos.conf // ok
-II		./webserv ./srcs/parser/tests/client_body_size.conf // pb there
+II		./webserv ./srcs/parser/tests/client_body_size.conf // ok
 III		./webserv ./srcs/parser/tests/minconf.conf // ok
 IV		./webserv ./srcs/parser/tests/redundancy_of_infos.conf 
 
