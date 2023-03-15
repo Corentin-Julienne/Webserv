@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 20:24:58 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/15 10:24:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,30 +127,13 @@ void	Parser::_iterateThroughStr(void)
 /* extract a server block of type std::string without the server keywork and the brackets */
 int	Parser::_splitServerBlock(int i)
 {
-	std::size_t		start = 0;
-	std::size_t		offset = i;
 	std::string 	block;
 	int				size;
 
-	start = this->_conf_str.find("server", offset);
-	while (start == this->_conf_str.find("server_name", offset) && start != std::string::npos)
-	{
-		offset++;
-		start = this->_conf_str.find("server", offset);
-	}
-
-	if (start == std::string::npos) // case server block is the last
-		block = this->_conf_str.substr(i);
-	else // case server block is not the last one
-		block = this->_conf_str.substr(i, start - i);
-	
+	block = this->_extractBracketsBlock(this->_conf_str.substr(i));	
 	if (!this->_isServerBlockValid(block))
-		throw std::runtime_error("invalid number of brackets in server block");
+		throw std::runtime_error("ZZZ invalid number of brackets in server block");
 	size = block.size();
-	while (std::isspace(block[0])) // trim whitespace before
-		block = block.substr(1, block.size() - 1);
-	while (std::isspace(block[block.size() - 1])) // trim whitespaces after
-		block = block.substr(0, block.size() - 1);
 	block = block.substr(1, block.size() - 2); // remove {}
 	if (!this->_areBracketsPopulated(block))
 	 	throw std::runtime_error("empty set of brackets detected");
