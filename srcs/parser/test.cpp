@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 11:40:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 20:22:59 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/15 10:31:22 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 	{
 		Parser		test_parsing(argv[1]);
 
-		//test_parsing.displayParsing();
+		test_parsing.displayParsing();
 		std::cout << "ending parsing test" << std::endl;
 	}
 	catch(const std::exception& e)

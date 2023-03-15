@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/15 10:24:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/15 10:31:04 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ int	Parser::_splitServerBlock(int i)
 
 	block = this->_extractBracketsBlock(this->_conf_str.substr(i));	
 	if (!this->_isServerBlockValid(block))
-		throw std::runtime_error("ZZZ invalid number of brackets in server block");
+		throw std::runtime_error("invalid number of brackets in server block");
 	size = block.size();
 	block = block.substr(1, block.size() - 2); // remove {}
 	if (!this->_areBracketsPopulated(block))
