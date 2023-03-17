@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 18:20:53 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/17 11:15:23 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ int	main(int argc, char **argv)
 				continue;
 			for (int i = 0; i < nevents; ++i)
 			{
+				if (!events[i].udata)
+					continue ;
 				CustomSocket	socket = *reinterpret_cast<CustomSocket *>(events[i].udata);
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket.getSocketFd())
 					socket.acceptConnection();
