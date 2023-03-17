@@ -2,8 +2,9 @@
 
 The goal of this project is to create a Web Server using the HTTPS protocol (see the subject PDF file for more information about the features).
 
-## useful resources about sockets in C++ :
-TODO
+## Usage
+Compile everything with the ``make`` command - compatible with Linux & MacOS.  
+You can run the program by using the command ``./webserv <path_to_your_config_file>`` and see that it's working by going to ``http://CONFIG_HOST:CONFIG_PORT/`` in your browser.
 
 ## Testing
 In the test folder, a stresser.sh bash script is available. You can use it this way:  
