@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/13 18:14:27 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/17 11:47:32 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class CustomSocket
 		void		write(int fd, char const *output);
 
 		int			getSocketFd();
+		int			getPort();
 		char		*getOutput();
 
 		void		setOutput(char *output);

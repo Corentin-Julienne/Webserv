@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 11:15:23 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/17 11:49:16 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ int	main(int argc, char **argv)
 
 		while (true)
 		{
-			std::cout << "+++++++++ Waiting for a connection ++++++++" << std::endl;
-
 			struct kevent	events[1000];
 			struct kevent	new_event;
 			int				nevents = kevent(kq, NULL, 0, events, 1000, NULL);
@@ -55,24 +53,34 @@ int	main(int argc, char **argv)
 			{
 				if (!events[i].udata)
 					continue ;
-				CustomSocket	socket = *reinterpret_cast<CustomSocket *>(events[i].udata);
-				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket.getSocketFd())
-					socket.acceptConnection();
+				CustomSocket	*socket = reinterpret_cast<CustomSocket *>(events[i].udata);
+				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
+				{
+					socket->acceptConnection(); // handle error
+					std::cout << "[" << socket->getPort() << "]\t" \
+						<< "Connection accepted\n";
+				}
 				else if (events[i].filter == EVFILT_READ)
 				{
-					std::string	output = socket.read(events[i].ident);
-					socket.setOutput(const_cast<char *>(output.c_str()));
-					EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, &socket);
+					std::cout << "[" << socket->getPort() << "]\t" \
+						<< "New read event\n";
+					std::cout << "++++++++++++++++++++++++++++\n";
+					std::string	output = socket->read(events[i].ident);
+					std::cout << "++++++++++++++++++++++++++++\n\n";
+					socket->setOutput(const_cast<char *>(output.c_str()));
+					EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, socket);
 					kevent(kq, &new_event, 1, NULL, 0, NULL);
 				}
 				else if (events[i].filter == EVFILT_WRITE)
 				{
-					socket.write(events[i].ident, static_cast<char *>(socket.getOutput()));
-					socket.closeSocket(events[i].ident);
+					std::cout << "[" << socket->getPort() << "]\t" \
+						<< "Writing response\n";
+					socket->write(events[i].ident, static_cast<char *>(socket->getOutput()));
+					std::cout << "[" << socket->getPort() << "]\t" \
+						<< "Connection closed\n";
+					socket->closeSocket(events[i].ident);
 				}
 			}
-	
-			std::cout << "++++++++ Message has been sent ++++++++" << std::endl;
 		}
 
 		// Delete sockets

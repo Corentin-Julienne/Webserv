@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 11:14:35 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/17 11:46:26 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,6 +301,11 @@ std::string	CustomSocket::_DELETE(std::string filePath, std::string body)
 int	CustomSocket::getSocketFd()
 {
 	return (this->_socket_fd);
+}
+
+int	CustomSocket::getPort()
+{
+	return (this->_servconf._port);
 }
 
 char	*CustomSocket::getOutput()
