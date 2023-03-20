@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+         #
+#    By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/16 12:16:41 by cjulienn          #+#    #+#              #
-#    Updated: 2023/03/17 01:20:27 by mpeharpr         ###   ########.fr        #
+#    Updated: 2023/03/20 16:21:13 by mpeharpr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -56,12 +56,12 @@ $(OBJ_DIR)/%.o : %.cpp
 
 clean:
 	@printf "$(YELLOW)Removing object files...\n$(END)"
-	$(RM) $(OBJ_DIR)
+	@$(RM) $(OBJ_DIR)
 	@printf "$(GREEN)Object files removed!\n\n$(END)"
 
 fclean: clean
 	@printf "$(YELLOW)Removing object files and Webserv executable...\n$(END)"
-	$(RM) $(NAME)
+	@$(RM) $(NAME)
 	@printf "$(GREEN)All clean!\n\n$(END)"
 
 re: fclean all
