@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 11:46:26 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/17 17:10:23 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,14 +114,76 @@ std::string	CustomSocket::read(int fd)
 	std::string							reqType, uri, body, output;
 	std::map<std::string, std::string>	headers;
 	this->_parseRequest(buff, reqType, uri, headers, body);
-	if (reqType == "GET")
-		output = this->_GET(uri);
-	else if (reqType == "POST")
-		output = this->_POST(uri, body);
-	else if (reqType == "DELETE")
-		output = this->_DELETE(uri, body);
+	
+	if (uri.substr(0, 1) != "/")
+		uri = "/" + uri;
+
+	// Check if the method used is allowed for this server
+	Location *loc = _getPathLocation(uri);
+	bool isAllowed = false;
+
+	if (loc)
+	{
+		if (loc->_allowed_http_methods.size() == 0)
+		{
+			isAllowed = true;
+		}
+		else
+		{
+			for (size_t i = 0; i < loc->_allowed_http_methods.size(); i++)
+			{
+				if (reqType == loc->_allowed_http_methods[i])
+				{
+					isAllowed = true;
+					break ;
+				}
+			}
+		}
+	}
 	else
-		output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
+	{
+		if (_servconf._allowed_http_methods.size() == 0)
+		{
+			isAllowed = true;
+		}
+		else
+		{
+			for (size_t i = 0; i < _servconf._allowed_http_methods.size(); i++)
+			{
+				if (reqType == _servconf._allowed_http_methods[i])
+				{
+					isAllowed = true;
+					break ;
+				}
+			}
+		}
+	}
+
+	std::cout << "isAllowed: " << isAllowed << std::endl;
+	if (isAllowed)
+	{
+		if (reqType == "GET")
+			output = _GET(uri);
+		else if (reqType == "POST")
+			output = _POST(uri, body);
+		else if (reqType == "DELETE")
+			output = _DELETE(uri, body);
+		else
+			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
+	}
+	else
+	{
+		output = "HTTP/1.1 405 Method Not Allowed\nContent-Type: text/plain\nContent-Length: 0\n\n";
+	}
+
+	// if (reqType == "GET")
+	// 	output = this->_GET(uri);
+	// else if (reqType == "POST")
+	// 	output = this->_POST(uri, body);
+	// else if (reqType == "DELETE")
+	// 	output = this->_DELETE(uri, body);
+	// else
+	// 	output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 
 	return (output);
 }
