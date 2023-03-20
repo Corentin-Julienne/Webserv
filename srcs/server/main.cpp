@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 11:49:16 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/20 10:04:54 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ int	main(int argc, char **argv)
 					std::cout << "++++++++++++++++++++++++++++\n";
 					std::string	output = socket->read(events[i].ident);
 					std::cout << "++++++++++++++++++++++++++++\n\n";
-					socket->setOutput(const_cast<char *>(output.c_str()));
+					socket->setOutput(output);
 					EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, socket);
 					kevent(kq, &new_event, 1, NULL, 0, NULL);
 				}
@@ -75,7 +75,7 @@ int	main(int argc, char **argv)
 				{
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Writing response\n";
-					socket->write(events[i].ident, static_cast<char *>(socket->getOutput()));
+					socket->write(events[i].ident, socket->getOutput());
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Connection closed\n";
 					socket->closeSocket(events[i].ident);

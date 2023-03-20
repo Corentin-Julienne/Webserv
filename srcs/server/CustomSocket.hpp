@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 11:47:32 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/20 10:04:52 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,13 +45,13 @@ class CustomSocket
 		void		acceptConnection(void);
 		void		closeSocket(int socket_fd);
 		std::string	read(int fd);
-		void		write(int fd, char const *output);
+		void		write(int fd, std::string output);
 
 		int			getSocketFd();
 		int			getPort();
-		char		*getOutput();
+		std::string	getOutput();
 
-		void		setOutput(char *output);
+		void		setOutput(std::string output);
 
 	private:
 	
@@ -75,6 +75,6 @@ class CustomSocket
 		int					_kq;
 		struct sockaddr_in	_sockaddr;
 		int					_new_socket_fd;
-		char				*_output;
+		std::string			_output;
 		ServConf			_servconf;
 };
