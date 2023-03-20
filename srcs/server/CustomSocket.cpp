@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 17:10:23 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/20 09:30:59 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,11 +188,11 @@ std::string	CustomSocket::read(int fd)
 	return (output);
 }
 
-void	CustomSocket::write(int fd, char const *output)
+void	CustomSocket::write(int fd, std::string output)
 {
 	ssize_t	valret;
 
-	valret = send(fd, output, strlen(output), MSG_DONTWAIT);
+	valret = send(fd, output.c_str(), output.length(), MSG_DONTWAIT);
 	if (valret < 0)
 	{
 		std::cerr << "write operation: failure" << std::endl;
@@ -370,12 +370,12 @@ int	CustomSocket::getPort()
 	return (this->_servconf._port);
 }
 
-char	*CustomSocket::getOutput()
+std::string	CustomSocket::getOutput()
 {
 	return (this->_output);
 }
 
-void	CustomSocket::setOutput(char *output)
+void	CustomSocket::setOutput(std::string output)
 {
 	this->_output = output;
 }
