@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/20 10:04:52 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/21 03:26:26 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include "../parser/ServConf.hpp"
 #include "../parser/Location.hpp"
 
@@ -61,9 +62,15 @@ class CustomSocket
 		void		_bindSocket(void);
 		void		_enableSocketListening(void);
 		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
-		std::string	_GET(std::string filePath);
-		std::string	_POST(std::string filePath, std::string body);
-		std::string	_DELETE(std::string filePath, std::string body);
+		std::string	_GET(std::string filePath, Location *loc);
+		std::string	_POST(std::string filePath, std::string body, Location *loc);
+		std::string	_DELETE(std::string filePath, std::string body, Location *loc);
+		
+		void 		_generateError(size_t code, std::string &output);
+		size_t 		_isContentLengthValid(std::string reqType, std::map<std::string, std::string> headers, long long int maxBodySize);
+		size_t		_isMethodAllowed(const std::string reqType, std::vector<std::string> allowedMethods);
+		std::string _generateAutoIndex(const std::string path, const std::string relativePath);
+		std::string	_generateFileContent(const std::string realFilePath);
 
 	private:
 	
