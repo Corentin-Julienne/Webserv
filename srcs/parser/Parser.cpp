@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/15 10:31:04 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/03/17 01:23:54 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,12 @@ std::string	Parser::_extractBracketsBlock(std::string content)
 		i++;
 	}
 	throw std::runtime_error("unclose brackets on block");
+}
+
+/* return parsing infos */
+const Parser::servers_array Parser::getServers(void) const
+{
+	return (this->_servers);
 }
 
 /* are brackets populated takes a substring content and check whether it is empty
