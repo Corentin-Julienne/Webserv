@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/27 11:52:00 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/27 19:03:34 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@ int	main(int argc, char **argv)
 		Parser						configParser(argv[1]);
 		int							kq = kqueue();
 		std::vector<CustomSocket *>	sockets;
+		int reqCount = 0;
+		int readCount = 0;
+		int acceptCount = 0;
 
 		Parser::servers_array servers = configParser.getServers();
 
@@ -37,6 +40,9 @@ int	main(int argc, char **argv)
 			sockets.push_back(serverSocket);
 		}
 
+		std::cout << "READ: " << EVFILT_READ << std::endl;
+		std::cout << "WRITE: " << EVFILT_WRITE << std::endl;
+
 		std::cout << "=== Server successfully initialized ===" << std::endl;
 
 		while (true)
@@ -45,17 +51,34 @@ int	main(int argc, char **argv)
 			struct kevent	new_event;
 			int				nevents = kevent(kq, NULL, 0, events, 1000, NULL);
 			if (nevents < 0)
-				continue;
+			{
+				if (errno == EAGAIN || errno == EWOULDBLOCK)
+				{
+					// Erreur temporaire, ignorez-la et continuez.
+					continue;
+				}
+				else
+				{
+					// Gestion des autres erreurs.
+					perror("kevent");
+					break;
+				}
+			}
+			
 			for (int i = 0; i < nevents; ++i)
 			{
 				if (!events[i].udata)
+				{
+					std::cout << "======== HELP ========" << std::endl;
 					continue ;
+				}
 				CustomSocket	*socket = reinterpret_cast<CustomSocket *>(events[i].udata);
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
 				{
 					socket->acceptConnection(); // handle error
-					std::cout << "[" << socket->getPort() << "]\t" \
-						<< "Connection accepted\n";
+					// std::cout << "[" << socket->getPort() << "]\t" \
+						// << "Connection accepted\n";
+					std::cout << ++acceptCount << " - ACCEPT" << std::endl;
 				}
 				else if (events[i].filter == EVFILT_READ)
 				{
@@ -67,15 +90,19 @@ int	main(int argc, char **argv)
 					socket->setOutput(output);
 					EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, socket);
 					kevent(kq, &new_event, 1, NULL, 0, NULL);
+					
+					std::cout <<  ++readCount << " - READ" << std::endl;
 				}
 				else if (events[i].filter == EVFILT_WRITE)
 				{
-					std::cout << "[" << socket->getPort() << "]\t" \
-						<< "Writing response\n";
+					// std::cout << "[" << socket->getPort() << "]\t" \
+						// << "Writing response\n";
 					socket->write(events[i].ident, socket->getOutput());
 					socket->closeSocket(events[i].ident);
-					std::cout << "[" << socket->getPort() << "]\t" \
-						<< "Connection closed\n";
+					
+					std::cout << ++reqCount << " - WRITE" << std::endl;
+					// std::cout << "[" << socket->getPort() << "]\t"
+						// << "Connection closed\n";
 				}
 			}
 		}

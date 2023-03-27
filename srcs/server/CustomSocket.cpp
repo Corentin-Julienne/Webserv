@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/27 11:50:27 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/27 18:48:02 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _
 	_socket_fd = socket(_domain, _type, _protocol);
 	if (_socket_fd < 0) {} // add function to handle errors
 	setsockopt(this->_socket_fd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
+	fcntl(this->_socket_fd, F_SETFL, O_NONBLOCK);
 	_bindSocket();
 	_enableSocketListening();
 	std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
@@ -39,7 +40,6 @@ CustomSocket::~CustomSocket()
 
 void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body)
 {
-	std::cout << req << std::endl;
 	if (req.substr(0, 4) == "GET ")
 		reqType = "GET";
 	else if (req.substr(0, 5) == "POST ")
@@ -157,9 +157,9 @@ std::string	CustomSocket::read(int fd)
 {
 	ssize_t	valret;
 
-	char	buffer[1024]; // create a buffer to be used by read
+	char	buffer[1024 * 10]; // create a buffer to be used by read
 	memset(buffer, 0, sizeof(buffer));
-	valret = recv(fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
+	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
 	if (valret < 0)
 	{
 		std::cerr << "recv: ";
@@ -167,7 +167,6 @@ std::string	CustomSocket::read(int fd)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
-	std::cout << buffer << std::endl; // print buffer content in terminal, to get debug stuff
 
 	std::string							buff = buffer;
 	std::string							reqType, uri, body, output;
@@ -198,6 +197,7 @@ std::string	CustomSocket::read(int fd)
 	else
 		_generateError(code, output);
 	
+	std::cout << "-> Code for above request is " << code << std::endl;
 	return (output);
 }
 
@@ -249,8 +249,6 @@ std::string	CustomSocket::_POST(std::string filePath, std::string body, Location
 
 	loc = (Location*)loc; // REMOVE THIS
 
-	std::cout << body << std::endl;
-	
 	std::string			realFilePath = _getAbsoluteURIPath(filePath);
 	_tryToIndex(realFilePath);
 
