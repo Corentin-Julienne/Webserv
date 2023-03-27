@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/20 10:04:54 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/03/27 11:52:00 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,14 +30,11 @@ int	main(int argc, char **argv)
 		std::vector<CustomSocket *>	sockets;
 
 		Parser::servers_array servers = configParser.getServers();
-		Parser::servers_array::iterator it = servers.begin();
-		Parser::servers_array::iterator ite = servers.end();
 
-		while (it != ite)
+		for (Parser::servers_array::iterator it = servers.begin(); it != servers.end(); ++it)
 		{
 			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
-			it++;
 		}
 
 		std::cout << "=== Server successfully initialized ===" << std::endl;
@@ -76,9 +73,9 @@ int	main(int argc, char **argv)
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Writing response\n";
 					socket->write(events[i].ident, socket->getOutput());
+					socket->closeSocket(events[i].ident);
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Connection closed\n";
-					socket->closeSocket(events[i].ident);
 				}
 			}
 		}

@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/21 03:26:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/27 11:50:27 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,10 @@ bool isDirectory(const std::string &path)
 
 CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _backlog(10), _kq(kq), _new_socket_fd(-1), _servconf(server_config)
 {
+	int	so_reuseaddr = 1;
 	_socket_fd = socket(_domain, _type, _protocol);
 	if (_socket_fd < 0) {} // add function to handle errors
+	setsockopt(this->_socket_fd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
 	_bindSocket();
 	_enableSocketListening();
 	std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
@@ -72,15 +74,17 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 // private helper functions
 void	CustomSocket::_bindSocket(void)
 {
-	memset((char *)&_sockaddr, 0, sizeof(_sockaddr)); // make sure struct is empty
+	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr)); // make sure struct is empty
 	
-	_sockaddr.sin_family = _domain;
-	_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
-	_sockaddr.sin_port = htons(_servconf._port);
+	this->_sockaddr.sin_family = this->_domain;
+	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
+//	this->_sockaddr.sin_addr.s_addr = htonl(this->_servconf._ip_address);
+	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
-	if (bind(_socket_fd, (struct sockaddr *)&_sockaddr, sizeof(_sockaddr)) < 0)
+	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
 	{
-		std::cerr << "bind operation : failure" << std::endl;
+		std::cerr << "bind: ";
+		std::cout << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
@@ -90,7 +94,8 @@ void	CustomSocket::_enableSocketListening(void)
 {
 	if (listen(_socket_fd, _backlog) < 0)
 	{
-		std::cerr << "listen operation : failure" << std::endl;
+		std::cerr << "listen: ";
+		std::cout << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
@@ -105,7 +110,8 @@ void	CustomSocket::acceptConnection(void)
 	socklen_t socketLen = sizeof(_sockaddr);
 	if ((_new_socket_fd = accept(_socket_fd, (struct sockaddr *)&_sockaddr, &socketLen)) < 0)
 	{
-		std::cerr << "accept operation : failure" << std::endl;
+		std::cerr << "accept: ";
+		std::cout << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 		// handle error here
 	}
@@ -120,7 +126,8 @@ void	CustomSocket::closeSocket(int socket_fd)
 {
 	if (close(socket_fd) < 0)
 	{
-		std::cerr << "close operation : failure" << std::endl;
+		std::cerr << "close: ";
+		std::cout << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
@@ -155,7 +162,8 @@ std::string	CustomSocket::read(int fd)
 	valret = recv(fd, buffer, 1024, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
 	if (valret < 0)
 	{
-		std::cerr << "read operation: failure" << std::endl;
+		std::cerr << "recv: ";
+		std::cout << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
@@ -200,7 +208,8 @@ void	CustomSocket::write(int fd, std::string output)
 	valret = send(fd, output.c_str(), output.length(), MSG_DONTWAIT);
 	if (valret < 0)
 	{
-		std::cerr << "write operation: failure" << std::endl;
+		std::cerr << "send: ";
+		std::cout << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 		// handle error here
 	}
