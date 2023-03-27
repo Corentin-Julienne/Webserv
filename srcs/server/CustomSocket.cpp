@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/27 18:48:02 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/27 19:20:11 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,29 +168,30 @@ std::string	CustomSocket::read(int fd)
 		// handle error there
 	}
 
-	std::string							buff = buffer;
-	std::string							reqType, uri, body, output;
-	std::map<std::string, std::string>	headers;
-	this->_parseRequest(buff, reqType, uri, headers, body);
+	SocketInfos		infos;
+	std::string		buff = buffer;
+	std::string		output;
+
+	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
 	
 	// Add the suffix to the uri if it's a directory
-	if (uri.substr(0, 1) != "/")
-		uri = "/" + uri;
+	if (infos.uri.substr(0, 1) != "/")
+		infos.uri = "/" + infos.uri;
 
-	Location 	*loc = _getPathLocation(uri);
-	size_t		code = _isMethodAllowed(reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+	Location 	*loc = _getPathLocation(infos.uri);
+	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200)
-		code = _isContentLengthValid(reqType, headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
+		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
 
 	if (code == 200)
 	{
-		if (reqType == "GET")
-			output = _GET(uri, loc);
-		else if (reqType == "POST")
-			output = _POST(uri, body, loc);
-		else if (reqType == "DELETE")
-			output = _DELETE(uri, body, loc);
+		if (infos.reqType == "GET")
+			output = _GET(infos, loc);
+		else if (infos.reqType == "POST")
+			output = _POST(infos, loc);
+		else if (infos.reqType == "DELETE")
+			output = _DELETE(infos, loc);
 		else
 			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 	}
@@ -215,22 +216,22 @@ void	CustomSocket::write(int fd, std::string output)
 	}
 }
 
-std::string	CustomSocket::_GET(std::string filePath, Location *loc)
+std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 {
 	std::string			ret;
 	std::stringstream	content;
-	std::string			realFilePath = _getAbsoluteURIPath(filePath);
+	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 
 	_tryToIndex(realFilePath);
-	std::cout << "GET:" << std::endl << "\t- uri: " << filePath << std::endl << "\t- real path: " << realFilePath << std::endl;
+	std::cout << "GET:" << std::endl << "\t- uri: " << infos.uri << std::endl << "\t- real path: " << realFilePath << std::endl;
 	
 	bool isDirectory = (realFilePath.substr(realFilePath.length() - 1, 1) == "/");
 	if (isDirectory)
 	{
-		if (filePath.substr(filePath.length() - 1, 1) != "/")
-			filePath += "/";
+		if (infos.uri.substr(infos.uri.length() - 1, 1) != "/")
+			infos.uri += "/";
 		if ((loc ? loc->_autoindex : _servconf._autoindex))
-			content << _generateAutoIndex(realFilePath, filePath);
+			content << _generateAutoIndex(realFilePath, infos.uri);
 		else
 			content << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: 0\n\n"; // TODO: Fit to HTTP norms
 	}
@@ -242,27 +243,27 @@ std::string	CustomSocket::_GET(std::string filePath, Location *loc)
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(std::string filePath, std::string body, Location *loc)
+std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 {
 	std::stringstream ss;
-	std::string s = "POST\tat " + filePath + "\nbody:\n" + body;
+	std::string s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
 
 	loc = (Location*)loc; // REMOVE THIS
 
-	std::string			realFilePath = _getAbsoluteURIPath(filePath);
+	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 	_tryToIndex(realFilePath);
 
 	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	return (ss.str());
 }
 
-std::string	CustomSocket::_DELETE(std::string filePath, std::string body, Location *loc)
+std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
 {
 	std::stringstream 	ss;
 	std::ifstream		ifs;
-	std::string 		s = "DELETE\tat " + filePath + "\nbody:\n" + body;
+	std::string 		s = "DELETE\tat " + infos.uri + "\nbody:\n" + infos.body;
 	
-	std::string			realFilePath = _getAbsoluteURIPath(filePath);
+	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 	_tryToIndex(realFilePath);
 	
 	loc = (Location*)loc; // REMOVE THIS

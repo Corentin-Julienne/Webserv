@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/21 03:26:26 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/27 19:16:03 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 #include <dirent.h>
 #include "../parser/ServConf.hpp"
 #include "../parser/Location.hpp"
+#include "SocketInfos.hpp"
 
 bool	isDirectory(const std::string &path);
 
@@ -62,9 +63,9 @@ class CustomSocket
 		void		_bindSocket(void);
 		void		_enableSocketListening(void);
 		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
-		std::string	_GET(std::string filePath, Location *loc);
-		std::string	_POST(std::string filePath, std::string body, Location *loc);
-		std::string	_DELETE(std::string filePath, std::string body, Location *loc);
+		std::string	_GET(SocketInfos &infos, Location *loc);
+		std::string	_POST(SocketInfos &infos, Location *loc);
+		std::string	_DELETE(SocketInfos &infos, Location *loc);
 		
 		void 		_generateError(size_t code, std::string &output);
 		size_t 		_isContentLengthValid(std::string reqType, std::map<std::string, std::string> headers, long long int maxBodySize);
