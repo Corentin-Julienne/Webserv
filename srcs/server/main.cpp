@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/27 19:20:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/30 16:53:45 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,6 @@ int	main(int argc, char **argv)
 		Parser						configParser(argv[1]);
 		int							kq = kqueue();
 		std::vector<CustomSocket *>	sockets;
-		int reqCount = 0;
-		int readCount = 0;
-		int acceptCount = 0;
 
 		Parser::servers_array servers = configParser.getServers();
 
@@ -40,15 +37,12 @@ int	main(int argc, char **argv)
 			sockets.push_back(serverSocket);
 		}
 
-		std::cout << "READ: " << EVFILT_READ << std::endl;
-		std::cout << "WRITE: " << EVFILT_WRITE << std::endl;
-
 		std::cout << "=== Server successfully initialized ===" << std::endl;
 
 		while (true)
 		{
 			struct kevent	events[1000];
-			struct kevent	new_event;
+			struct kevent	new_event[2];
 			int				nevents = kevent(kq, NULL, 0, events, 1000, NULL);
 			if (nevents < 0)
 			{
@@ -76,9 +70,8 @@ int	main(int argc, char **argv)
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
 				{
 					socket->acceptConnection(); // handle error
-					// std::cout << "[" << socket->getPort() << "]\t" \
-						// << "Connection accepted\n";
-					std::cout << ++acceptCount << " - ACCEPT" << std::endl;
+					std::cout << "[" << socket->getPort() << "]\t" \
+						<< "Connection accepted\n";
 				}
 				else if (events[i].filter == EVFILT_READ)
 				{
@@ -88,21 +81,21 @@ int	main(int argc, char **argv)
 					std::string	output = socket->read(events[i].ident);
 					std::cout << "++++++++++++++++++++++++++++\n\n";
 					socket->setOutput(output);
-					EV_SET(&new_event, events[i].ident, EVFILT_WRITE, EV_ENABLE, 0, 0, socket);
-					kevent(kq, &new_event, 1, NULL, 0, NULL);
-					
-					std::cout <<  ++readCount << " - READ" << std::endl;
+					EV_SET(&new_event[0], events[i].ident, EVFILT_READ, EV_DELETE, 0, 0, socket);
+					EV_SET(&new_event[1], events[i].ident, EVFILT_WRITE, EV_ADD, 0, 0, socket);
+					kevent(kq, new_event, 2, NULL, 0, NULL);
 				}
 				else if (events[i].filter == EVFILT_WRITE)
 				{
-					// std::cout << "[" << socket->getPort() << "]\t" \
-						// << "Writing response\n";
+					std::cout << "[" << socket->getPort() << "]\t" \
+						<< "Writing response\n";
 					socket->write(events[i].ident, socket->getOutput());
+					EV_SET(&new_event[0], events[i].ident, EVFILT_WRITE, EV_DELETE, 0, 0, socket);
+					kevent(kq, new_event, 1, NULL, 0, NULL);
 					socket->closeSocket(events[i].ident);
-					
-					std::cout << ++reqCount << " - WRITE" << std::endl;
-					// std::cout << "[" << socket->getPort() << "]\t"
-						// << "Connection closed\n";
+
+					std::cout << "[" << socket->getPort() << "]\t"
+						<< "Connection closed\n";
 				}
 			}
 		}

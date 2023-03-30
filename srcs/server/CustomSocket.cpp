@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/27 19:20:11 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/03/30 16:57:00 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ void	CustomSocket::_enableSocketListening(void)
 	}
 	// don't forget protections
 	struct kevent	kev;
-	EV_SET(&kev, this->_socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, this);
+	EV_SET(&kev, this->_socket_fd, EVFILT_READ, EV_ADD, 0, 0, this);
 	kevent(this->_kq, &kev, 1, NULL, 0, NULL);
 }
 
@@ -117,9 +117,9 @@ void	CustomSocket::acceptConnection(void)
 	}
 	fcntl(this->_new_socket_fd, F_SETFL, O_NONBLOCK);
 	struct kevent	events[2];
-	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, this);
-	EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE | EV_ONESHOT, 0, 0, this);
-	kevent(this->_kq, events, 2, NULL, 0, NULL);
+	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD, 0, 0, this);
+	//EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, this);
+	kevent(this->_kq, events, 1, NULL, 0, NULL);
 }
 
 void	CustomSocket::closeSocket(int socket_fd)
