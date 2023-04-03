@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/03 14:30:33 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/03 15:36:59 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,14 +143,19 @@ int	CustomSocket::getPort()
 	return (this->_servconf._port);
 }
 
-std::string	CustomSocket::getOutput()
+std::string	CustomSocket::getOutput(int fd)
 {
-	return (this->_output);
+	return this->_outputs[fd];
 }
 
-void	CustomSocket::setOutput(std::string output)
+void CustomSocket::clearOutput(int fd)
 {
-	this->_output = output;
+	this->_outputs.erase(fd);
+}
+
+void	CustomSocket::setOutput(int fd, std::string output)
+{
+	this->_outputs[fd] = output;
 }
 
 std::string	CustomSocket::read(int fd)
@@ -222,8 +227,6 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 
 	_tryToIndex(realFilePath);
-	// std::cout << "GET:" << std::endl << "\t- uri: " << infos.uri << std::endl << "\t- real path: " << realFilePath << std::endl;
-	std::cout << "GET -> real path: " << realFilePath << std::endl;
 	
 	bool isDirectory = (realFilePath.substr(realFilePath.length() - 1, 1) == "/");
 	if (isDirectory)

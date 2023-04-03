@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/03 14:30:42 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/03 15:36:39 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ int	main(int argc, char **argv)
 
 			if (nevents < 0)
 				continue;
-			std::cout << "nevents: " << nevents << std::endl;
 
 			for (int i = 0; i < nevents; ++i)
 			{
@@ -61,7 +60,6 @@ int	main(int argc, char **argv)
 				CustomSocket	*socket = reinterpret_cast<CustomSocket *>(events[i].udata);
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
 				{
-					std::cout << "!!! Accepting..." << std::endl;
 					socket->acceptConnection(); // handle error
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Connection accepted\n";
@@ -70,11 +68,8 @@ int	main(int argc, char **argv)
 				{
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "New read event\n";
-					std::cout << "++++++++++++++++++++++++++++\n";
-					std::cout << "!!! Reading..." << std::endl;
 					std::string	output = socket->read(events[i].ident);
-					std::cout << "++++++++++++++++++++++++++++\n\n";
-					socket->setOutput(output);
+					socket->setOutput(events[i].ident, output);
 					EV_SET(&new_event[0], events[i].ident, EVFILT_READ, EV_DELETE, 0, 0, socket);
 					EV_SET(&new_event[1], events[i].ident, EVFILT_WRITE, EV_ADD, 0, 0, socket);
 					kevent(kq, new_event, 2, NULL, 0, NULL);
@@ -83,9 +78,11 @@ int	main(int argc, char **argv)
 				{
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Writing response\n";
-					socket->write(events[i].ident, socket->getOutput());
+						
+					socket->write(events[i].ident, socket->getOutput(events[i].ident));
 					EV_SET(&new_event[0], events[i].ident, EVFILT_WRITE, EV_DELETE, 0, 0, socket);
 					kevent(kq, new_event, 1, NULL, 0, NULL);
+					socket->clearOutput(events[i].ident);
 					socket->closeSocket(events[i].ident);
 
 					std::cout << "[" << socket->getPort() << "]\t"
