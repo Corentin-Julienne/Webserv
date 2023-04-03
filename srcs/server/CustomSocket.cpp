@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/30 16:57:00 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/03 14:30:33 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,7 +198,6 @@ std::string	CustomSocket::read(int fd)
 	else
 		_generateError(code, output);
 	
-	std::cout << "-> Code for above request is " << code << std::endl;
 	return (output);
 }
 
@@ -223,7 +222,8 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 
 	_tryToIndex(realFilePath);
-	std::cout << "GET:" << std::endl << "\t- uri: " << infos.uri << std::endl << "\t- real path: " << realFilePath << std::endl;
+	// std::cout << "GET:" << std::endl << "\t- uri: " << infos.uri << std::endl << "\t- real path: " << realFilePath << std::endl;
+	std::cout << "GET -> real path: " << realFilePath << std::endl;
 	
 	bool isDirectory = (realFilePath.substr(realFilePath.length() - 1, 1) == "/");
 	if (isDirectory)

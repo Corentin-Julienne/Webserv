@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/30 16:53:45 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/03 14:30:42 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,34 +41,27 @@ int	main(int argc, char **argv)
 
 		while (true)
 		{
+			std::cout << "!!! Looping..." << std::endl;
+			
 			struct kevent	events[1000];
 			struct kevent	new_event[2];
 			int				nevents = kevent(kq, NULL, 0, events, 1000, NULL);
+
 			if (nevents < 0)
-			{
-				if (errno == EAGAIN || errno == EWOULDBLOCK)
-				{
-					// Erreur temporaire, ignorez-la et continuez.
-					continue;
-				}
-				else
-				{
-					// Gestion des autres erreurs.
-					perror("kevent");
-					break;
-				}
-			}
-			
+				continue;
+			std::cout << "nevents: " << nevents << std::endl;
+
 			for (int i = 0; i < nevents; ++i)
 			{
 				if (!events[i].udata)
 				{
-					std::cout << "======== HELP ========" << std::endl;
+					std::cout << "!!! ERROR !!!" << std::endl;
 					continue ;
 				}
 				CustomSocket	*socket = reinterpret_cast<CustomSocket *>(events[i].udata);
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
 				{
+					std::cout << "!!! Accepting..." << std::endl;
 					socket->acceptConnection(); // handle error
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "Connection accepted\n";
@@ -78,6 +71,7 @@ int	main(int argc, char **argv)
 					std::cout << "[" << socket->getPort() << "]\t" \
 						<< "New read event\n";
 					std::cout << "++++++++++++++++++++++++++++\n";
+					std::cout << "!!! Reading..." << std::endl;
 					std::string	output = socket->read(events[i].ident);
 					std::cout << "++++++++++++++++++++++++++++\n\n";
 					socket->setOutput(output);
