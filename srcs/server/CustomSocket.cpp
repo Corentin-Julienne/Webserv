@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/03 15:36:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/03 15:58:04 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ void	CustomSocket::_bindSocket(void)
 	
 	this->_sockaddr.sin_family = this->_domain;
 	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
-//	this->_sockaddr.sin_addr.s_addr = htonl(this->_servconf._ip_address);
 	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
@@ -260,7 +259,7 @@ std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 	return (ss.str());
 }
 
-std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
+std::string	CustomSocket::_DELETE(SocketInfos &infos)
 {
 	std::stringstream 	ss;
 	std::ifstream		ifs;
@@ -269,21 +268,18 @@ std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
 	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 	_tryToIndex(realFilePath);
 	
-	loc = (Location*)loc; // REMOVE THIS
-
 	ifs.open(realFilePath.c_str());
 	if (ifs.is_open())
 	{
-		// delete the file
 		ifs.close();
 		std::remove(realFilePath.c_str());
+		ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	}
 	else
 	{
-		// file does not exist
+		ss << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: 0\n\n";
 	}
 
-	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	return (ss.str());
 }
 
