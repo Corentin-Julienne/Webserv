@@ -1,4 +1,8 @@
-@import url("components/uno.css");
+@import url("components/quatro.css");
 @import url("components/dos.css");
 @import url("components/tres.css");
-@import url("components/quatro.css");
+@import url("components/uno.css");
+
+.style {
+    color: #ff0000;
+}

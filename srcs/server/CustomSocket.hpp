@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/27 19:16:03 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/03 15:34:30 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,9 +51,10 @@ class CustomSocket
 
 		int			getSocketFd();
 		int			getPort();
-		std::string	getOutput();
 
-		void		setOutput(std::string output);
+		std::string	getOutput(int fd);
+		void		setOutput(int fd, std::string output);
+		void 		clearOutput(int fd);
 
 	private:
 	
@@ -75,14 +76,14 @@ class CustomSocket
 
 	private:
 	
-		int					_domain;
-		int					_type;
-		int					_protocol;
-		int					_backlog;
-		int					_socket_fd;
-		int					_kq;
-		struct sockaddr_in	_sockaddr;
-		int					_new_socket_fd;
-		std::string			_output;
-		ServConf			_servconf;
+		int							_domain;
+		int							_type;
+		int							_protocol;
+		int							_backlog;
+		int							_socket_fd;
+		int							_kq;
+		struct sockaddr_in			_sockaddr;
+		int							_new_socket_fd;
+		std::map<int, std::string> 	_outputs;
+		ServConf					_servconf;
 };
