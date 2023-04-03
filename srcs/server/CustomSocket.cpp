@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/03 15:36:59 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/03 17:29:38 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _
 	fcntl(this->_socket_fd, F_SETFL, O_NONBLOCK);
 	_bindSocket();
 	_enableSocketListening();
-	std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
+	// std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
 }
 
 CustomSocket::~CustomSocket() 
 {
-	std::cout << "Closing socket" << std::endl;
+	// std::cout << "Closing socket" << std::endl;
 	closeSocket(_socket_fd);
 }
 
@@ -78,7 +78,6 @@ void	CustomSocket::_bindSocket(void)
 	
 	this->_sockaddr.sin_family = this->_domain;
 	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
-//	this->_sockaddr.sin_addr.s_addr = htonl(this->_servconf._ip_address);
 	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
@@ -201,7 +200,7 @@ std::string	CustomSocket::read(int fd)
 			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
 	}
 	else
-		_generateError(code, output);
+		output = _generateError(code, loc);
 	
 	return (output);
 }
@@ -234,13 +233,13 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		if (infos.uri.substr(infos.uri.length() - 1, 1) != "/")
 			infos.uri += "/";
 		if ((loc ? loc->_autoindex : _servconf._autoindex))
-			content << _generateAutoIndex(realFilePath, infos.uri);
+			content << _generateAutoIndex(realFilePath, infos.uri, loc);
 		else
-			content << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: 0\n\n"; // TODO: Fit to HTTP norms
+			content << _generateError(404, loc);
 	}
 	else
 	{
-		content << _generateFileContent(realFilePath);
+		content << _generateFileContent(realFilePath, loc);
 	}
 	
 	return (content.str());
@@ -269,25 +268,22 @@ std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
 	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 	_tryToIndex(realFilePath);
 	
-	loc = (Location*)loc; // REMOVE THIS
-
 	ifs.open(realFilePath.c_str());
 	if (ifs.is_open())
 	{
-		// delete the file
 		ifs.close();
 		std::remove(realFilePath.c_str());
+		ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	}
 	else
 	{
-		// file does not exist
+		ss << _generateError(404, loc);
 	}
 
-	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	return (ss.str());
 }
 
-std::string CustomSocket::_generateAutoIndex(const std::string path, const std::string relativePath)
+std::string CustomSocket::_generateAutoIndex(const std::string path, const std::string relativePath, Location *loc)
 {
 	DIR 				*dir;
 	struct dirent 		*ent;
@@ -297,7 +293,7 @@ std::string CustomSocket::_generateAutoIndex(const std::string path, const std::
 	dir = opendir(path.c_str());
 	if (dir == NULL)
 	{
-		ss << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: 0\n\n"; // TODO: Fit to HTTP norms
+		ss << _generateError(404, loc);
 		return (ss.str());
 	}
 
@@ -315,7 +311,7 @@ std::string CustomSocket::_generateAutoIndex(const std::string path, const std::
 	return (content.str());
 }
 
-std::string	CustomSocket::_generateFileContent(const std::string realFilePath)
+std::string	CustomSocket::_generateFileContent(const std::string realFilePath, Location *loc)
 {
 	std::ifstream		ifs;
 	std::stringstream	content;
@@ -324,9 +320,9 @@ std::string	CustomSocket::_generateFileContent(const std::string realFilePath)
 	if (!ifs.is_open())
 	{
 		if (access(realFilePath.c_str(), F_OK) != 0)
-			content << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: 0\n\n"; // TODO: Fit to HTTP norms
+			content << _generateError(404, loc);
 		else if (access(realFilePath.c_str(), R_OK) != 0)
-			content << "HTTP/1.1 403 Forbidden\nContent-Type: text/plain\nContent-Length: 0\n\n"; // TODO: Fit to HTTP norms
+			content << _generateError(403, loc);
 	}
 	else
 	{
@@ -401,9 +397,8 @@ void CustomSocket::_tryToIndex(std::string &filePath)
 }
 
 size_t CustomSocket::_isMethodAllowed(const std::string reqType, std::vector<std::string> allowedMethods)
-
 {
-	size_t	code = 200;
+	size_t	code = 405;
 
 	if (allowedMethods.size() == 0)
 	{
@@ -449,24 +444,67 @@ size_t CustomSocket::_isContentLengthValid(std::string reqType, std::map<std::st
 	return (code);
 }
 
-void CustomSocket::_generateError(size_t code, std::string &output)
+std::string CustomSocket::_generateError(size_t code, Location *location)
 {
+	std::stringstream ss;
+	std::vector< std::vector<std::string> > errors;
+
+	if (location)
+		errors = location->_error_pages;
+	else
+		errors = _servconf._error_pages;
+
 	switch (code)
 	{
 		case 413:
-			output = "HTTP/1.1 413 Request Entity Too Large\nContent-Type: text/plain\nContent-Length: 0\n\n";
+			ss << "HTTP/1.1 413 Request Entity Too Large\nContent-Type: text/plain\nContent-Length: ";
 			break ;
 		case 405:
-			output = "HTTP/1.1 405 Method Not Allowed\nContent-Type: text/plain\nContent-Length: 0\n\n";
+			ss << "HTTP/1.1 405 Method Not Allowed\nContent-Type: text/plain\nContent-Length: ";
 			break ;
 		case 411:
-			output = "HTTP/1.1 411 Length Required\nContent-Type: text/plain\nContent-Length: 0\n\n";
+			ss << "HTTP/1.1 411 Length Required\nContent-Type: text/plain\nContent-Length: ";
 			break ;
 		case 400:
-			output = "HTTP/1.1 400 Bad Request\nContent-Type: text/plain\nContent-Length: 0\n\n";
+			ss << "HTTP/1.1 400 Bad Request\nContent-Type: text/plain\nContent-Length: ";
+			break ;
+		case 404:
+			ss << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: ";
+			break ;
+		case 403:
+			ss << "HTTP/1.1 403 Forbidden\nContent-Type: text/plain\nContent-Length: ";
 			break ;
 		default:
-			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
+			ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: ";
 			break ;
 	}
+
+	// List through all errors pages to find the one corresponding to the error code
+	std::stringstream errStr;
+	errStr << code;
+	std::string errCode = errStr.str();
+
+	for (size_t i = 0; i < errors.size(); i++)
+	{
+		for (size_t j = 0; j < errors[i].size() - 1; j++)
+		{
+			if (errors[i][j] == errCode)
+			{
+				std::string	realErrPath = _getAbsoluteURIPath(errors[i][errors[i].size() - 1]);
+				std::ifstream ifs(realErrPath.c_str());
+
+				if (ifs.is_open())
+				{
+					std::stringstream buff;
+					buff << ifs.rdbuf();
+					ifs.close();
+					ss << buff.str().length() << "\n\n" << buff.str();
+					return (ss.str());
+				}
+			}
+		}
+	}
+
+	ss << "0\n\n";
+	return (ss.str());
 }
