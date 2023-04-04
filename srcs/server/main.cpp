@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/03 16:13:16 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/04 14:33:37 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ int	main(int argc, char **argv)
 		{
 			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
+
+			std::cout << "-> Server started: http://" << it->_ip_address << ":" << it->_port << std::endl;
 		}
 
 		std::cout << "=== Server successfully initialized ===" << std::endl;

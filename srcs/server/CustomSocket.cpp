@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 15:05:01 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/04 15:06:54 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -385,7 +385,7 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 	
 	for (size_t i = 0; i < _servconf._locs.size(); i++)
 	{
-		if (uriPath.find(_servconf._locs[i]._url) == 0 && _servconf._locs[i]._url.size() > (location ? location->_url.size() : 0))
+		if (uriPath.find(_servconf._locs[i]._url) != std::string::npos && _servconf._locs[i]._url.size() > (location ? location->_url.size() : 0))
 		{
 			location = &(_servconf._locs[i]);
 		}
