@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/03 16:57:01 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/04 12:06:33 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 #include <dirent.h>
 #include "../parser/ServConf.hpp"
 #include "../parser/Location.hpp"
+#include "../cgi/cgiLauncher.hpp"
 #include "SocketInfos.hpp"
 
 bool	isDirectory(const std::string &path);
@@ -46,6 +47,8 @@ class CustomSocket
 
 		void		acceptConnection(void);
 		void		closeSocket(int socket_fd);
+		std::string	_extractQueryString(SocketInfos &infos);
+
 		std::string	read(int fd);
 		void		write(int fd, std::string output);
 
