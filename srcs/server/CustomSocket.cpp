@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 12:46:07 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/04 14:15:51 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,16 +258,17 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		else
 			content << _generateError(404, loc);
 	}
-	else if (1) // if realFilePath, minus query string, is index with a .php extension CHANGE THIS
-	{		
-		infos.absoluteURIPath = realFilePath;
-		
-		cgiLauncher		cgi(infos, *loc, this->_servconf);
-		
-		content << cgi.exec();
-	}
 	else
 		content << _generateFileContent(realFilePath, loc);
+
+	// else if (1) // if realFilePath, minus query string, is index with a .php extension CHANGE THIS
+	// {		
+	// 	infos.absoluteURIPath = realFilePath;
+		
+	// 	cgiLauncher		cgi(infos, *loc, this->_servconf);
+		
+	// 	content << cgi.exec();
+	// }
 
 	std::cout << content.str() << std::endl;
 	return (content.str());

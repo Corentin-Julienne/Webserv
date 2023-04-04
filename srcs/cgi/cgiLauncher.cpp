@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 12:54:44 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/04 14:09:44 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,9 +264,9 @@ std::string	cgiLauncher::exec(void)
 	dup2(originalStdout, STDOUT_FILENO);
 	close(originalStdout);
 
-	std::cout << "---------------OUTPUT---------------" << std::endl;
-	std::cout << output << std::endl;
-	std::cout << "------------------------------------" << std::endl;
+	// std::cout << "---------------OUTPUT---------------" << std::endl;
+	// std::cout << output << std::endl;
+	// std::cout << "------------------------------------" << std::endl;
 	//exit(EXIT_FAILURE);
 	return (this->_removeCGIHeader(output));
 }
@@ -305,7 +305,34 @@ void	cgiLauncher::_addHeadersToEnv(void) // to test
 
 std::string	cgiLauncher::_removeCGIHeader(std::string output)
 {
-	std::string		clear_output;
+	std::string		clear_output = "";
+	std::size_t		pos;
+	bool			reach_empty_line = false;
+	std::string		token;
+	std::size_t		spaces;
 
+	while (!output.empty())
+	{
+		pos = output.find('\n');
+		token = output.substr(0, pos + 1);
+		if (output.find('\n') == std::string::npos)
+			output.clear();
+		else
+			output.erase(0, pos + 1);
+		
+		spaces = 0;
+		for (std::size_t i = 0; i < token.size(); i++)
+		{
+			if (std::isspace(token[i]))
+				spaces++;
+		}
+		if (spaces == token.size())
+		{
+			reach_empty_line = true;
+			continue ;
+		}
+		if (reach_empty_line == true)
+			clear_output += token;
+	}
 	return (clear_output);
 }
