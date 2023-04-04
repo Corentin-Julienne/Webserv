@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 15:06:54 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/04 15:24:41 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -457,25 +457,25 @@ std::string CustomSocket::_generateError(size_t code, Location *location)
 	switch (code)
 	{
 		case 413:
-			ss << "HTTP/1.1 413 Request Entity Too Large\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 413 Request Entity Too Large\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		case 405:
-			ss << "HTTP/1.1 405 Method Not Allowed\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 405 Method Not Allowed\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		case 411:
-			ss << "HTTP/1.1 411 Length Required\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 411 Length Required\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		case 400:
-			ss << "HTTP/1.1 400 Bad Request\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 400 Bad Request\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		case 404:
-			ss << "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 404 Not Found\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		case 403:
-			ss << "HTTP/1.1 403 Forbidden\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 403 Forbidden\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		default:
-			ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: ";
+			ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
 			break ;
 	}
 
