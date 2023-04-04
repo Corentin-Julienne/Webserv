@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 15:06:54 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/04 18:36:05 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,8 +248,6 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 
 	_tryToIndex(realFilePath);
 	
-	std::cout << realFilePath << std::endl;
-	
 	bool isDirectory = (realFilePath.substr(realFilePath.length() - 1, 1) == "/");
 	if (isDirectory)
 	{
@@ -271,7 +269,6 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	else
 		content << _generateFileContent(realFilePath, loc);
 
-	//std::cout << content.str() << std::endl; // debug
 	return (content.str());
 }
 
