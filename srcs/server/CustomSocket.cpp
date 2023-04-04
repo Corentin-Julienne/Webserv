@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
 /*   Updated: 2023/04/04 15:06:54 by mpeharpr         ###   ########.fr       */
@@ -157,6 +157,24 @@ void	CustomSocket::setOutput(int fd, std::string output)
 	this->_outputs[fd] = output;
 }
 
+/* extract query string and store it in SocketInfos struct, then cut query string from the uri */
+std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
+{
+	std::size_t		i = 0;
+	std::string		query_string = "";
+	
+	i = infos.uri.find_first_of('?');
+	if (i != std::string::npos)
+	{
+		if (infos.uri.size() > i)
+			query_string = infos.uri.substr(i + 1);
+		infos.uri = infos.uri.substr(0, infos.uri.size() - query_string.size());
+		if (query_string.size() > 0)
+			infos.uri.pop_back();
+	}
+	return (query_string);
+}
+
 std::string	CustomSocket::read(int fd)
 {
 	ssize_t	valret;
@@ -181,6 +199,9 @@ std::string	CustomSocket::read(int fd)
 	// Add the suffix to the uri if it's a directory
 	if (infos.uri.substr(0, 1) != "/")
 		infos.uri = "/" + infos.uri;
+
+	/* add relative path_info and query string to infos struct, withdraw query string from uri */
+	infos.queryString = this->_extractQueryString(infos);
 
 	Location 	*loc = _getPathLocation(infos.uri);
 	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
@@ -227,6 +248,8 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 
 	_tryToIndex(realFilePath);
 	
+	std::cout << realFilePath << std::endl;
+	
 	bool isDirectory = (realFilePath.substr(realFilePath.length() - 1, 1) == "/");
 	if (isDirectory)
 	{
@@ -237,11 +260,18 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		else
 			content << _generateError(404, loc);
 	}
-	else
-	{
-		content << _generateFileContent(realFilePath, loc);
+	else if (realFilePath.size() > 4 && !realFilePath.substr(realFilePath.size() - 4).compare(".php")) // triggers php cgi
+	{		
+		infos.absoluteURIPath = realFilePath;
+		
+		cgiLauncher		cgi(infos, *loc, this->_servconf);
+		
+		content << cgi.exec();
 	}
-	
+	else
+		content << _generateFileContent(realFilePath, loc);
+
+	//std::cout << content.str() << std::endl; // debug
 	return (content.str());
 }
 
