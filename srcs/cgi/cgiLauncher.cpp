@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 21:26:23 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/05 20:51:06 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ cgiLauncher::cgiLauncher(SocketInfos &infos, Location &loc, ServConf &serv) : _i
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
 	/* debug */
-	// this->_printInfos();
-	// this->_printEnv(); // debug
+	this->_printInfos();
+	this->_printEnv(); // debug
 	this->_StrEnvToCStrArray();
 }
 
@@ -318,4 +318,5 @@ void	cgiLauncher::_printInfos(void)
 	std::cerr << "printing query string : " << _infos.queryString << std::endl;
 	std::cerr << "printing real URI path : " << _infos.absoluteURIPath << std::endl;
 	std::cerr << "printing type of request : " << _infos.reqType << std::endl;
+	std::cerr << "-------------------------------" << std::endl;
 }

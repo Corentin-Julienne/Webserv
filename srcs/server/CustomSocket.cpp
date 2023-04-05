@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 22:07:45 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/05 21:16:11 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,10 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		if (end_line_idx != req.npos)
 			++i;
 	}
-	if (i != req.npos && ++i < req.length())
-		body = req.substr(i);
+	if (req.find("\r\n\r\n") != std::string::npos && req.substr(req.find("\r\n\r\n") + 3).size() > 1)
+		body = req.substr(req.find("\r\n\r\n") + 4);
+	else
+		body = "";
 }
 
 // private helper functions
@@ -194,7 +196,7 @@ std::string	CustomSocket::read(int fd)
 
 	SocketInfos		infos;
 	std::string		buff = buffer;
-	std::cout << buff << std::endl;
+	std::cout << "!" << buff << "!" << std::endl;
 	std::string		output;
 
 	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
@@ -212,7 +214,7 @@ std::string	CustomSocket::read(int fd)
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
 
-	std::cout << "req type = " << infos.reqType << std::endl;
+	code = 200; // debug, suppress after use
 	if (code == 200)
 	{
 		if (infos.reqType == "GET")
@@ -278,22 +280,24 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 
 std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 {
-	std::cout << "go there" << std::endl;
+	std::cerr << "go to POST request" << std::endl;
 	
 	std::stringstream		ss;
 	std::string				s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
 
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
 	
+	std::cout << "uri = " << infos.uri << std::endl;
+	std::cout << "not real file path" << realFilePath << std::endl;
 	_tryToIndex(realFilePath);
+
+	std::cout << "real file path = " << realFilePath << std::endl;
 
 	cgiLauncher	cgi(infos, *loc, this->_servconf);
 
 	ss << cgi.exec();
 
 	//ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
-
-	exit(EXIT_FAILURE);
 	return (ss.str());
 }
 
