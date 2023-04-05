@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 18:54:40 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/04 21:26:23 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,8 @@ std::string	cgiLauncher::exec(void)
 			output += buffer;
 		}
 	}
+
+	std::cout << output << std::endl;
 
 	/* reset STDIN and STDOUT */
 	dup2(originalStdin, STDIN_FILENO);

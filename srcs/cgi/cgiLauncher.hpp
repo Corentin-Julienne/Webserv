@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:18 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 18:47:44 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/04 19:04:10 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ class cgiLauncher
 		std::string									_cwd;
 		/* output */
 		std::string									_contentType;
-		
 };
 
 #endif
