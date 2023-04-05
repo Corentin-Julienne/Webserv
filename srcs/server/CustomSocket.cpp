@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 15:24:41 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/04 22:07:45 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,11 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 			std::string	value = line.substr(sep_idx + 2);
 			headers.insert(std::make_pair(key, value));
 		}
-		i = end_line_idx + 1;
+		i = end_line_idx;
+		if (end_line_idx != req.npos)
+			++i;
 	}
-	if (++i < req.length())
+	if (i != req.npos && ++i < req.length())
 		body = req.substr(i);
 }
 
@@ -192,6 +194,7 @@ std::string	CustomSocket::read(int fd)
 
 	SocketInfos		infos;
 	std::string		buff = buffer;
+	std::cout << buff << std::endl;
 	std::string		output;
 
 	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
@@ -209,6 +212,7 @@ std::string	CustomSocket::read(int fd)
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
 
+	std::cout << "req type = " << infos.reqType << std::endl;
 	if (code == 200)
 	{
 		if (infos.reqType == "GET")
@@ -248,8 +252,6 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 
 	_tryToIndex(realFilePath);
 	
-	std::cout << realFilePath << std::endl;
-	
 	bool isDirectory = (realFilePath.substr(realFilePath.length() - 1, 1) == "/");
 	if (isDirectory)
 	{
@@ -271,21 +273,27 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	else
 		content << _generateFileContent(realFilePath, loc);
 
-	//std::cout << content.str() << std::endl; // debug
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
+std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 {
-	std::stringstream ss;
-	std::string s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
+	std::cout << "go there" << std::endl;
+	
+	std::stringstream		ss;
+	std::string				s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
 
-	loc = (Location*)loc; // REMOVE THIS
-
-	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
+	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
+	
 	_tryToIndex(realFilePath);
 
-	ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
+	cgiLauncher	cgi(infos, *loc, this->_servconf);
+
+	ss << cgi.exec();
+
+	//ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
+
+	exit(EXIT_FAILURE);
 	return (ss.str());
 }
 
