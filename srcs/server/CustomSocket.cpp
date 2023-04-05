@@ -65,9 +65,11 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 			std::string	value = line.substr(sep_idx + 2);
 			headers.insert(std::make_pair(key, value));
 		}
-		i = end_line_idx + 1;
+		i = end_line_idx;
+		if (end_line_idx != req.npos)
+			++i;
 	}
-	if (++i < req.length())
+	if (i != req.npos && ++i < req.length())
 		body = req.substr(i);
 }
 
