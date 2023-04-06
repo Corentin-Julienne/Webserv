@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 14:52:57 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/06 16:36:44 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,11 @@ int	main(int argc, char **argv)
 	{
 		std::cout << "=== Starting server... ===" << std::endl;
 
+		std::vector<CustomSocket *>	sockets;
 		Parser						configParser(argv[1]);
 		int							kq = kqueue();
-		std::vector<CustomSocket *>	sockets;
+		if (kq == -1)
+			call_error("kqueue", true);
 
 		Parser::servers_array servers = configParser.getServers();
 
