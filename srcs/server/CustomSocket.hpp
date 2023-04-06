@@ -6,35 +6,33 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 12:06:33 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/06 14:51:25 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <sys/socket.h>	// for sockets in general
-#include <sys/event.h>	// for kevents macros
-#include <sys/stat.h>   // for isDirectory
-#include <netinet/in.h>	// for the struct sockaddr_in
-#include <cstring>		// for memset
-#include <arpa/inet.h>	// for htonl and similar
-#include <unistd.h>		// for close
-#include <fcntl.h>		// for fcntl
-#include <vector>
-#include <poll.h>		// for poll
-#include <sstream>      // for to_string equivalent
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <fstream>
-#include <iostream>
-#include <unistd.h>
-#include <stdlib.h>
-#include <dirent.h>
-#include "../parser/ServConf.hpp"
-#include "../parser/Location.hpp"
-#include "../cgi/cgiLauncher.hpp"
-#include "SocketInfos.hpp"
+#ifndef __CUSTOMSOCKET_HPP__
+# define __CUSTOMSOCKET_HPP__
 
-bool	isDirectory(const std::string &path);
+# include <sys/socket.h>	// for sockets in general
+# include <sys/event.h>	// for kevents macros
+# include <sys/stat.h>   // for isDirectory
+# include <netinet/in.h>	// for the struct sockaddr_in
+# include <cstring>		// for memset
+# include <arpa/inet.h>	// for htonl and similar
+# include <fcntl.h>		// for fcntl
+# include <vector>
+# include <sstream>      // for to_string equivalent
+# include <fstream>
+# include <map>
+# include <iostream>
+# include <unistd.h>
+# include <cstdlib>
+# include <dirent.h>
+# include "../parser/ServConf.hpp"
+# include "../parser/Location.hpp"
+# include "../cgi/cgiLauncher.hpp"
+# include "SocketInfos.hpp"
+# include "include.hpp"
 
 // used to create a socket and setup it to be used later
 class CustomSocket
@@ -49,15 +47,15 @@ class CustomSocket
 		void		closeSocket(int socket_fd);
 		std::string	_extractQueryString(SocketInfos &infos);
 
-		std::string	read(int fd);
-		void		write(int fd, std::string output);
+		void		read(int fd);
+		void		write(int fd);
 
 		int			getSocketFd();
 		int			getPort();
 
-		std::string	getOutput(int fd);
-		void		setOutput(int fd, std::string output);
-		void 		clearOutput(int fd);
+//		std::string	getOutput(int fd);
+//		void		setOutput(int fd, std::string output);
+//		void 		removeOutput(int fd);
 
 	private:
 	
@@ -79,14 +77,16 @@ class CustomSocket
 
 	private:
 	
-		int							_domain;
-		int							_type;
-		int							_protocol;
-		int							_backlog;
-		int							_socket_fd;
-		int							_kq;
-		struct sockaddr_in			_sockaddr;
-		int							_new_socket_fd;
-		std::map<int, std::string> 	_outputs;
-		ServConf					_servconf;
+		int													_domain;
+		int													_type;
+		int													_protocol;
+		int													_backlog;
+		int													_socket_fd;
+		int													_kq;
+		struct sockaddr_in									_sockaddr;
+		int													_new_socket_fd;
+		std::map< int, std::pair<std::string, std::string> > _outputs;
+		ServConf											_servconf;
 };
+
+#endif

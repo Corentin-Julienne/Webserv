@@ -6,12 +6,27 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 14:33:37 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/06 16:36:44 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "include.hpp"
 #include "CustomSocket.hpp"
-#include "../parser/Parser.hpp"
+
+bool	isDirectory(const std::string &path)
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) != 0)
+		return false;
+	return S_ISDIR(statbuf.st_mode);
+}
+
+void	call_error(std::string failing_call, bool exit_process)
+{
+	std::cerr << failing_call << ": " << strerror(errno) << std::endl;
+	if (exit_process)
+		exit(EXIT_FAILURE);
+}
 
 int	main(int argc, char **argv)
 {
@@ -25,9 +40,11 @@ int	main(int argc, char **argv)
 	{
 		std::cout << "=== Starting server... ===" << std::endl;
 
+		std::vector<CustomSocket *>	sockets;
 		Parser						configParser(argv[1]);
 		int							kq = kqueue();
-		std::vector<CustomSocket *>	sockets;
+		if (kq == -1)
+			call_error("kqueue", true);
 
 		Parser::servers_array servers = configParser.getServers();
 
@@ -68,21 +85,24 @@ int	main(int argc, char **argv)
 				{
 					// std::cout << "[" << socket->getPort() << "]\t" \
 						// << "New read event\n";
-					std::string	output = socket->read(events[i].ident);
-					socket->setOutput(events[i].ident, output);
+					socket->read(events[i].ident);
 					EV_SET(&new_event[0], events[i].ident, EVFILT_READ, EV_DELETE, 0, 0, socket);
 					EV_SET(&new_event[1], events[i].ident, EVFILT_WRITE, EV_ADD, 0, 0, socket);
-					kevent(kq, new_event, 2, NULL, 0, NULL);
+					if (kevent(kq, new_event, 2, NULL, 0, NULL) == -1)
+					{
+						call_error("kevent", false);
+						socket->closeSocket(events[i].ident);
+					}
 				}
 				else if (events[i].filter == EVFILT_WRITE)
 				{
 					// std::cout << "[" << socket->getPort() << "]\t" \
 						// << "Writing response\n";
 						
-					socket->write(events[i].ident, socket->getOutput(events[i].ident));
+					socket->write(events[i].ident);
 					EV_SET(&new_event[0], events[i].ident, EVFILT_WRITE, EV_DELETE, 0, 0, socket);
-					kevent(kq, new_event, 1, NULL, 0, NULL);
-					socket->clearOutput(events[i].ident);
+					if (kevent(kq, new_event, 1, NULL, 0, NULL) == -1)
+						call_error("kevent", false);
 					socket->closeSocket(events[i].ident);
 
 					// std::cout << "[" << socket->getPort() << "]\t"
