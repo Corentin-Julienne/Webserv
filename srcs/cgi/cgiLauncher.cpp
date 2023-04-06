@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/05 20:51:06 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/06 17:55:06 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ cgiLauncher::cgiLauncher(SocketInfos &infos, Location &loc, ServConf &serv) : _i
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
 	/* debug */
-	this->_printInfos();
+	this->_printInfos(); // debug
 	this->_printEnv(); // debug
 	this->_StrEnvToCStrArray();
 }
@@ -67,9 +67,6 @@ void	cgiLauncher::_initEnv()
 		_env["CONTENT_TYPE"] = _infos.headers["Content-Type"];
 		_env["CONTENT_LENGTH"] = this->_numToStr(_infos.body.size());
 	}
-	/* providing PATH_INFO (i.e. full path) to the CGI executable */
-	//_env["PATH_INFO"] = _cwd + _infos.absoluteURIPath + "/index.php"; // DEBUG
-	//std::cout << _env["PATH_INFO"] << std::endl;
 	/* query string extraction */
 	_env["QUERY_STRING"] = _infos.queryString; // everything after ? in the URI
 	/* server IP and port */
@@ -122,14 +119,13 @@ char	**cgiLauncher::_getArgs(std::string path)
 /* serve a std::string called this->_output. Is the result of calling the CGI that will serve the content to 
 the webserv, that needs to serve it to the client (i.e web browser) */
 std::string	cgiLauncher::exec(void)
-{	
+{		
 	std::string		output;
 	/* saving original fds for later */
 	int		originalStdout = dup(STDIN_FILENO);
-	int		originalStdin = dup(STDOUT_FILENO);
-	
+	int		originalStdin = dup(STDOUT_FILENO);	
 	int		fds[2];
-	
+
 	if (pipe(fds) == -1)
 	{
 		std::cerr << "pipe syscall failure" << std::endl;
@@ -145,25 +141,33 @@ std::string	cgiLauncher::exec(void)
 	}
 	else if (pid == 0) // child process
 	{		
-		close(fds[0]); 					// no need to read anything
+		if (_infos.reqType == "POST")
+			dup2(fds[0], STDIN_FILENO);
+		close(fds[0]);
 		dup2(fds[1], STDOUT_FILENO);	// need to change stdout
 		close(fds[1]);
-		
+
 		char	**argv = this->_getArgs(this->_cwd + "/" + _loc._root + "/php/php-cgi"); // placeholder
-		std::cerr << argv[0] << std::endl;
-		
+			
+		/* debug, checks for existence and chmod for the cgi script */
 		if (access(argv[0],F_OK) == -1)
 			std::cerr << "php-cgi not found" << std::endl;
 		if (access(argv[0], X_OK) == -1)
 			std::cerr << "php-cgi not executable" << std::endl;
 		
-		if (execve(argv[0], argv, this->_char_env) == -1)
+		std::cerr << "go just before execve!" << std::endl;
+		if (execve(argv[0], argv, this->_char_env) == -1) // segfault there with POST
 			std::cerr << "execve failed and returned -1" << std::endl;
+		std::cerr << "go there after execve !" << std::endl;
+
 		exit(EXIT_FAILURE); // error to change
 	}
 	else // parent process
 	{
-		close(fds[1]);  // no need to write anything
+		/* write body to fds[1] */
+		if (_infos.reqType == "POST")
+			write(fds[1], _infos.body.c_str(), _infos.body.size());
+		close(fds[1]);
 		dup2(fds[0], STDIN_FILENO);
 		close(fds[0]);
 		if (waitpid(pid, NULL, 0) == -1) // wait for child process to finish
@@ -178,7 +182,7 @@ std::string	cgiLauncher::exec(void)
 		while (reader > 0)
 		{
 			memset(buffer, 0, BUFFER_SIZE);
-			reader = read(STDIN_FILENO, buffer, BUFFER_SIZE);
+			reader = read(STDIN_FILENO, buffer, 50000);
 			if (reader < 0)
 			{
 				std::cerr << "read syscall failure" << std::endl;
@@ -188,7 +192,7 @@ std::string	cgiLauncher::exec(void)
 		}
 	}
 
-	std::cout << output << std::endl;
+	//std::cout << output << std::endl; // debug
 
 	/* reset STDIN and STDOUT */
 	dup2(originalStdin, STDIN_FILENO);
@@ -196,9 +200,14 @@ std::string	cgiLauncher::exec(void)
 	dup2(originalStdout, STDOUT_FILENO);
 	close(originalStdout);
 
-	output = this->_removeCGIHeader(output);
-	output = this->_formatOutput(output);
-	std::cout << output << std::endl;
+	/* post treatment of the output */
+	//if (_infos.reqType == "GET")
+	std::cout << "!!!" << output << "!!!" << std::endl; 
+	// output = this->_removeCGIHeader(output);
+	// std::cout << "@@@" << output << "@@@" << std::endl; 
+	
+	// output = this->_formatOutput(output);
+
 	return (output);
 }
 
@@ -301,9 +310,7 @@ void	cgiLauncher::_printEnv(void)
 
 void	cgiLauncher::_printInfos(void)
 {
-	std::cerr << "printing infos" << std::endl;
-	std::cerr << "--------------" << std::endl;
-	
+	std::cerr << "printing infos..." << std::endl;
 	std::cerr << "printing headers" << std::endl;
 	std::map<std::string, std::string>::iterator	it = _infos.headers.begin();
 	while (it != _infos.headers.end())
@@ -311,12 +318,14 @@ void	cgiLauncher::_printInfos(void)
 		std::cerr << "key = " << it->first << " = " << it->second << std::endl;
 		it++;	
 	}
-	std::cerr << "printing body if existing" << std::endl;
+	std::cerr << "printing body if existing : ";
 	if (!_infos.body.empty())
 		std::cerr << _infos.body << std::endl;
 	std::cerr << "printing uri : " << _infos.uri << std::endl;
 	std::cerr << "printing query string : " << _infos.queryString << std::endl;
 	std::cerr << "printing real URI path : " << _infos.absoluteURIPath << std::endl;
 	std::cerr << "printing type of request : " << _infos.reqType << std::endl;
+	std::cerr << "printing path to location : " << _infos.locPath << std::endl;
+	std::cerr << "" << std::endl;
 	std::cerr << "-------------------------------" << std::endl;
 }

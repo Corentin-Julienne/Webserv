@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 12:06:33 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/06 09:45:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,8 @@ class CustomSocket
 		size_t		_isMethodAllowed(const std::string reqType, std::vector<std::string> allowedMethods);
 		std::string _generateAutoIndex(const std::string path, const std::string relativePath, Location *loc);
 		std::string	_generateFileContent(const std::string realFilePath, Location *loc);
+
+		std::string	_assembleURI(SocketInfos &infos);
 
 	private:
 	

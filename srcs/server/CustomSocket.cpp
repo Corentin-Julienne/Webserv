@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/05 21:16:11 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/06 14:36:13 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 	{
 		size_t		end_line_idx = req.find("\n", i);
 		std::string	line = req.substr(i, end_line_idx - i);
+		if (line.back() == '\r') // rm return carriages
+			line.pop_back();
 		size_t		sep_idx = line.find(": ");
 		if (sep_idx != line.npos)
 		{
@@ -193,30 +195,37 @@ std::string	CustomSocket::read(int fd)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
+	buffer[valret] = '\0';
 
 	SocketInfos		infos;
 	std::string		buff = buffer;
-	std::cout << "!" << buff << "!" << std::endl;
 	std::string		output;
 
 	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
 	
-	// Add the suffix to the uri if it's a directory
+	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
 		infos.uri = "/" + infos.uri;
+
+	/* if POST request, add the prefix if location different form / */
+	if (infos.reqType == "POST")
+		infos.uri = this->_assembleURI(infos);
+	else
+		infos.locPath = infos.uri;
 
 	/* add relative path_info and query string to infos struct, withdraw query string from uri */
 	infos.queryString = this->_extractQueryString(infos);
 
-	Location 	*loc = _getPathLocation(infos.uri);
+	Location 	*loc = _getPathLocation(infos.locPath);
+	
 	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
 
-	code = 200; // debug, suppress after use
 	if (code == 200)
 	{
+
 		if (infos.reqType == "GET")
 			output = _GET(infos, loc);
 		else if (infos.reqType == "POST")
@@ -230,6 +239,16 @@ std::string	CustomSocket::read(int fd)
 		output = _generateError(code, loc);
 	
 	return (output);
+}
+
+std::string	CustomSocket::_assembleURI(SocketInfos &infos)
+{	
+	std::string		prefix = infos.headers["Referer"];
+
+	prefix = prefix.substr(prefix.find("//") + 2);
+	prefix = prefix.substr(prefix.find("/"));
+	infos.locPath = prefix;
+	return (prefix + infos.uri);
 }
 
 void	CustomSocket::write(int fd, std::string output)
@@ -279,19 +298,13 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 }
 
 std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
-{
-	std::cerr << "go to POST request" << std::endl;
-	
+{	
 	std::stringstream		ss;
 	std::string				s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
-
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
 	
-	std::cout << "uri = " << infos.uri << std::endl;
-	std::cout << "not real file path" << realFilePath << std::endl;
 	_tryToIndex(realFilePath);
-
-	std::cout << "real file path = " << realFilePath << std::endl;
+	infos.absoluteURIPath = realFilePath;
 
 	cgiLauncher	cgi(infos, *loc, this->_servconf);
 
