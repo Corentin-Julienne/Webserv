@@ -1,3 +1,4 @@
 webserv
 objs/
 .vscode/
+.DS_Store
