@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 16:52:21 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 17:01:25 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,8 +184,9 @@ void	CustomSocket::read(int fd)
 	SocketInfos		infos;
 	std::string		output;
 	int				len_to_read;
-	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers);
+	std::vector<char> final_data;
 
+	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers);
 	usleep(1000);
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
@@ -195,12 +196,20 @@ void	CustomSocket::read(int fd)
 	while (len_to_read > 0)
 	{
 		memset(buffer, 0, sizeof(buffer));
-		valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC);
-		if (valret == -1)
-			break ;
-		infos.body += buffer;
-		len_to_read -= valret;
+		valret = recv(fd, buffer, sizeof(buffer), 0);
+		if (valret > 0)
+		{
+			std::cout << valret << std::endl;
+			final_data.insert(final_data.end(), buffer, buffer + valret);
+			len_to_read -= valret;
+		}
+		else
+		{
+			break;
+		}
 	}
+
+	::write(1, final_data.data(), final_data.size());
 
 	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
@@ -216,7 +225,6 @@ void	CustomSocket::read(int fd)
 	infos.queryString = this->_extractQueryString(infos);
 
 	Location 	*loc = _getPathLocation(infos.locPath);
-	
 	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200)
