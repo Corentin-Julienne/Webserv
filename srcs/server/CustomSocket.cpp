@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 14:36:13 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 11:16:04 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,9 +196,12 @@ std::string	CustomSocket::read(int fd)
 		// handle error there
 	}
 	buffer[valret] = '\0';
+	std::string		buff = buffer;
+	usleep(1000);
+	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC);
+	buff += buffer;
 
 	SocketInfos		infos;
-	std::string		buff = buffer;
 	std::string		output;
 
 	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
