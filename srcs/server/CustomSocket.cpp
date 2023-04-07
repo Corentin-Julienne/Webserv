@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 15:47:37 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/07 16:52:21 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,12 +196,12 @@ void	CustomSocket::read(int fd)
 	{
 		memset(buffer, 0, sizeof(buffer));
 		valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC);
-		infos.body += buffer;
-		len_to_read -= valret;
 		if (valret == -1)
 			break ;
+		infos.body += buffer;
+		len_to_read -= valret;
 	}
-	
+
 	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
 		infos.uri = "/" + infos.uri;
