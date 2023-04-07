@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 11:20:16 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 11:58:58 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,11 @@ std::string	CustomSocket::read(int fd)
 	std::string		buff = buffer;
 	usleep(1000);
 	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC);
+	buffer[valret] = '\0';
 	buff += buffer;
+	std::cout << "buff.size() =" << buff.size() << std::endl;
+
+	std::cout << "full request = |" << buff << "|" << std::endl;
 
 	SocketInfos		infos;
 	std::string		output;
@@ -303,7 +307,6 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 {	
 	std::stringstream		ss;
-	std::string				s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
 	
 	_tryToIndex(realFilePath);
@@ -313,7 +316,6 @@ std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 
 	ss << cgi.exec();
 
-	//ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
 	return (ss.str());
 }
 
