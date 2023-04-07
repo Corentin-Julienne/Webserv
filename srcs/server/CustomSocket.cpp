@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 17:01:25 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/07 17:53:33 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,28 +165,40 @@ std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 
 void	CustomSocket::read(int fd)
 {
-	ssize_t		valret;
 	std::string	output_500;
+	std::string headers_str;
+	ssize_t		valret;
+	char	c;
 
-	char	buffer[1024 * 10]; // create a buffer to be used by read
-	memset(buffer, 0, sizeof(buffer));
-	valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
-	if (valret < 0)
+	while (1)
 	{
-		call_error("recv", false);
-		std::string output_500 = "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\nContent-Length: 25\n\n500 Internal Server Error";
-		this->_outputs[fd] = std::make_pair(output_500, output_500);
-		return ;
-	}
-	buffer[valret] = '\0';
+		if (headers_str.length() >= 4 && headers_str.substr(headers_str.length() - 4, 4) == "\r\n\r\n")
+			break;
 
-	std::string		buff = buffer;
+		valret = recv(fd, &c, 1, 0);
+		if (valret < 0)
+		{
+			std::cerr << "gere cette erreur stp" << std::endl; // todo
+			break;
+		}
+		if (valret == 0)
+		{
+			std::cerr << "celle la aussi stp" << std::endl; // todo
+			break;
+		}
+
+		headers_str += c;
+	}
+
 	SocketInfos		infos;
 	std::string		output;
 	int				len_to_read;
+	char			buffer[1024];
 	std::vector<char> final_data;
 
-	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers);
+	std::cout << "===BUFFER===\n" << headers_str <<  "\n===BUFFER===" << std::endl;
+	
+	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
 	usleep(1000);
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
@@ -209,7 +221,11 @@ void	CustomSocket::read(int fd)
 		}
 	}
 
+	infos.body = final_data;
+
+	std::cout << "===BODY===" <<  std::endl;
 	::write(1, final_data.data(), final_data.size());
+	std::cout << "\n===BODY===" <<  std::endl;
 
 	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
@@ -253,6 +269,8 @@ std::string	CustomSocket::_assembleURI(SocketInfos &infos)
 {	
 	std::string		prefix = infos.headers["Referer"];
 
+	if (prefix.length() == 0)
+		return (infos.uri);
 	prefix = prefix.substr(prefix.find("//") + 2);
 	prefix = prefix.substr(prefix.find("/"));
 	infos.locPath = prefix;
@@ -295,7 +313,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	{		
 		infos.absoluteURIPath = realFilePath;
 		
-		cgiLauncher		cgi(infos, *loc, this->_servconf);
+		cgiLauncher		cgi(infos, loc, this->_servconf);
 		
 		content << cgi.exec();
 	}
@@ -313,7 +331,7 @@ std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 	_tryToIndex(realFilePath);
 	infos.absoluteURIPath = realFilePath;
 
-	cgiLauncher	cgi(infos, *loc, this->_servconf);
+	cgiLauncher	cgi(infos, loc, this->_servconf);
 
 	ss << cgi.exec();
 
@@ -324,8 +342,8 @@ std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
 {
 	std::stringstream 	ss;
 	std::ifstream		ifs;
-	std::string 		s = "DELETE\tat " + infos.uri + "\nbody:\n" + infos.body;
-	
+	std::string 		s = "DELETE\tat " + infos.uri + "\nbody:\n" + infos.body.data();
+
 	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 	_tryToIndex(realFilePath);
 	
