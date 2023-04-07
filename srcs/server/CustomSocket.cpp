@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 11:58:58 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 15:47:37 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,6 @@ std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 void	CustomSocket::read(int fd)
 {
 	ssize_t		valret;
-	std::string	output;
 	std::string	output_500;
 
 	char	buffer[1024 * 10]; // create a buffer to be used by read
