@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   cgiLauncher.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 11:39:30 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 17:26:34 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cgiLauncher.hpp"
 
-cgiLauncher::cgiLauncher(SocketInfos &infos, Location &loc, ServConf &serv) : _infos(infos), _loc(loc), _serv(serv)
+cgiLauncher::cgiLauncher(SocketInfos &infos, Location *loc, ServConf &serv) : _infos(infos), _loc(loc), _serv(serv)
 {
 	char			buffer[FILENAME_MAX];
 	char			*success = getcwd(buffer, FILENAME_MAX);
@@ -147,7 +147,7 @@ std::string	cgiLauncher::exec(void)
 		dup2(fds[1], STDOUT_FILENO);	// need to change stdout
 		close(fds[1]);
 
-		char	**argv = this->_getArgs(this->_cwd + "/" + _loc._root + "/php/php-cgi"); // placeholder
+		char	**argv = this->_getArgs(this->_cwd + "/" + (_loc ? _loc->_root : _serv._root) + "/php/php-cgi"); // placeholder
 			
 		/* debug, checks for existence and chmod for the cgi script */
 		if (access(argv[0],F_OK) == -1)
@@ -163,7 +163,7 @@ std::string	cgiLauncher::exec(void)
 	{
 		/* write body to fds[1] */
 		if (_infos.reqType == "POST")
-			write(fds[1], _infos.body.c_str(), _infos.body.size());
+			write(fds[1], _infos.body.data(), _infos.body.size());
 		close(fds[1]);
 		dup2(fds[0], STDIN_FILENO);
 		close(fds[0]);
@@ -298,8 +298,6 @@ void	cgiLauncher::_printInfos(void)
 		it++;	
 	}
 	std::cerr << "printing body if existing : ";
-	if (!_infos.body.empty())
-		std::cerr << _infos.body << std::endl;
 	std::cerr << "printing uri : " << _infos.uri << std::endl;
 	std::cerr << "printing query string : " << _infos.queryString << std::endl;
 	std::cerr << "printing real URI path : " << _infos.absoluteURIPath << std::endl;
