@@ -12,21 +12,16 @@
 
 #include "CustomSocket.hpp"
 
-bool isDirectory(const std::string &path)
-{
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf) != 0)
-		return false;
-	return S_ISDIR(statbuf.st_mode);
-}
-
 CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _backlog(10), _kq(kq), _new_socket_fd(-1), _servconf(server_config)
 {
 	int	so_reuseaddr = 1;
 	_socket_fd = socket(_domain, _type, _protocol);
-	if (_socket_fd < 0) {} // add function to handle errors
-	setsockopt(this->_socket_fd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr));
-	fcntl(this->_socket_fd, F_SETFL, O_NONBLOCK);
+	if (_socket_fd < 0)
+		call_error("socket", true);
+	if (setsockopt(this->_socket_fd, SOL_SOCKET, SO_REUSEADDR, &so_reuseaddr, sizeof(so_reuseaddr)) == -1)
+		call_error("setsockopt", true);
+	if (fcntl(this->_socket_fd, F_SETFL, O_NONBLOCK) == -1)
+		call_error("fcntl", true);
 	_bindSocket();
 	_enableSocketListening();
 	// std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
@@ -34,11 +29,10 @@ CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _
 
 CustomSocket::~CustomSocket() 
 {
-	// std::cout << "Closing socket" << std::endl;
 	closeSocket(_socket_fd);
 }
 
-void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body)
+void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers)
 {
 	if (req.substr(0, 4) == "GET ")
 		reqType = "GET";
@@ -72,10 +66,6 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		if (end_line_idx != req.npos)
 			++i;
 	}
-	if (req.find("\r\n\r\n") != std::string::npos && req.substr(req.find("\r\n\r\n") + 3).size() > 1)
-		body = req.substr(req.find("\r\n\r\n") + 4);
-	else
-		body = "";
 }
 
 // private helper functions
@@ -88,27 +78,17 @@ void	CustomSocket::_bindSocket(void)
 	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
-	{
-		std::cerr << "bind: ";
-		std::cout << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
-		// handle error there
-	}
+		call_error("bind", true);
 }
 
 void	CustomSocket::_enableSocketListening(void)
 {
 	if (listen(_socket_fd, _backlog) < 0)
-	{
-		std::cerr << "listen: ";
-		std::cout << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
-		// handle error there
-	}
-	// don't forget protections
+		call_error("listen", true);
 	struct kevent	kev;
 	EV_SET(&kev, this->_socket_fd, EVFILT_READ, EV_ADD, 0, 0, this);
-	kevent(this->_kq, &kev, 1, NULL, 0, NULL);
+	if (kevent(this->_kq, &kev, 1, NULL, 0, NULL) == -1)
+		call_error("kevent", true);
 }
 
 void	CustomSocket::acceptConnection(void)
@@ -116,26 +96,25 @@ void	CustomSocket::acceptConnection(void)
 	socklen_t socketLen = sizeof(_sockaddr);
 	if ((_new_socket_fd = accept(_socket_fd, (struct sockaddr *)&_sockaddr, &socketLen)) < 0)
 	{
-		std::cerr << "accept: ";
-		std::cout << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
-		// handle error here
+		call_error("accept", false);
+		return ;
 	}
 	fcntl(this->_new_socket_fd, F_SETFL, O_NONBLOCK);
-	struct kevent	events[2];
-	EV_SET(&events[0], this->_new_socket_fd, EVFILT_READ, EV_ADD, 0, 0, this);
-	//EV_SET(&events[1], this->_new_socket_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, this);
-	kevent(this->_kq, events, 1, NULL, 0, NULL);
+	struct kevent	events;
+	EV_SET(&events, this->_new_socket_fd, EVFILT_READ, EV_ADD, 0, 0, this);
+	if (kevent(this->_kq, &events, 1, NULL, 0, NULL) == -1)
+		call_error("kevent", false);
 }
 
 void	CustomSocket::closeSocket(int socket_fd)
 {
+	this->_outputs.erase(socket_fd);
+	// std::cout << "Closing socket" << std::endl;
 	if (close(socket_fd) < 0)
 	{
-		std::cerr << "close: ";
-		std::cout << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
-		// handle error there
+		call_error("close", false);
+		if (errno == EINTR)
+			close(socket_fd);
 	}
 }
 
@@ -149,12 +128,13 @@ int	CustomSocket::getPort()
 	return (this->_servconf._port);
 }
 
+/*
 std::string	CustomSocket::getOutput(int fd)
 {
 	return this->_outputs[fd];
 }
 
-void CustomSocket::clearOutput(int fd)
+void CustomSocket::removeOutput(int fd)
 {
 	this->_outputs.erase(fd);
 }
@@ -163,6 +143,7 @@ void	CustomSocket::setOutput(int fd, std::string output)
 {
 	this->_outputs[fd] = output;
 }
+*/
 
 /* extract query string and store it in SocketInfos struct, then cut query string from the uri */
 std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
@@ -182,34 +163,45 @@ std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 	return (query_string);
 }
 
-std::string	CustomSocket::read(int fd)
+void	CustomSocket::read(int fd)
 {
-	ssize_t	valret;
+	ssize_t		valret;
+	std::string	output;
+	std::string	output_500;
 
 	char	buffer[1024 * 10]; // create a buffer to be used by read
 	memset(buffer, 0, sizeof(buffer));
-	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
+	valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
 	if (valret < 0)
 	{
-		std::cerr << "recv: ";
-		std::cout << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
-		// handle error there
+		call_error("recv", false);
+		std::string output_500 = "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\nContent-Length: 25\n\n500 Internal Server Error";
+		this->_outputs[fd] = std::make_pair(output_500, output_500);
+		return ;
 	}
 	buffer[valret] = '\0';
+
 	std::string		buff = buffer;
-	usleep(1000);
-	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC);
-	buffer[valret] = '\0';
-	buff += buffer;
-	std::cout << "buff.size() =" << buff.size() << std::endl;
-
-	std::cout << "full request = |" << buff << "|" << std::endl;
-
 	SocketInfos		infos;
 	std::string		output;
+	int				len_to_read;
+	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers);
 
-	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
+	usleep(1000);
+
+	if (infos.headers.find("Content-Length") != infos.headers.end())
+		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;
+	else
+		len_to_read = 0;
+	while (len_to_read > 0)
+	{
+		memset(buffer, 0, sizeof(buffer));
+		valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC);
+		infos.body += buffer;
+		len_to_read -= valret;
+		if (valret == -1)
+			break ;
+	}
 	
 	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
@@ -244,8 +236,10 @@ std::string	CustomSocket::read(int fd)
 	}
 	else
 		output = _generateError(code, loc);
+
+	output_500 = this->_generateError(500, loc);
 	
-	return (output);
+	this->_outputs[fd] = make_pair(output, output_500);
 }
 
 std::string	CustomSocket::_assembleURI(SocketInfos &infos)
@@ -258,17 +252,17 @@ std::string	CustomSocket::_assembleURI(SocketInfos &infos)
 	return (prefix + infos.uri);
 }
 
-void	CustomSocket::write(int fd, std::string output)
+void	CustomSocket::write(int fd)
 {
-	ssize_t	valret;
+	ssize_t		valret;
+	std::string	output = this->_outputs[fd].first;
 
 	valret = send(fd, output.c_str(), output.length(), MSG_DONTWAIT);
-	if (valret < 0)
+	if (valret <= 0)
 	{
-		std::cerr << "send: ";
-		std::cout << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
-		// handle error here
+		call_error("send", false);
+		output = this->_outputs[fd].second;
+		send(fd, output.c_str(), output.length(), MSG_DONTWAIT);
 	}
 }
 
@@ -305,7 +299,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 }
 
 std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
-{	
+{
 	std::stringstream		ss;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
 	
