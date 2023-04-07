@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 14:45:50 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 10:04:48 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,12 @@ void	CustomSocket::read(int fd)
 
 	Location 	*loc = _getPathLocation(infos.uri);
 	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+
+	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
+	{
+		std::vector<std::string>	hosts = this->_servconf._server_name;
+		code = std::find(hosts.begin(), hosts.end(), infos.headers.find("Host")->second) != hosts.end() ? 200 : 404;
+	}
 
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
