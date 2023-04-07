@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 17:55:06 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/06 23:14:17 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ cgiLauncher::cgiLauncher(SocketInfos &infos, Location &loc, ServConf &serv) : _i
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
 	/* debug */
-	this->_printInfos(); // debug
-	this->_printEnv(); // debug
+	// this->_printInfos(); // debug
+	// this->_printEnv(); // debug
 	this->_StrEnvToCStrArray();
 }
 
@@ -155,11 +155,8 @@ std::string	cgiLauncher::exec(void)
 		if (access(argv[0], X_OK) == -1)
 			std::cerr << "php-cgi not executable" << std::endl;
 		
-		std::cerr << "go just before execve!" << std::endl;
 		if (execve(argv[0], argv, this->_char_env) == -1) // segfault there with POST
 			std::cerr << "execve failed and returned -1" << std::endl;
-		std::cerr << "go there after execve !" << std::endl;
-
 		exit(EXIT_FAILURE); // error to change
 	}
 	else // parent process
@@ -192,7 +189,7 @@ std::string	cgiLauncher::exec(void)
 		}
 	}
 
-	//std::cout << output << std::endl; // debug
+	//std::cout << "|" << output << "|" << std::endl; // debug
 
 	/* reset STDIN and STDOUT */
 	dup2(originalStdin, STDIN_FILENO);
@@ -202,12 +199,11 @@ std::string	cgiLauncher::exec(void)
 
 	/* post treatment of the output */
 	//if (_infos.reqType == "GET")
-	std::cout << "!!!" << output << "!!!" << std::endl; 
-	// output = this->_removeCGIHeader(output);
-	// std::cout << "@@@" << output << "@@@" << std::endl; 
+	//std::cout << "!!!" << output << "!!!" << std::endl; 
+	output = this->_removeCGIHeader(output);
+	std::cout << "@@@" << output << "@@@" << std::endl; 
 	
-	// output = this->_formatOutput(output);
-
+	output = this->_formatOutput(output);
 	return (output);
 }
 
@@ -262,37 +258,14 @@ std::string	cgiLauncher::_trimWhitespaces(std::string str)
 	return (trimmed_str);
 }
 
-std::string	cgiLauncher::_removeCGIHeader(std::string output)
+std::string	cgiLauncher::_removeCGIHeader(std::string output) // do later
 {
 	std::string		clear_output = "";
-	std::size_t		pos;
-	bool			reach_empty_line = false;
-	std::string		token;
-	std::size_t		spaces;
 
-	while (!output.empty())
-	{
-		pos = output.find('\n');
-		token = output.substr(0, pos + 1);
-		if (output.find('\n') == std::string::npos)
-			output.clear();
-		else
-			output.erase(0, pos + 1);
-		
-		spaces = 0;
-		for (std::size_t i = 0; i < token.size(); i++)
-		{
-			if (std::isspace(token[i]))
-				spaces++;
-		}
-		if (spaces == token.size())
-		{
-			reach_empty_line = true;
-			continue ;
-		}
-		if (reach_empty_line == true)
-			clear_output += token;
-	}
+	if (output.find("\r\n\r\n") != std::string::npos)
+		clear_output = output.substr(output.find("\r\n\r\n"));
+	if (clear_output.size() > 4)
+		clear_output.substr(4);
 	return (this->_trimWhitespaces(clear_output));
 }
 
