@@ -32,7 +32,7 @@ CustomSocket::~CustomSocket()
 	closeSocket(_socket_fd);
 }
 
-void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body)
+void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers)
 {
 	if (req.substr(0, 4) == "GET ")
 		reqType = "GET";
@@ -45,6 +45,7 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		reqType = "UNDEFINED";
 		return ;
 	}
+	
 	size_t	i = req.find(" /") + 2;
 	uri = req.substr(i, req.find(" ", i) - i);
 	i = req.find("\n") + 1;
@@ -52,6 +53,8 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 	{
 		size_t		end_line_idx = req.find("\n", i);
 		std::string	line = req.substr(i, end_line_idx - i);
+		if (line.back() == '\r') // rm return carriages
+			line.pop_back();
 		size_t		sep_idx = line.find(": ");
 		if (sep_idx != line.npos)
 		{
@@ -63,8 +66,6 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		if (end_line_idx != req.npos)
 			++i;
 	}
-	if (i != req.npos && ++i < req.length())
-		body = req.substr(i);
 }
 
 // private helper functions
@@ -170,28 +171,53 @@ void	CustomSocket::read(int fd)
 
 	char	buffer[1024 * 10]; // create a buffer to be used by read
 	memset(buffer, 0, sizeof(buffer));
-	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
-	if (valret <= 0)
+	valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
+	if (valret < 0)
 	{
 		call_error("recv", false);
 		std::string output_500 = "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\nContent-Length: 25\n\n500 Internal Server Error";
 		this->_outputs[fd] = std::make_pair(output_500, output_500);
 		return ;
 	}
+	buffer[valret] = '\0';
 
-	SocketInfos		infos;
 	std::string		buff = buffer;
+	SocketInfos		infos;
+	std::string		output;
+	int				len_to_read;
+	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers);
 
-	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
+	usleep(1000);
+
+	if (infos.headers.find("Content-Length") != infos.headers.end())
+		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;
+	else
+		len_to_read = 0;
+	while (len_to_read > 0)
+	{
+		memset(buffer, 0, sizeof(buffer));
+		valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC);
+		infos.body += buffer;
+		len_to_read -= valret;
+		if (valret == -1)
+			break ;
+	}
 	
-	// Add the suffix to the uri if it's a directory
+	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
 		infos.uri = "/" + infos.uri;
+
+	/* if POST request, add the prefix if location different form / */
+	if (infos.reqType == "POST")
+		infos.uri = this->_assembleURI(infos);
+	else
+		infos.locPath = infos.uri;
 
 	/* add relative path_info and query string to infos struct, withdraw query string from uri */
 	infos.queryString = this->_extractQueryString(infos);
 
-	Location 	*loc = _getPathLocation(infos.uri);
+	Location 	*loc = _getPathLocation(infos.locPath);
+	
 	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
@@ -220,6 +246,16 @@ void	CustomSocket::read(int fd)
 	output_500 = this->_generateError(500, loc);
 	
 	this->_outputs[fd] = make_pair(output, output_500);
+}
+
+std::string	CustomSocket::_assembleURI(SocketInfos &infos)
+{	
+	std::string		prefix = infos.headers["Referer"];
+
+	prefix = prefix.substr(prefix.find("//") + 2);
+	prefix = prefix.substr(prefix.find("/"));
+	infos.locPath = prefix;
+	return (prefix + infos.uri);
 }
 
 void	CustomSocket::write(int fd)
@@ -271,19 +307,15 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 {
 	std::stringstream		ss;
-	std::string				s = "POST\tat " + infos.uri + "\nbody:\n" + infos.body;
-
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
 	
 	_tryToIndex(realFilePath);
+	infos.absoluteURIPath = realFilePath;
 
 	cgiLauncher	cgi(infos, *loc, this->_servconf);
 
 	ss << cgi.exec();
 
-	//ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
-
-	exit(EXIT_FAILURE);
 	return (ss.str());
 }
 

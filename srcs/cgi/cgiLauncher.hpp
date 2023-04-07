@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:18 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/04 19:04:10 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 11:22:42 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class cgiLauncher
 
 		void			_addHeadersToEnv(void);
 		std::string		_extractContentType(std::string ouput);
-		std::string		_removeCGIHeader(std::string output);
+		std::string		_extractCGIHeader(std::string output);
 		std::string		_formatOutput(std::string output);
 		std::string 	_trimWhitespaces(std::string str);
 
@@ -69,6 +69,7 @@ class cgiLauncher
 		std::string									_cwd;
 		/* output */
 		std::string									_contentType;
+		std::string									_output_headers;
 };
 
 #endif
