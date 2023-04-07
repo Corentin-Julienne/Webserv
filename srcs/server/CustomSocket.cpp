@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 23:25:35 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 11:20:16 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		reqType = "UNDEFINED";
 		return ;
 	}
-	
-	std::cout << "req == |" << req << "|" << std::endl;
 	
 	size_t	i = req.find(" /") + 2;
 	uri = req.substr(i, req.find(" ", i) - i);
@@ -198,13 +196,14 @@ std::string	CustomSocket::read(int fd)
 		exit(EXIT_FAILURE);
 		// handle error there
 	}
-	//buffer[valret] = '\0';
+	buffer[valret] = '\0';
+	std::string		buff = buffer;
+	usleep(1000);
+	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC);
+	buff += buffer;
 
 	SocketInfos		infos;
-	std::string		buff = buffer;
 	std::string		output;
-
-	std::cout << "!!" << buff << "!!" << std::endl;
 
 	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
 	
