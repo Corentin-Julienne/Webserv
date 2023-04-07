@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 09:45:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 13:19:47 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ class CustomSocket
 		void		_tryToIndex(std::string &filePath);
 		void		_bindSocket(void);
 		void		_enableSocketListening(void);
-		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
+		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers);
 		std::string	_GET(SocketInfos &infos, Location *loc);
 		std::string	_POST(SocketInfos &infos, Location *loc);
 		std::string	_DELETE(SocketInfos &infos, Location *loc);

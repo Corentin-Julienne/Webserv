@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 11:20:16 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 13:21:53 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ CustomSocket::~CustomSocket()
 	closeSocket(_socket_fd);
 }
 
-void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body)
+void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers)
 {
 	if (req.substr(0, 4) == "GET ")
 		reqType = "GET";
@@ -72,10 +72,6 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		if (end_line_idx != req.npos)
 			++i;
 	}
-	if (req.find("\r\n\r\n") != std::string::npos && req.substr(req.find("\r\n\r\n") + 3).size() > 1)
-		body = req.substr(req.find("\r\n\r\n") + 4);
-	else
-		body = "";
 }
 
 // private helper functions
@@ -188,7 +184,7 @@ std::string	CustomSocket::read(int fd)
 
 	char	buffer[1024 * 10]; // create a buffer to be used by read
 	memset(buffer, 0, sizeof(buffer));
-	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
+	valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC/* | MSG_DONTWAIT*/); // manage case when len > 1024
 	if (valret < 0)
 	{
 		std::cerr << "recv: ";
@@ -197,15 +193,28 @@ std::string	CustomSocket::read(int fd)
 		// handle error there
 	}
 	buffer[valret] = '\0';
-	std::string		buff = buffer;
-	usleep(1000);
-	valret = recv(fd, buffer, 1024 * 10, MSG_TRUNC);
-	buff += buffer;
 
+	std::string		buff = buffer;
 	SocketInfos		infos;
 	std::string		output;
+	int				len_to_read;
+	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers);
 
-	this->_parseRequest(buff, infos.reqType, infos.uri, infos.headers, infos.body);
+	usleep(1000);
+
+	if (infos.headers.find("Content-Length") != infos.headers.end())
+		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;
+	else
+		len_to_read = 0;
+	while (len_to_read > 0)
+	{
+		memset(buffer, 0, sizeof(buffer));
+		valret = recv(fd, buffer, 1024 * 10 - 1, MSG_TRUNC);
+		infos.body += buffer;
+		len_to_read -= valret;
+		if (valret == -1)
+			break ;
+	}
 	
 	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
