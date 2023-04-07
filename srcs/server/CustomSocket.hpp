@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 14:51:25 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 13:19:47 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ class CustomSocket
 		void		_tryToIndex(std::string &filePath);
 		void		_bindSocket(void);
 		void		_enableSocketListening(void);
-		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers, std::string &body);
+		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers);
 		std::string	_GET(SocketInfos &infos, Location *loc);
 		std::string	_POST(SocketInfos &infos, Location *loc);
 		std::string	_DELETE(SocketInfos &infos, Location *loc);
@@ -74,6 +74,8 @@ class CustomSocket
 		size_t		_isMethodAllowed(const std::string reqType, std::vector<std::string> allowedMethods);
 		std::string _generateAutoIndex(const std::string path, const std::string relativePath, Location *loc);
 		std::string	_generateFileContent(const std::string realFilePath, Location *loc);
+
+		std::string	_assembleURI(SocketInfos &infos);
 
 	private:
 	
