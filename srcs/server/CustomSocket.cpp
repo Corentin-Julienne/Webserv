@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 11:16:04 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 11:20:16 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 		reqType = "UNDEFINED";
 		return ;
 	}
+	
 	size_t	i = req.find(" /") + 2;
 	uri = req.substr(i, req.find(" ", i) - i);
 	i = req.find("\n") + 1;
@@ -228,7 +229,6 @@ std::string	CustomSocket::read(int fd)
 
 	if (code == 200)
 	{
-
 		if (infos.reqType == "GET")
 			output = _GET(infos, loc);
 		else if (infos.reqType == "POST")
