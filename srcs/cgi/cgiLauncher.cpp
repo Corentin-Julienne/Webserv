@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 23:14:17 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 11:39:30 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,7 @@ std::string	cgiLauncher::exec(void)
 		}
 	}
 
-	//std::cout << "|" << output << "|" << std::endl; // debug
+	std::cout << "|" << output << "|" << std::endl; // debug
 
 	/* reset STDIN and STDOUT */
 	dup2(originalStdin, STDIN_FILENO);
@@ -198,20 +198,16 @@ std::string	cgiLauncher::exec(void)
 	close(originalStdout);
 
 	/* post treatment of the output */
-	//if (_infos.reqType == "GET")
-	//std::cout << "!!!" << output << "!!!" << std::endl; 
-	output = this->_removeCGIHeader(output);
-	std::cout << "@@@" << output << "@@@" << std::endl; 
-	
+	output = this->_extractCGIHeader(output);	
 	output = this->_formatOutput(output);
 	return (output);
 }
 
-std::string	cgiLauncher::_formatOutput(std::string output) // to improve
+std::string	cgiLauncher::_formatOutput(std::string output)
 {
 	std::stringstream	content;
 
-	content << "HTTP/1.1 200 OK" << "\nContent-Type: " << "text/html" << "\n\n" << output;
+	content << "HTTP/1.1 200 OK\n" << this->_output_headers << "\n\n" << output;
 	return (content.str());
 }
 
@@ -258,14 +254,24 @@ std::string	cgiLauncher::_trimWhitespaces(std::string str)
 	return (trimmed_str);
 }
 
-std::string	cgiLauncher::_removeCGIHeader(std::string output) // do later
+/* will suppress the first line added by the PHP-CGI erase, the headers and store them in 
+a std::string to further use */
+std::string	cgiLauncher::_extractCGIHeader(std::string output) // do later
 {
 	std::string		clear_output = "";
-
+	std::string		out_headers;
+	
+	/* extracting body */
 	if (output.find("\r\n\r\n") != std::string::npos)
 		clear_output = output.substr(output.find("\r\n\r\n"));
 	if (clear_output.size() > 4)
 		clear_output.substr(4);
+	
+	/* extracting headers and store them */
+	output = output.substr(output.find_first_of('\n') + 1);
+	out_headers = output.substr(0, output.find("\r\n\r\n"));
+	this->_output_headers = out_headers;
+
 	return (this->_trimWhitespaces(clear_output));
 }
 
