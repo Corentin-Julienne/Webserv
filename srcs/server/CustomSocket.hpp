@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 13:19:47 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/07 18:13:23 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@
 # include "../cgi/cgiLauncher.hpp"
 # include "SocketInfos.hpp"
 # include "include.hpp"
+
+# define MAX_READ 16384
 
 // used to create a socket and setup it to be used later
 class CustomSocket

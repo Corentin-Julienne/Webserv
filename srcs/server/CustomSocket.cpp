@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 17:53:33 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/07 18:13:08 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,16 +193,22 @@ void	CustomSocket::read(int fd)
 	SocketInfos		infos;
 	std::string		output;
 	int				len_to_read;
-	char			buffer[1024];
+	char			buffer[MAX_READ];
 	std::vector<char> final_data;
+	size_t				code = 200;
 
-	std::cout << "===BUFFER===\n" << headers_str <<  "\n===BUFFER===" << std::endl;
-	
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
-	usleep(1000);
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
-		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;
+	{
+		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;	
+		usleep(1000);
+	}
+	else if (infos.reqType == "POST")
+	{
+		code = 411;
+		len_to_read = 0;
+	}
 	else
 		len_to_read = 0;
 	while (len_to_read > 0)
@@ -211,21 +217,16 @@ void	CustomSocket::read(int fd)
 		valret = recv(fd, buffer, sizeof(buffer), 0);
 		if (valret > 0)
 		{
-			std::cout << valret << std::endl;
 			final_data.insert(final_data.end(), buffer, buffer + valret);
 			len_to_read -= valret;
 		}
 		else
 		{
+			code = 500;
 			break;
 		}
 	}
-
 	infos.body = final_data;
-
-	std::cout << "===BODY===" <<  std::endl;
-	::write(1, final_data.data(), final_data.size());
-	std::cout << "\n===BODY===" <<  std::endl;
 
 	/* Add the suffix to the uri if it's a directory */
 	if (infos.uri.substr(0, 1) != "/")
@@ -241,7 +242,9 @@ void	CustomSocket::read(int fd)
 	infos.queryString = this->_extractQueryString(infos);
 
 	Location 	*loc = _getPathLocation(infos.locPath);
-	size_t		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+	
+	if (code == 200)
+		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
