@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiLauncher.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 17:26:34 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/08 11:15:58 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ std::string	cgiLauncher::exec(void)
 		if (_infos.reqType == "POST")
 			dup2(fds[0], STDIN_FILENO);
 		close(fds[0]);
-		dup2(fds[1], STDOUT_FILENO);	// need to change stdout
+		dup2(fds[1], STDOUT_FILENO);
 		close(fds[1]);
 
 		char	**argv = this->_getArgs(this->_cwd + "/" + (_loc ? _loc->_root : _serv._root) + "/php/php-cgi"); // placeholder
@@ -157,7 +157,7 @@ std::string	cgiLauncher::exec(void)
 		
 		if (execve(argv[0], argv, this->_char_env) == -1) // segfault there with POST
 			std::cerr << "execve failed and returned -1" << std::endl;
-		exit(EXIT_FAILURE); // error to change
+		exit(EXIT_FAILURE);
 	}
 	else // parent process
 	{
@@ -179,7 +179,7 @@ std::string	cgiLauncher::exec(void)
 		while (reader > 0)
 		{
 			memset(buffer, 0, BUFFER_SIZE);
-			reader = read(STDIN_FILENO, buffer, 50000);
+			reader = read(STDIN_FILENO, buffer, BUFFER_SIZE);
 			if (reader < 0)
 			{
 				std::cerr << "read syscall failure" << std::endl;
