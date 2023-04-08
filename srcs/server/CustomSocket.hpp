@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 18:13:23 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:21:14 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ class CustomSocket
 		void		_enableSocketListening(void);
 		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers);
 		std::string	_GET(SocketInfos &infos, Location *loc);
-		std::string	_POST(SocketInfos &infos, Location *loc);
+		std::string	_POST(SocketInfos &infos);
 		std::string	_DELETE(SocketInfos &infos, Location *loc);
 		
 		std::string	_generateError(size_t code, Location *location);

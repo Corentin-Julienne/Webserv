@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:17:09 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 17:46:43 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ cgiLauncher::cgiLauncher(SocketInfos &infos, ServConf &serv) : _infos(infos), _s
 
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
-	/* debug */
 	// this->_printInfos(); // debug
 	// this->_printEnv(); // debug
 	this->_StrEnvToCStrArray();
@@ -70,13 +69,13 @@ void	cgiLauncher::_initEnv()
 	/* query string extraction */
 	_env["QUERY_STRING"] = _infos.queryString; // everything after ? in the URI
 	/* server IP and port */
-	_env["REMOTE_ADDR"] = _serv._ip_address; // address of the client making the request
+	_env["REMOTE_ADDR"] = "0.0.0.0"; // address of the client making the request
 	_env["SERVER_PORT"] = this->_numToStr(_serv._port); // 
 	/* domain name, if existing */
 	if (!this->_serv._server_name.empty())
 		_env["SERVER_NAME"] = this->_serv._server_name.back();
 	else
-		_env["SERVER_NAME"] = _serv._ip_address;
+		_env["SERVER_NAME"] = "0.0.0.0";
 	/* script infos */
 	_env["SCRIPT_NAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
 	_env["SCRIPT_FILENAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder

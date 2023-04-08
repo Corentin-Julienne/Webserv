@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 17:00:49 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 17:43:28 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,9 @@ struct Location
 		std::vector< std::vector<std::string> >		_error_pages;
 		long long int								_client_max_body_size;
 		std::vector<std::string>					_allowed_http_methods;
-		//std::vector< std::vector<std::string> >		_rewrite;
 		std::string									_root;
 		bool										_autoindex;
 		std::vector<std::string> 					_index;
-		std::vector<std::string>					_cgi;	
 		// specific to Location
 		std::string									_url;
 };

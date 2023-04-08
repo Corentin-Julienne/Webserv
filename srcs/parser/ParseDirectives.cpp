@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:10:39 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 17:49:47 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,9 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	if (is_loc)
 		throw std::runtime_error("listen directive is not accepted in a location block");
 	if (arg_num < 2 || arg_num > 3)
-		throw std::runtime_error("listen directive between one and two arguments");
+		throw std::runtime_error("listen directive takes one or two arguments");
 	args = this->_cutArgs(directive, ';');
-	if (args[1].find(':') != std::string::npos) // case there is a ip separated by : and then a port number
-	{
-		if (!this->_isIpValid(args[1].substr(0, args[1].find(":"))))
-			throw std::runtime_error("invalid format of IpV4 address provided in .conf file");
-		this->_servers[serv_idx]._ip_address = args[1].substr(0, args[1].find(":"));	
-		port_str = args[1].substr(args[1].find(":") + 1);
-	}
-	else
-		port_str = args[1];
+	port_str = args[1];
 	if (port_str.size() > 5)
 		throw std::runtime_error("port number should be between 0 and 65535");
 	for (std::size_t i = 0; i < port_str.size(); i++)
@@ -46,7 +38,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	if (arg_num == 3) // case there is a default_server directive
 	{
 		if (args[2].compare("default_server"))
-			throw std::runtime_error("third argument is for default_server only");
+			throw std::runtime_error("second argument is for default_server only");
 		this->_servers[serv_idx]._default_server = true;
 	}
 }

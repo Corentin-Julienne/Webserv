@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/05 18:16:50 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 17:45:45 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ void	Parser::displayDummyParser(void)
 		std::cout << "displaying server " << (i + 1) << " :" << std::endl << std::endl;
 
 		std::cout << "port = " << this->_servers[i]._port << std::endl;
-		std::cout << "ip address = " << this->_servers[i]._ip_address << std::endl;
 		std::cout << "default_server = " << std::boolalpha << this->_servers[i]._default_server << std::endl;
 		
 		std::cout << "----------------------------------------------" << std::endl;
@@ -62,15 +61,12 @@ void	Parser::displayDummyParser(void)
 		std::cout << "displaying autoindex = " << this->_servers[i]._autoindex << std::endl;
 		for (std::size_t j = 0; j < this->_servers[i]._index.size(); j++)
 			std::cout << "displaying index = " << this->_servers[i]._index[j] << std::endl;
-		for (std::size_t j = 0; j < this->_servers[i]._cgi.size(); j++)
-			std::cout << "displaying cgi = " << this->_servers[i]._cgi[j] << std::endl;
 		
 		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 
 		std::cout << "displaying every location in Location format" << std::endl << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl;
 
-		
 		for (std::size_t j = 0; j < this->_servers[i]._locs.size(); j++)
 			this->displayLocation(this->_servers[i]._locs[j], j); // debug that		
 		
@@ -87,7 +83,6 @@ Parser::Parser(void) // to be used only with fake parsing infos
 	this->_servers.push_back(ServConf()); // add a first server
 	
 	this->_servers[0]._port = 80;
-	this->_servers[0]._ip_address = "0.0.0.0";
 	this->_servers[0]._default_server = true;
 
 	//server_name
@@ -105,7 +100,6 @@ Parser::Parser(void) // to be used only with fake parsing infos
 	this->_servers[0]._autoindex = false;
 	this->_servers[0]._index.push_back("index.html");
 	this->_servers[0]._root = "www/html";
-	this->_servers[0]._cgi.push_back("NOT YET IMPLEMENTED");
 
 	// allowed https methods
 	this->_servers[0]._allowed_http_methods.push_back("GET");
@@ -120,7 +114,6 @@ Parser::Parser(void) // to be used only with fake parsing infos
 	this->_servers[0]._locs[0]._autoindex = this->_servers[0]._autoindex;
 	this->_servers[0]._locs[0]._index = this->_servers[0]._index;
 	this->_servers[0]._locs[0]._root = this->_servers[0]._root;
-	this->_servers[0]._locs[0]._cgi = this->_servers[0]._cgi;
 	this->_servers[0]._locs[0]._allowed_http_methods = this->_servers[0]._allowed_http_methods;
 	this->_servers[0]._locs[0]._url = "/";
 }
@@ -147,7 +140,6 @@ void	Parser::displayParsing(void)
 		std::cout << GREEN << "2) displaying server in ServConf format" << RESET << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 		std::cout << "port = " << this->_servers[i]._port << std::endl;
-		std::cout << "ip address = " << this->_servers[i]._ip_address << std::endl;
 		std::cout << "default_server = " << std::boolalpha << this->_servers[i]._default_server << std::endl;
 		
 		std::cout << "---------------------------------------------------------" << std::endl;
@@ -176,11 +168,6 @@ void	Parser::displayParsing(void)
 		std::cout << RED << "displaying index directive : " << RESET << std::endl;
 		for (std::size_t j = 0; j < this->_servers[i]._index.size(); j++)
 			std::cout << "displaying index = " << this->_servers[i]._index[j] << std::endl;
-		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
-
-		std::cout << RED << "displaying CGI : " << RESET << std::endl;
-		for (std::size_t j = 0; j < this->_servers[i]._cgi.size(); j++)
-			std::cout << "displaying cgi = " << this->_servers[i]._cgi[j] << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 
 		std::cout << GREEN << "3) displaying every location in Location format" << RESET << std::endl;
@@ -224,12 +211,7 @@ void	Parser::displayLocation(Location& loc, int loc_index)
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 	std::cout << RED << "displaying index directive : " << RESET << std::endl;
 	for (std::size_t i = 0; i < loc._index.size(); i++)
-		std::cout << "display index arg num " << i << " = " << loc._index[i] << std::endl;
-	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
-	std::cout << RED << "displaying CGI : " << RESET << std::endl;
-	
-	for (std::size_t i = 0; i < loc._cgi.size(); i++)
-		std::cout << "display cgi arg num " << i << " = " << loc._index[i] << std::endl;
+		std::cout << "display index arg num " << i << " = " << loc._index[i] << std::endl;	
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 	std::cout << "display url = " << loc._url << std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:19:29 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:28:57 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,10 +165,10 @@ std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 
 void	CustomSocket::read(int fd)
 {
-	std::string	output_500;
-	std::string headers_str;
-	ssize_t		valret;
-	char	c;
+	std::string		output_500;
+	std::string		headers_str;
+	ssize_t			valret;
+	char			c;
 
 	while (1)
 	{
@@ -190,12 +190,12 @@ void	CustomSocket::read(int fd)
 		headers_str += c;
 	}
 
-	SocketInfos		infos;
-	std::string		output;
-	int				len_to_read;
-	char			buffer[MAX_READ];
-	std::vector<char> final_data;
-	size_t				code = 200;
+	SocketInfos				infos;
+	std::string				output;
+	int						len_to_read;
+	char					buffer[MAX_READ];
+	std::vector<char> 		final_data;
+	size_t					code = 200;
 
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
 
@@ -254,7 +254,7 @@ void	CustomSocket::read(int fd)
 		if (infos.reqType == "GET")
 			output = _GET(infos, loc);
 		else if (infos.reqType == "POST")
-			output = _POST(infos, loc);
+			output = _POST(infos);
 		else if (infos.reqType == "DELETE")
 			output = _DELETE(infos, loc);
 		else
@@ -326,7 +326,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
+std::string	CustomSocket::_POST(SocketInfos &infos)
 {
 	std::stringstream		ss;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
