@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 18:00:48 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 18:29:31 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,23 +30,24 @@ void	call_error(std::string failing_call, bool exit_process)
 
 int	main(int argc, char **argv)
 {
-	if (argc != 2)
+	if (argc > 2)
 	{
-		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
+		std::cerr << "Usage: ./webserv <config_file> or ./webserv (with default params)" << std::endl;
 		return (1);
 	}
-
 	try
 	{
 		std::cout << "=== Starting server... ===" << std::endl;
 
 		std::vector<CustomSocket *>	sockets;
-		Parser						configParser(argv[1]);
+
+		Parser		configParser = (argc == 2) ? Parser(argv[1]) : Parser();
+		
 		int							kq = kqueue();
 		if (kq == -1)
 			call_error("kqueue", true);
 
-		Parser::servers_array servers = configParser.getServers(); // pb there
+		Parser::servers_array servers = configParser.getServers();
 
 		for (Parser::servers_array::iterator it = servers.begin(); it != servers.end(); ++it)
 		{

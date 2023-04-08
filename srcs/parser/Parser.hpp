@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:10:02 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 18:44:29 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ class Parser
 		/* test features */
 		void						displayParsing(void);	
 		void						displayLocation(Location& loc, int loc_index);
-		void						displayDummyParser(void);
+		void						displayDefaultParsing(void);
 		
 	private:
 		
