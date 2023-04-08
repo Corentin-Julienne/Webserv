@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 18:13:08 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:19:29 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,7 +316,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	{		
 		infos.absoluteURIPath = realFilePath;
 		
-		cgiLauncher		cgi(infos, loc, this->_servconf);
+		cgiLauncher		cgi(infos, this->_servconf);
 		
 		content << cgi.exec();
 	}
@@ -326,7 +326,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
+std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 {
 	std::stringstream		ss;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
@@ -334,7 +334,7 @@ std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc) // wip
 	_tryToIndex(realFilePath);
 	infos.absoluteURIPath = realFilePath;
 
-	cgiLauncher	cgi(infos, loc, this->_servconf);
+	cgiLauncher	cgi(infos, this->_servconf);
 
 	ss << cgi.exec();
 

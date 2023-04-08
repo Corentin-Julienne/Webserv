@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 18:20:37 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:10:39 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,20 +216,4 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index = index_values;
 	else
 		this->_servers[serv_idx]._index = index_values;
-}
-
-void	Parser::_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // implement later
-{
-	std::vector<std::string>	args;
-	std::vector<std::string>	cgi_values;
-	
-	if (arg_num < 2)
-		throw std::runtime_error("cgi directive take a least one argument");
-	args = this->_cutArgs(directive, ';');
-	for (std::size_t i = 1; i < args.size(); i++)
-		cgi_values.push_back(args[i]);
-	if (is_loc)
-		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._cgi = cgi_values;
-	else
-		this->_servers[serv_idx]._cgi = cgi_values;
 }

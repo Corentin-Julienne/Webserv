@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 16:36:44 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/08 11:20:39 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	main(int argc, char **argv)
 		if (kq == -1)
 			call_error("kqueue", true);
 
-		Parser::servers_array servers = configParser.getServers();
+		Parser::servers_array servers = configParser.getServers(); // pb there
 
 		for (Parser::servers_array::iterator it = servers.begin(); it != servers.end(); ++it)
 		{

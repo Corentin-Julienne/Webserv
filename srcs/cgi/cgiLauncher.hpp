@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiLauncher.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:18 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 17:21:42 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:17:19 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class cgiLauncher
 {
 	public:
 	
-		cgiLauncher(SocketInfos &infos, Location *loc, ServConf &serv);
+		cgiLauncher(SocketInfos &infos, ServConf &serv);
 		~cgiLauncher();
 		cgiLauncher(const cgiLauncher& original);
 		

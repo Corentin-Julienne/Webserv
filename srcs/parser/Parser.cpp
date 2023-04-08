@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 01:23:54 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/08 11:51:01 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@ Parser::Parser(char *config_file)
 	}
 	if (!this->_isThereEnoughInfo())
 		throw std::runtime_error("conf file does not provides enough information to be used correctly");
+	
+	// debug
+	this->displayParsing();
 }
 
 Parser::~Parser() {}

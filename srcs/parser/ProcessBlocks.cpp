@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 18:54:17 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:08:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,6 @@ bool	Parser::_isThereEnoughInfo(void)
 		// case no ip address and no server_name (can't find relevant info where to listen)
 		if (this->_servers[serv_idx]._ip_address.empty() && this->_servers[serv_idx]._server_name.empty())
 			return (false);
-		// case no cgi instructions are provided
-		// if (this->_servers[serv_idx]._cgi.empty())
-		// 	return (false);	
 		// check every location block
 		if (this->_servers[serv_idx]._locs.empty()) // no location provided
 			return (false);			

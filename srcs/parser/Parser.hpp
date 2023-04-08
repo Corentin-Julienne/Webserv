@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 01:22:58 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:10:02 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 #include <stdexcept>
 #include <limits>
 #include <climits>
-#include <stdlib.h> // needed for atoi
+#include <stdlib.h>
 
 #define BAD_INSTR			0
 #define LOCATION			1
@@ -38,7 +38,6 @@
 #define ROOT				7
 #define AUTOINDEX			8
 #define INDEX				9
-#define CGI					10
 
 #define MAX_PORT			65535
 
@@ -98,8 +97,6 @@ class Parser
 		void			_processAutoindexDirective(std::string directive, int serv_idx,
 							int arg_num, bool is_loc = false);
 		void			_processIndexDirective(std::string directive, int serv_idx,
-							int arg_num, bool is_loc = false);
-		void			_processCgiDirective(std::string directive, int serv_idx,
 							int arg_num, bool is_loc = false);
 
 		/* Utils.cpp */

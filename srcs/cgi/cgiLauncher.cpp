@@ -6,13 +6,13 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 11:15:58 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 12:17:09 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cgiLauncher.hpp"
 
-cgiLauncher::cgiLauncher(SocketInfos &infos, Location *loc, ServConf &serv) : _infos(infos), _loc(loc), _serv(serv)
+cgiLauncher::cgiLauncher(SocketInfos &infos, ServConf &serv) : _infos(infos), _serv(serv)
 {
 	char			buffer[FILENAME_MAX];
 	char			*success = getcwd(buffer, FILENAME_MAX);
@@ -147,7 +147,7 @@ std::string	cgiLauncher::exec(void)
 		dup2(fds[1], STDOUT_FILENO);
 		close(fds[1]);
 
-		char	**argv = this->_getArgs(this->_cwd + "/" + (_loc ? _loc->_root : _serv._root) + "/php/php-cgi"); // placeholder
+		char	**argv = this->_getArgs(this->_cwd + "/srcs/cgi/php-cgi");
 			
 		/* debug, checks for existence and chmod for the cgi script */
 		if (access(argv[0],F_OK) == -1)
