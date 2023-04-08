@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 11:20:39 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 18:00:48 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	main(int argc, char **argv)
 			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
 
-			std::cout << "-> Server started: http://" << it->_ip_address << ":" << it->_port << std::endl;
+			std::cout << "-> Server started: http://" << "0.0.0.0 :" << it->_port << std::endl;
 		}
 
 		std::cout << "=== Server successfully initialized ===" << std::endl;

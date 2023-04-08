@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:08:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 17:54:55 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ void	Parser::_enforceInheritance(Location& loc, int server_index)
 	loc._root = this->_servers[server_index]._root;
 	loc._autoindex = this->_servers[server_index]._autoindex;
 	loc._index = this->_servers[server_index]._index;
-	loc._cgi = this->_servers[server_index]._cgi;
 }
 
 /* check whether the location block have two arguments (location and the path)
@@ -111,15 +110,12 @@ bool	Parser::_isThereEnoughInfo(void)
 {
 	for (std::size_t serv_idx = 0; serv_idx < this->_servers.size(); serv_idx++)
 	{
-		// case no ip address and no server_name (can't find relevant info where to listen)
-		if (this->_servers[serv_idx]._ip_address.empty() && this->_servers[serv_idx]._server_name.empty())
-			return (false);
-		// check every location block
-		if (this->_servers[serv_idx]._locs.empty()) // no location provided
+		/* check every location block */
+		if (this->_servers[serv_idx]._locs.empty()) // case no location provided
 			return (false);			
 		for (std::size_t j = 0; j < this->_servers[serv_idx]._locs.size(); j++)
 		{
-			// need both root and index to be functionnal
+			/* need both root and index to be functionnal */
 			if (this->_servers[serv_idx]._locs[j]._root.empty() && this->_servers[serv_idx]._locs[j]._index.empty())
 				return (false);
 		}
