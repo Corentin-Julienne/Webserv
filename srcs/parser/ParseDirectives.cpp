@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:34:55 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 18:04:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,6 +279,7 @@ void	Parser::_processCGI(std::string directive, int serv_idx, int arg_num, bool 
 	char			*success = getcwd(buffer, FILENAME_MAX);
 	std::string		curr_wd;
 	std::string		full_path;
+	std::string		cgi_name;
 
 	if (success)
 		curr_wd = success;
@@ -286,10 +287,16 @@ void	Parser::_processCGI(std::string directive, int serv_idx, int arg_num, bool 
 		throw std::runtime_error("problem with getcwd syscall");
 
 	cgi_path = args[2];
+	if (cgi_path.find_last_of('/') == std::string::npos || cgi_path.substr(cgi_path.find_last_of('/')).size() < 1)
+		throw std::runtime_error("wrong syntax of the path of the cgi script");
+	if (cgi_path.substr(cgi_path.find_last_of('/') + 1).compare("php-cgi") && 
+	cgi_path.substr(cgi_path.find_last_of('/') + 1).compare("cgi_tester"))
+		throw std::runtime_error("cgi script not accepted. Should be php-cgi or cgi_tester");
+
 	full_path = curr_wd + "/" + cgi_path;
 
 	/* debug, checks for existence and chmod for the cgi script */
-	if (access(full_path.c_str() ,F_OK) == -1)
+	if (access(full_path.c_str(), F_OK) == -1)
 		throw std::runtime_error("cgi script not found");
 	if (access(full_path.c_str(), X_OK) == -1)
 		throw std::runtime_error("cgi script not executable");
