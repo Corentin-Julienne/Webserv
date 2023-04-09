@@ -190,18 +190,26 @@ void	CustomSocket::read(int fd)
 		headers_str += c;
 	}
 
-	SocketInfos				infos;
-	std::string				output;
-	int						len_to_read;
-	char					buffer[MAX_READ];
-	std::vector<char> 		final_data;
-	size_t					code = 200;
+	SocketInfos			infos;
+	std::string			output;
+	size_t				len_to_read;
+	char				buffer[MAX_READ];
+	std::vector<char> 	final_data;
+	size_t				code = 200;
 
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
+	Location 	*loc = _getPathLocation(infos.locPath);
+	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
+	
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
 	{
-		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;	
+		std::istringstream(infos.headers.at("Content-Length")) >> len_to_read;
+		if (len_to_read > max_body_size)
+		{
+			code = 413;
+			len_to_read = 0;
+		}
 		usleep(1000);
 	}
 	else if (infos.reqType == "POST")
@@ -211,6 +219,7 @@ void	CustomSocket::read(int fd)
 	}
 	else
 		len_to_read = 0;
+
 	while (len_to_read > 0)
 	{
 		memset(buffer, 0, sizeof(buffer));
@@ -222,6 +231,7 @@ void	CustomSocket::read(int fd)
 		}
 		else
 		{
+			std::cout << "recv returning error" << std::endl;
 			code = 500;
 			break;
 		}
@@ -239,12 +249,17 @@ void	CustomSocket::read(int fd)
 		infos.locPath = infos.uri;
 
 	/* add relative path_info and query string to infos struct, withdraw query string from uri */
-	infos.queryString = this->_extractQueryString(infos);
-
-	Location 	*loc = _getPathLocation(infos.locPath);
+	if (code == 200)
+		infos.queryString = this->_extractQueryString(infos);
 	
 	if (code == 200)
 		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+
+	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
+	{
+		std::vector<std::string>	hosts = this->_servconf._server_name;
+		code = std::find(hosts.begin(), hosts.end(), infos.headers.find("Host")->second) != hosts.end() ? 200 : 404;
+	}
 
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
@@ -263,8 +278,9 @@ void	CustomSocket::read(int fd)
 	else
 		output = _generateError(code, loc);
 
+	std::cout << output << std::endl;
+
 	output_500 = this->_generateError(500, loc);
-	
 	this->_outputs[fd] = make_pair(output, output_500);
 }
 
