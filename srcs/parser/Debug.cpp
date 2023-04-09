@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 18:56:06 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 13:55:49 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,14 @@ void	Parser::displayParsing(void)
 		for (std::size_t j = 0; j < this->_servers[i]._index.size(); j++)
 			std::cout << "displaying index = " << this->_servers[i]._index[j] << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
-
-		std::cout << GREEN << "3) displaying every location in Location format" << RESET << std::endl;
 		
+		std::cout << RED << "displaying return directive : " << RESET << std::endl;
+		if (!this->_servers[i]._return.empty())
+		{
+			std::cout << "return code = " << this->_servers[i]._return[0] << " and url = " << this->_servers[i]._return[1] 
+			<< std::endl;
+		}
+		std::cout << GREEN << "3) displaying every location in Location format" << RESET << std::endl;
 		for (std::size_t j = 0; j < this->_servers[i]._locs.size(); j++)
 			this->displayLocation(this->_servers[i]._locs[j], j);		
 		
@@ -135,5 +140,12 @@ void	Parser::displayLocation(Location& loc, int loc_index)
 	for (std::size_t i = 0; i < loc._index.size(); i++)
 		std::cout << "display index arg num " << i << " = " << loc._index[i] << std::endl;	
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
+	
+	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
+	std::cout << RED << "displaying return directive : " << RESET << std::endl;
+	if (!loc._return.empty())
+		std::cout << "return code == " << loc._return[0] << " and url = |" << loc._return[1] << "|" << std::endl;
+	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
+
 	std::cout << "display url = " << loc._url << std::endl;
 }

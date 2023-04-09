@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 13:42:17 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 15:00:23 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,34 +53,54 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 		throw std::runtime_error("server_name take at least one argument");
 	args = this->_cutArgs(directive, ';');
 
+	/* remove quotes if double quotes are povided */
 	for (std::size_t i = 1; i < args.size(); i++)
 	{
 		if (args[i][0] == '"' && args[i][args[i].size() - 1] == '"')
 			args[i] = args[i].substr(1, args[i].size() - 2);
 	}
 
-	// clear the vector is there is already a std:string in the same server block or location block  
+	/* clear the vector is there is already a std:string in the same server block or location block */  
 	if (!this->_servers[serv_idx]._server_name.empty())
 		this->_servers[serv_idx]._server_name.clear();
 
 	for (std::size_t i = 1; i < args.size(); i++)
-		this->_servers[serv_idx]._server_name.push_back(args[i]);	
+		this->_servers[serv_idx]._server_name.push_back(args[i]);
 }
 
+/* add a set of new error pages. Add a vector of string, which contains : 
+=> error codes (first argument) 
+=> html page to display */
 void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	new_err_dir;
+	std::string					code;
+	std::string					html_page;
 	
-	if (arg_num < 3)
-		throw std::runtime_error("error_page directive accept at least two arguments");
+	if (arg_num != 3)
+		throw std::runtime_error("error_page directive accepts two arguments");
 	args = this->_cutArgs(directive, ';');
-	for (std::size_t i = 1; i < args.size(); i++)
-		new_err_dir.push_back(args[i]);
+	/* check that code is ok */
+	code = args[1];
+	if (code.size() != 3 || !std::isdigit(code[0]) || !std::isdigit(code[1]) || !std::isdigit(code[2]))
+		throw std::runtime_error("error_page : not a valid http error code");
+	
+	int		code_int = atoi(code.c_str());
+
+	if ((code_int < 500 || code_int > 511) && code_int != 404)
+		throw std::runtime_error("error_page : not a valid http error code");
+	/* check that last argument is an html page */
+	html_page = args[2];
+	if (html_page.size() > 5 && html_page.substr(html_page.size() - 5).compare(".html"))
+		throw std::runtime_error("error_page directive last argument must be an html page");
+	/* push argument to vector and add it to location or servconf */
+	new_err_dir.push_back(code);
+	new_err_dir.push_back(html_page);
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._error_pages.push_back(new_err_dir);
 	else
-		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);	
+		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);
 }
 
 void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
@@ -131,7 +151,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 		throw std::runtime_error("allow directive needs at least one argument");
 	args = this->_cutArgs(directive, ';');
 
-	// check if the directive as already been used, and clear it if it is the case
+	/* check if the directive as already been used, and clear it if it is the case */
 	if (is_loc &&
 	!this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._allowed_http_methods.empty())
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._allowed_http_methods.clear();
