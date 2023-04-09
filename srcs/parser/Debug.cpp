@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 13:55:49 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:15:58 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	Parser::displayDefaultParsing(void)
 	std::cout << "index = " << _servers[0]._locs[0]._index[0] << std::endl;
 	std::cout << "allow = " << _servers[0]._locs[0]._allowed_http_methods.at(0) << std::endl;
 	std::cout << "url = " << _servers[0]._locs[0]._url << std::endl;
+	std::cout << "cgi =" << _servers[0]._locs[0]._cgi[0] << " , " << _servers[0]._locs[0]._cgi[1] << std::endl;
 }
 
 void	Parser::displayParsing(void)

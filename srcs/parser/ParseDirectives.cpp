@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 15:00:23 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:10:13 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,4 +256,49 @@ void	Parser::_processReturnDirective(std::string directive, int serv_idx, int ar
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._return = rtn_dir;
 	else
 		this->_servers[serv_idx]._return = rtn_dir;
+}
+
+void	Parser::_processCGI(std::string directive, int serv_idx, int arg_num, bool is_loc)
+{
+	std::vector<std::string>	args;
+	std::vector<std::string>	cgi_infos;
+	std::string					extension;
+	std::string					cgi_path;
+	
+	if (arg_num != 3)
+		throw std::runtime_error("cgi directive takes two arguments : extension, path/executable_name");
+	args = this->_cutArgs(directive, ';');
+
+	/* check that extension is php or bla (for testing) */
+	extension = args[1];
+	if (extension.compare("php") && extension.compare("bla"))
+		throw std::runtime_error("extension have to be php (or bla for testing only)");
+	/* check that path exists */
+	
+	char			buffer[FILENAME_MAX];
+	char			*success = getcwd(buffer, FILENAME_MAX);
+	std::string		curr_wd;
+	std::string		full_path;
+
+	if (success)
+		curr_wd = success;
+	else
+		throw std::runtime_error("problem with getcwd syscall");
+
+	cgi_path = args[2];
+	full_path = curr_wd + "/" + cgi_path;
+
+	/* debug, checks for existence and chmod for the cgi script */
+	if (access(full_path.c_str() ,F_OK) == -1)
+		throw std::runtime_error("cgi script not found");
+	if (access(full_path.c_str(), X_OK) == -1)
+		throw std::runtime_error("cgi script not executable");
+	/* store the cgi informations */
+	cgi_infos.push_back(extension);
+	cgi_infos.push_back(cgi_path);
+	/* store into servconf or location */
+	if (is_loc)
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._cgi = cgi_infos;
+	else
+		this->_servers[serv_idx]._cgi = cgi_infos;
 }

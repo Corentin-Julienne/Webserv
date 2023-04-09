@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 18:13:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 13:23:06 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 16:48:49 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,9 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 		case (RETURN):
 			this->_processReturnDirective(directive, serv_idx, args_num, is_loc);
 			break ;
+		case (CGI):
+			this->_processCGI(directive, serv_idx, args_num, is_loc);
+			break ;
 		default:
 			throw std::runtime_error("instruction unknown");
 			break ;
@@ -138,6 +141,8 @@ int	Parser::_rtnInstructionType(std::string directive)
 		return (INDEX);
 	else if (!directive.compare("return"))
 		return (RETURN);
+	else if (!directive.compare("cgi"))
+		return (CGI);
 	else
 		return (BAD_INSTR);
 }

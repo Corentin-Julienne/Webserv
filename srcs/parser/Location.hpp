@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 13:20:26 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 16:43:06 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ struct Location
 		bool										_autoindex;
 		std::vector<std::string> 					_index;
 		std::vector<std::string>					_return;
+		std::vector<std::string>					_cgi;
 		// specific to Location
 		std::string									_url;
 };

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 13:23:16 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:02:31 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <limits>
 #include <climits>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define BAD_INSTR			0
 #define LOCATION			1
@@ -39,6 +40,7 @@
 #define AUTOINDEX			8
 #define INDEX				9
 #define RETURN				10
+#define CGI					11
 
 #define MAX_PORT			65535
 
@@ -100,6 +102,8 @@ class Parser
 		void			_processIndexDirective(std::string directive, int serv_idx,
 							int arg_num, bool is_loc = false);
 		void			_processReturnDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
+		void			_processCGI(std::string directive, int serv_idx,
 							int arg_num, bool is_loc = false);
 
 		/* Utils.cpp */

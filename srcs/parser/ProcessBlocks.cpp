@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 13:22:17 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:17:07 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ void	Parser::_enforceInheritance(Location& loc, int server_index)
 	loc._autoindex = this->_servers[server_index]._autoindex;
 	loc._index = this->_servers[server_index]._index;
 	loc._return = this->_servers[server_index]._return;
+	loc._cgi = this->_servers[server_index]._cgi;
 }
 
 /* check whether the location block have two arguments (location and the path)
@@ -114,12 +115,9 @@ bool	Parser::_isThereEnoughInfo(void)
 		/* check every location block */
 		if (this->_servers[serv_idx]._locs.empty()) // case no location provided
 			return (false);			
-		for (std::size_t j = 0; j < this->_servers[serv_idx]._locs.size(); j++)
-		{
-			/* need both root and index to be functionnal */
-			if (this->_servers[serv_idx]._locs[j]._root.empty() && this->_servers[serv_idx]._locs[j]._index.empty())
-				return (false);
-		}
+		/* check if there is a CGI */
+		if (this->_servers[serv_idx]._cgi.empty())
+			return (false);
 	}
 	return (true);
 }

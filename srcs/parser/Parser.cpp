@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 14:08:26 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:18:20 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ Parser::Parser(void)
 	this->_servers[0]._locs[0]._url = "/";
 	this->_servers[0]._locs[0]._root = "www/html";
 	this->_servers[0]._locs[0]._index.push_back("index.html");
+	this->_servers[0]._cgi[0] = "php";
+	this->_servers[0]._cgi[0] = "srcs/cgi/php-cgi";
 	// debug
 	//this->displayDefaultParsing();
 }

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 17:46:43 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 16:38:00 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,7 +255,7 @@ std::string	cgiLauncher::_trimWhitespaces(std::string str)
 
 /* will suppress the first line added by the PHP-CGI erase, the headers and store them in 
 a std::string to further use */
-std::string	cgiLauncher::_extractCGIHeader(std::string output) // do later
+std::string	cgiLauncher::_extractCGIHeader(std::string output)
 {
 	std::string		clear_output = "";
 	std::string		out_headers;
@@ -267,7 +267,6 @@ std::string	cgiLauncher::_extractCGIHeader(std::string output) // do later
 		clear_output.substr(4);
 	
 	/* extracting headers and store them */
-	output = output.substr(output.find_first_of('\n') + 1);
 	out_headers = output.substr(0, output.find("\r\n\r\n"));
 	this->_output_headers = out_headers;
 
