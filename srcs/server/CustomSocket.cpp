@@ -255,6 +255,12 @@ void	CustomSocket::read(int fd)
 	if (code == 200)
 		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
+	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
+	{
+		std::vector<std::string>	hosts = this->_servconf._server_name;
+		code = std::find(hosts.begin(), hosts.end(), infos.headers.find("Host")->second) != hosts.end() ? 200 : 404;
+	}
+
 	if (code == 200)
 		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
 
