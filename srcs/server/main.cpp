@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/06 16:36:44 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/09 17:09:07 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,21 @@ int	main(int argc, char **argv)
 
 		for (Parser::servers_array::iterator it = servers.begin(); it != servers.end(); ++it)
 		{
+			bool shouldStart = true;
+
+			for (size_t si = 0; si < sockets.size(); si++)
+			{
+				if (sockets[si]->getPort() == it->_port)
+				{
+					std::cout << "-> Server on http://" << it->_ip_address << ":" << it->_port << " will be skipped since another server is using the same port" << std::endl;
+					shouldStart = false;
+					break;
+				}
+			}
+
+			if (!shouldStart)
+				continue;
+			
 			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
 
