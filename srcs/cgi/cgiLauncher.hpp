@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgiLauncher.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:18 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 11:22:42 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/07 17:21:42 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class cgiLauncher
 {
 	public:
 	
-		cgiLauncher(SocketInfos &infos, Location &loc, ServConf &serv);
+		cgiLauncher(SocketInfos &infos, Location *loc, ServConf &serv);
 		~cgiLauncher();
 		cgiLauncher(const cgiLauncher& original);
 		
@@ -60,7 +60,7 @@ class cgiLauncher
 		cgiLauncher(void);
 	
 		SocketInfos									_infos;
-		Location									_loc;
+		Location									*_loc;
 		ServConf									_serv;
 		std::string									_scriptPath;
 		std::map<std::string, std::string>			_env; // env variables
