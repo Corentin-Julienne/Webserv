@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   cgiLauncher.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/07 17:26:34 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:31:51 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cgiLauncher.hpp"
 
-cgiLauncher::cgiLauncher(SocketInfos &infos, Location *loc, ServConf &serv) : _infos(infos), _loc(loc), _serv(serv)
+cgiLauncher::cgiLauncher(SocketInfos &infos, ServConf &serv, std::string cgi_path) : _infos(infos), _serv(serv),
+_scriptPath(cgi_path)
 {
 	char			buffer[FILENAME_MAX];
 	char			*success = getcwd(buffer, FILENAME_MAX);
@@ -24,7 +25,6 @@ cgiLauncher::cgiLauncher(SocketInfos &infos, Location *loc, ServConf &serv) : _i
 
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
-	/* debug */
 	// this->_printInfos(); // debug
 	// this->_printEnv(); // debug
 	this->_StrEnvToCStrArray();
@@ -70,13 +70,13 @@ void	cgiLauncher::_initEnv()
 	/* query string extraction */
 	_env["QUERY_STRING"] = _infos.queryString; // everything after ? in the URI
 	/* server IP and port */
-	_env["REMOTE_ADDR"] = _serv._ip_address; // address of the client making the request
+	_env["REMOTE_ADDR"] = "0.0.0.0"; // address of the client making the request
 	_env["SERVER_PORT"] = this->_numToStr(_serv._port); // 
 	/* domain name, if existing */
 	if (!this->_serv._server_name.empty())
 		_env["SERVER_NAME"] = this->_serv._server_name.back();
 	else
-		_env["SERVER_NAME"] = _serv._ip_address;
+		_env["SERVER_NAME"] = "0.0.0.0";
 	/* script infos */
 	_env["SCRIPT_NAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
 	_env["SCRIPT_FILENAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
@@ -144,20 +144,20 @@ std::string	cgiLauncher::exec(void)
 		if (_infos.reqType == "POST")
 			dup2(fds[0], STDIN_FILENO);
 		close(fds[0]);
-		dup2(fds[1], STDOUT_FILENO);	// need to change stdout
+		dup2(fds[1], STDOUT_FILENO);
 		close(fds[1]);
 
-		char	**argv = this->_getArgs(this->_cwd + "/" + (_loc ? _loc->_root : _serv._root) + "/php/php-cgi"); // placeholder
+		char	**argv = this->_getArgs(this->_cwd + "/" + this->_scriptPath);
 			
 		/* debug, checks for existence and chmod for the cgi script */
 		if (access(argv[0],F_OK) == -1)
-			std::cerr << "php-cgi not found" << std::endl;
+			std::cerr << "cgi not found" << std::endl;
 		if (access(argv[0], X_OK) == -1)
-			std::cerr << "php-cgi not executable" << std::endl;
+			std::cerr << "cgi not executable" << std::endl;
 		
 		if (execve(argv[0], argv, this->_char_env) == -1) // segfault there with POST
 			std::cerr << "execve failed and returned -1" << std::endl;
-		exit(EXIT_FAILURE); // error to change
+		exit(EXIT_FAILURE);
 	}
 	else // parent process
 	{
@@ -179,7 +179,7 @@ std::string	cgiLauncher::exec(void)
 		while (reader > 0)
 		{
 			memset(buffer, 0, BUFFER_SIZE);
-			reader = read(STDIN_FILENO, buffer, 50000);
+			reader = read(STDIN_FILENO, buffer, BUFFER_SIZE);
 			if (reader < 0)
 			{
 				std::cerr << "read syscall failure" << std::endl;
@@ -256,7 +256,7 @@ std::string	cgiLauncher::_trimWhitespaces(std::string str)
 
 /* will suppress the first line added by the PHP-CGI erase, the headers and store them in 
 a std::string to further use */
-std::string	cgiLauncher::_extractCGIHeader(std::string output) // do later
+std::string	cgiLauncher::_extractCGIHeader(std::string output)
 {
 	std::string		clear_output = "";
 	std::string		out_headers;
@@ -268,7 +268,6 @@ std::string	cgiLauncher::_extractCGIHeader(std::string output) // do later
 		clear_output.substr(4);
 	
 	/* extracting headers and store them */
-	output = output.substr(output.find_first_of('\n') + 1);
 	out_headers = output.substr(0, output.find("\r\n\r\n"));
 	this->_output_headers = out_headers;
 

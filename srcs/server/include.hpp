@@ -2,6 +2,7 @@
 # define __INCLUDE_HPP__
 
 # include <cstdlib>
+# include <iostream>
 # include "../parser/Parser.hpp"
 
 bool	isDirectory(const std::string &path);

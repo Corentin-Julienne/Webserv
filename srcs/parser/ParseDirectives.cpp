@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/14 18:20:37 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 18:04:52 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,9 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	if (is_loc)
 		throw std::runtime_error("listen directive is not accepted in a location block");
 	if (arg_num < 2 || arg_num > 3)
-		throw std::runtime_error("listen directive between one and two arguments");
+		throw std::runtime_error("listen directive takes one or two arguments");
 	args = this->_cutArgs(directive, ';');
-	if (args[1].find(':') != std::string::npos) // case there is a ip separated by : and then a port number
-	{
-		if (!this->_isIpValid(args[1].substr(0, args[1].find(":"))))
-			throw std::runtime_error("invalid format of IpV4 address provided in .conf file");
-		this->_servers[serv_idx]._ip_address = args[1].substr(0, args[1].find(":"));	
-		port_str = args[1].substr(args[1].find(":") + 1);
-	}
-	else
-		port_str = args[1];
+	port_str = args[1];
 	if (port_str.size() > 5)
 		throw std::runtime_error("port number should be between 0 and 65535");
 	for (std::size_t i = 0; i < port_str.size(); i++)
@@ -46,7 +38,7 @@ void	Parser::_processListenDirective(std::string directive, int serv_idx, int ar
 	if (arg_num == 3) // case there is a default_server directive
 	{
 		if (args[2].compare("default_server"))
-			throw std::runtime_error("third argument is for default_server only");
+			throw std::runtime_error("second argument is for default_server only");
 		this->_servers[serv_idx]._default_server = true;
 	}
 }
@@ -61,34 +53,54 @@ void	Parser::_processServerNameDirective(std::string directive, int serv_idx, in
 		throw std::runtime_error("server_name take at least one argument");
 	args = this->_cutArgs(directive, ';');
 
+	/* remove quotes if double quotes are povided */
 	for (std::size_t i = 1; i < args.size(); i++)
 	{
 		if (args[i][0] == '"' && args[i][args[i].size() - 1] == '"')
 			args[i] = args[i].substr(1, args[i].size() - 2);
 	}
 
-	// clear the vector is there is already a std:string in the same server block or location block  
+	/* clear the vector is there is already a std:string in the same server block or location block */  
 	if (!this->_servers[serv_idx]._server_name.empty())
 		this->_servers[serv_idx]._server_name.clear();
 
 	for (std::size_t i = 1; i < args.size(); i++)
-		this->_servers[serv_idx]._server_name.push_back(args[i]);	
+		this->_servers[serv_idx]._server_name.push_back(args[i]);
 }
 
+/* add a set of new error pages. Add a vector of string, which contains : 
+=> error codes (first argument) 
+=> html page to display */
 void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
 	std::vector<std::string>	new_err_dir;
+	std::string					code;
+	std::string					html_page;
 	
-	if (arg_num < 3)
-		throw std::runtime_error("error_page directive accept at least two arguments");
+	if (arg_num != 3)
+		throw std::runtime_error("error_page directive accepts two arguments");
 	args = this->_cutArgs(directive, ';');
-	for (std::size_t i = 1; i < args.size(); i++)
-		new_err_dir.push_back(args[i]);
+	/* check that code is ok */
+	code = args[1];
+	if (code.size() != 3 || !std::isdigit(code[0]) || !std::isdigit(code[1]) || !std::isdigit(code[2]))
+		throw std::runtime_error("error_page : not a valid http error code");
+	
+	int		code_int = atoi(code.c_str());
+
+	if ((code_int < 500 || code_int > 511) && code_int != 404)
+		throw std::runtime_error("error_page : not a valid http error code");
+	/* check that last argument is an html page */
+	html_page = args[2];
+	if (html_page.size() > 5 && html_page.substr(html_page.size() - 5).compare(".html"))
+		throw std::runtime_error("error_page directive last argument must be an html page");
+	/* push argument to vector and add it to location or servconf */
+	new_err_dir.push_back(code);
+	new_err_dir.push_back(html_page);
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._error_pages.push_back(new_err_dir);
 	else
-		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);	
+		this->_servers[serv_idx]._error_pages.push_back(new_err_dir);
 }
 
 void	Parser::_processBodySizeDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
@@ -139,7 +151,7 @@ void	Parser::_processAllowDirective(std::string directive, int serv_idx, int arg
 		throw std::runtime_error("allow directive needs at least one argument");
 	args = this->_cutArgs(directive, ';');
 
-	// check if the directive as already been used, and clear it if it is the case
+	/* check if the directive as already been used, and clear it if it is the case */
 	if (is_loc &&
 	!this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._allowed_http_methods.empty())
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._allowed_http_methods.clear();
@@ -200,7 +212,7 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 	std::vector<std::string>	index_values;
 
 	if (arg_num < 2)
-		throw std::runtime_error("index directive take at least one argument");
+		throw std::runtime_error("index directive takes at least one argument");
 	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		index_values.push_back(args[i]);
@@ -218,18 +230,82 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 		this->_servers[serv_idx]._index = index_values;
 }
 
-void	Parser::_processCgiDirective(std::string directive, int serv_idx, int arg_num, bool is_loc) // implement later
+void	Parser::_processReturnDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
-	std::vector<std::string>	cgi_values;
+	std::vector<std::string>	rtn_dir;
+	std::string					code;
+	std::string					url;
 	
-	if (arg_num < 2)
-		throw std::runtime_error("cgi directive take a least one argument");
+	if (arg_num != 3)
+		throw std::runtime_error("return directive takes two arguments : a return code and a full url");
 	args = this->_cutArgs(directive, ';');
-	for (std::size_t i = 1; i < args.size(); i++)
-		cgi_values.push_back(args[i]);
+	/* assess validity of redirection code */
+	code = args[1];
+	if (code.size() != 3 && (!code.compare("301") || !code.compare("302")))
+		throw std::runtime_error("error code must be either 301 or 302");
+	/* assess length of the scheme of the url */
+	url = args[2];
+	if (url.size() <= 7 || url.substr(0, 7).compare("http://") || url.size() > 2048)
+		throw std::runtime_error("url is not on the good format");
+	/* store the code */
+	rtn_dir.push_back(code);
+	rtn_dir.push_back(url);
+	/* store into servconf or location */
 	if (is_loc)
-		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._cgi = cgi_values;
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._return = rtn_dir;
 	else
-		this->_servers[serv_idx]._cgi = cgi_values;
+		this->_servers[serv_idx]._return = rtn_dir;
+}
+
+void	Parser::_processCGI(std::string directive, int serv_idx, int arg_num, bool is_loc)
+{
+	std::vector<std::string>	args;
+	std::vector<std::string>	cgi_infos;
+	std::string					extension;
+	std::string					cgi_path;
+	
+	if (arg_num != 3)
+		throw std::runtime_error("cgi directive takes two arguments : extension, path/executable_name");
+	args = this->_cutArgs(directive, ';');
+
+	/* check that extension is php or bla (for testing) */
+	extension = args[1];
+	if (extension.size() != 4 || (extension.compare(".php") && extension.compare(".bla")))
+		throw std::runtime_error("extension have to be php (or bla for testing only)");
+	/* check that path exists */
+	
+	char			buffer[FILENAME_MAX];
+	char			*success = getcwd(buffer, FILENAME_MAX);
+	std::string		curr_wd;
+	std::string		full_path;
+	std::string		cgi_name;
+
+	if (success)
+		curr_wd = success;
+	else
+		throw std::runtime_error("problem with getcwd syscall");
+
+	cgi_path = args[2];
+	if (cgi_path.find_last_of('/') == std::string::npos || cgi_path.substr(cgi_path.find_last_of('/')).size() < 1)
+		throw std::runtime_error("wrong syntax of the path of the cgi script");
+	if (cgi_path.substr(cgi_path.find_last_of('/') + 1).compare("php-cgi") && 
+	cgi_path.substr(cgi_path.find_last_of('/') + 1).compare("cgi_tester"))
+		throw std::runtime_error("cgi script not accepted. Should be php-cgi or cgi_tester");
+
+	full_path = curr_wd + "/" + cgi_path;
+
+	/* debug, checks for existence and chmod for the cgi script */
+	if (access(full_path.c_str(), F_OK) == -1)
+		throw std::runtime_error("cgi script not found");
+	if (access(full_path.c_str(), X_OK) == -1)
+		throw std::runtime_error("cgi script not executable");
+	/* store the cgi informations */
+	cgi_infos.push_back(extension);
+	cgi_infos.push_back(cgi_path);
+	/* store into servconf or location */
+	if (is_loc)
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._cgi = cgi_infos;
+	else
+		this->_servers[serv_idx]._cgi = cgi_infos;
 }

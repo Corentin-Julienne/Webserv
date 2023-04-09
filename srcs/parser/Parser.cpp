@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.s19.be>         +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/03/17 01:23:54 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:18:20 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,30 @@ Parser::Parser(char *config_file)
 	}
 	if (!this->_isThereEnoughInfo())
 		throw std::runtime_error("conf file does not provides enough information to be used correctly");
+	// debug
+	//this->displayParsing();
+}
+
+/* case no conf file is provided */
+Parser::Parser(void)
+{
+	Location	loc;
+	
+	// add only one sever block
+	this->_servers.push_back(ServConf());
+	// populate this server with a port (8080), which is the default server, an index and a root
+	this->_servers[0]._port = 8080;
+	// add a location block with value /
+	this->_servers[0]._locs.push_back(loc);
+	// population location with URL, and allow GET method
+	this->_servers[0]._locs[0]._allowed_http_methods.push_back("GET");
+	this->_servers[0]._locs[0]._url = "/";
+	this->_servers[0]._locs[0]._root = "www/html";
+	this->_servers[0]._locs[0]._index.push_back("index.html");
+	this->_servers[0]._cgi[0] = "php";
+	this->_servers[0]._cgi[0] = "srcs/cgi/php-cgi";
+	// debug
+	//this->displayDefaultParsing();
 }
 
 Parser::~Parser() {}
