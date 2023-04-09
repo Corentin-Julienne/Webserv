@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:15:58 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:27:46 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,12 @@ void	Parser::displayParsing(void)
 			std::cout << "return code = " << this->_servers[i]._return[0] << " and url = " << this->_servers[i]._return[1] 
 			<< std::endl;
 		}
+		std::cout << RED << "dislaying cgi info..." << RESET << std::endl;
+		std::cout << "cgi extension == " << this->_servers[i]._cgi[0] << " and cgi_script = " 
+		<< this->_servers[i]._cgi[1]  << std::endl;
 		std::cout << GREEN << "3) displaying every location in Location format" << RESET << std::endl;
 		for (std::size_t j = 0; j < this->_servers[i]._locs.size(); j++)
-			this->displayLocation(this->_servers[i]._locs[j], j);		
+			this->displayLocation(this->_servers[i]._locs[j], j);
 		
 		std::cout << std::endl << std::endl;
 		i++;
@@ -147,6 +150,9 @@ void	Parser::displayLocation(Location& loc, int loc_index)
 	if (!loc._return.empty())
 		std::cout << "return code == " << loc._return[0] << " and url = |" << loc._return[1] << "|" << std::endl;
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
-
+	
+	std::cout << "dislaying cgi info..." << std::endl;
+	std::cout << "cgi extension == " << loc._cgi[0] << " and cgi_script = " << loc._cgi[1]  << std::endl;
+	
 	std::cout << "display url = " << loc._url << std::endl;
 }

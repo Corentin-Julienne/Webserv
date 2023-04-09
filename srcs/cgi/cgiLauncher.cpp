@@ -6,13 +6,14 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 16:38:00 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:31:51 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cgiLauncher.hpp"
 
-cgiLauncher::cgiLauncher(SocketInfos &infos, ServConf &serv) : _infos(infos), _serv(serv)
+cgiLauncher::cgiLauncher(SocketInfos &infos, ServConf &serv, std::string cgi_path) : _infos(infos), _serv(serv),
+_scriptPath(cgi_path)
 {
 	char			buffer[FILENAME_MAX];
 	char			*success = getcwd(buffer, FILENAME_MAX);
@@ -146,13 +147,13 @@ std::string	cgiLauncher::exec(void)
 		dup2(fds[1], STDOUT_FILENO);
 		close(fds[1]);
 
-		char	**argv = this->_getArgs(this->_cwd + "/srcs/cgi/php-cgi");
+		char	**argv = this->_getArgs(this->_cwd + "/" + this->_scriptPath);
 			
 		/* debug, checks for existence and chmod for the cgi script */
 		if (access(argv[0],F_OK) == -1)
-			std::cerr << "php-cgi not found" << std::endl;
+			std::cerr << "cgi not found" << std::endl;
 		if (access(argv[0], X_OK) == -1)
-			std::cerr << "php-cgi not executable" << std::endl;
+			std::cerr << "cgi not executable" << std::endl;
 		
 		if (execve(argv[0], argv, this->_char_env) == -1) // segfault there with POST
 			std::cerr << "execve failed and returned -1" << std::endl;

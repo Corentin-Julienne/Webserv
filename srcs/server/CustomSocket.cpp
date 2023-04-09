@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:28:57 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:35:22 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -312,11 +312,11 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		else
 			content << _generateError(404, loc);
 	}
-	else if (realFilePath.size() > 4 && !realFilePath.substr(realFilePath.size() - 4).compare(".php")) // triggers php cgi
+	else if (realFilePath.size() > 4 && !realFilePath.substr(realFilePath.size() - 4).compare(this->_servconf._cgi[0]))
 	{		
 		infos.absoluteURIPath = realFilePath;
 		
-		cgiLauncher		cgi(infos, this->_servconf);
+		cgiLauncher		cgi(infos, this->_servconf, this->_servconf._cgi[1]);
 		
 		content << cgi.exec();
 	}
@@ -334,7 +334,7 @@ std::string	CustomSocket::_POST(SocketInfos &infos)
 	_tryToIndex(realFilePath);
 	infos.absoluteURIPath = realFilePath;
 
-	cgiLauncher	cgi(infos, this->_servconf);
+	cgiLauncher	cgi(infos, this->_servconf, this->_servconf._cgi[1]);
 
 	ss << cgi.exec();
 

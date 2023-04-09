@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:10:13 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:34:55 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ void	Parser::_processCGI(std::string directive, int serv_idx, int arg_num, bool 
 
 	/* check that extension is php or bla (for testing) */
 	extension = args[1];
-	if (extension.compare("php") && extension.compare("bla"))
+	if (extension.size() != 4 || (extension.compare(".php") && extension.compare(".bla")))
 		throw std::runtime_error("extension have to be php (or bla for testing only)");
 	/* check that path exists */
 	

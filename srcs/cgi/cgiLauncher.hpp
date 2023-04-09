@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:18 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:17:19 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 17:30:14 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class cgiLauncher
 {
 	public:
 	
-		cgiLauncher(SocketInfos &infos, ServConf &serv);
+		cgiLauncher(SocketInfos &infos, ServConf &serv, std::string cgi_path);
 		~cgiLauncher();
 		cgiLauncher(const cgiLauncher& original);
 		
@@ -67,6 +67,7 @@ class cgiLauncher
 		char										**_char_env;
 		std::string									_output;
 		std::string									_cwd;
+		
 		/* output */
 		std::string									_contentType;
 		std::string									_output_headers;
