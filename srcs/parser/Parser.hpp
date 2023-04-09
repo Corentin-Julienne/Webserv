@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 18:44:29 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 13:23:16 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@
 #define ROOT				7
 #define AUTOINDEX			8
 #define INDEX				9
+#define RETURN				10
 
 #define MAX_PORT			65535
 
@@ -98,10 +99,12 @@ class Parser
 							int arg_num, bool is_loc = false);
 		void			_processIndexDirective(std::string directive, int serv_idx,
 							int arg_num, bool is_loc = false);
+		void			_processReturnDirective(std::string directive, int serv_idx,
+							int arg_num, bool is_loc = false);
 
 		/* Utils.cpp */
 		std::vector<std::string>	_cutArgs(std::string directive, char delim);
-		bool						_isIpValid(std::string ip);
+		// bool						_isIpValid(std::string ip);
 		int							_rtnInstructionType(std::string directive);
 		int							_dispatchInstructionProcessing(int type, std::string directive,
 										int serv_idx, bool is_loc = false);

@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 15:54:49 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 17:44:46 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 13:08:49 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ struct ServConf
 		std::string									_root;
 		bool										_autoindex;
 		std::vector<std::string> 					_index;
+		std::vector<std::string>					_return;
 		// handle location blocks
 		std::vector<Location>						_locs;
 };

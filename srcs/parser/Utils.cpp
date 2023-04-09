@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 18:13:09 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:10:11 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 13:23:06 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,35 +35,35 @@ std::vector<std::string>	Parser::_cutArgs(std::string directive, char delim)
 	return (args);
 }
 
-/* ParseDirectives.cpp contains all the specialized functions that will store evry directive and 
+/* ParseDirectives.cpp contains all the specialized functions that will store every directive and 
 check if they are compliant with the syntaxic rules accepted by the server */
-bool	Parser::_isIpValid(std::string ip)
-{
-	std::string		delimiter = ".";
-	std::string		token;
-	std::size_t		pos = 0;
-	bool			stop = false;
+// bool	Parser::_isIpValid(std::string ip)
+// {
+// 	std::string		delimiter = ".";
+// 	std::string		token;
+// 	std::size_t		pos = 0;
+// 	bool			stop = false;
 
-	if (!ip.compare("localhost"))
-		return (true);
-	while (!stop)
-	{
-		if ((pos = ip.find(delimiter)) == std::string::npos)
-			stop = true;
-		token = ip.substr(0, pos);
-		if (token.size() > 3)
-			return (false);
-		for (std::size_t j = 0; j < token.size(); j++)
-		{
-			if (!std::isdigit(token[j]))
-				return (false);
-		}
-		if (atoi(token.c_str()) > 255)
-			return (false);
-		ip.erase(0, pos + delimiter.length());
-	}
-	return (true);
-}
+// 	if (!ip.compare("localhost"))
+// 		return (true);
+// 	while (!stop)
+// 	{
+// 		if ((pos = ip.find(delimiter)) == std::string::npos)
+// 			stop = true;
+// 		token = ip.substr(0, pos);
+// 		if (token.size() > 3)
+// 			return (false);
+// 		for (std::size_t j = 0; j < token.size(); j++)
+// 		{
+// 			if (!std::isdigit(token[j]))
+// 				return (false);
+// 		}
+// 		if (atoi(token.c_str()) > 255)
+// 			return (false);
+// 		ip.erase(0, pos + delimiter.length());
+// 	}
+// 	return (true);
+// }
 
 /* if directive refers to a location, triggers the specialized function. Otherwise, 
 check if the directive format is valid (have at least two arguments, is bounded by ';').
@@ -106,6 +106,9 @@ int	Parser::_dispatchInstructionProcessing(int type, std::string directive, int 
 		case (INDEX):
 			this->_processIndexDirective(directive, serv_idx, args_num, is_loc);
 			break ;
+		case (RETURN):
+			this->_processReturnDirective(directive, serv_idx, args_num, is_loc);
+			break ;
 		default:
 			throw std::runtime_error("instruction unknown");
 			break ;
@@ -133,6 +136,8 @@ int	Parser::_rtnInstructionType(std::string directive)
 		return (AUTOINDEX);
 	else if (!directive.compare("index"))
 		return (INDEX);
+	else if (!directive.compare("return"))
+		return (RETURN);
 	else
 		return (BAD_INSTR);
 }

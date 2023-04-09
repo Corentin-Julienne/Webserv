@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 18:58:34 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/08 19:17:24 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,8 @@ Parser::Parser(char *config_file)
 	}
 	if (!this->_isThereEnoughInfo())
 		throw std::runtime_error("conf file does not provides enough information to be used correctly");
-	
 	// debug
-	this->displayParsing();
+	//this->displayParsing();
 }
 
 /* case no conf file is provided */

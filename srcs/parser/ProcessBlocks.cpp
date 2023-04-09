@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 17:54:55 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 13:22:17 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ void	Parser::_enforceInheritance(Location& loc, int server_index)
 	loc._root = this->_servers[server_index]._root;
 	loc._autoindex = this->_servers[server_index]._autoindex;
 	loc._index = this->_servers[server_index]._index;
+	loc._return = this->_servers[server_index]._return;
 }
 
 /* check whether the location block have two arguments (location and the path)

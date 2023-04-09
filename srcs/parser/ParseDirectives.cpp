@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 17:49:47 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/09 13:42:17 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 	std::vector<std::string>	index_values;
 
 	if (arg_num < 2)
-		throw std::runtime_error("index directive take at least one argument");
+		throw std::runtime_error("index directive takes at least one argument");
 	args = this->_cutArgs(directive, ';');
 	for (std::size_t i = 1; i < args.size(); i++)
 		index_values.push_back(args[i]);
@@ -208,4 +208,32 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._index = index_values;
 	else
 		this->_servers[serv_idx]._index = index_values;
+}
+
+void	Parser::_processReturnDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
+{
+	std::vector<std::string>	args;
+	std::vector<std::string>	rtn_dir;
+	std::string					code;
+	std::string					url;
+	
+	if (arg_num != 3)
+		throw std::runtime_error("return directive takes two arguments : a return code and a full url");
+	args = this->_cutArgs(directive, ';');
+	/* assess validity of redirection code */
+	code = args[1];
+	if (code.size() != 3 && (!code.compare("301") || !code.compare("302")))
+		throw std::runtime_error("error code must be either 301 or 302");
+	/* assess length of the scheme of the url */
+	url = args[2];
+	if (url.size() <= 7 || url.substr(0, 7).compare("http://") || url.size() > 2048)
+		throw std::runtime_error("url is not on the good format");
+	/* store the code */
+	rtn_dir.push_back(code);
+	rtn_dir.push_back(url);
+	/* store into servconf or location */
+	if (is_loc)
+		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._return = rtn_dir;
+	else
+		this->_servers[serv_idx]._return = rtn_dir;
 }
