@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 15:11:14 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:26:11 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,17 +198,21 @@ void	CustomSocket::read(int fd)
 	size_t				code = 200;
 
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
-	Location 	*loc = _getPathLocation(infos.locPath);
-
-	/* debug */
-	if (loc)
-		std::cerr << "loc present with request = " << infos.reqType << "and url =" << loc->_url << std::endl;
-	else
-		std::cerr << "no loc and request = " << infos.reqType << std::endl;
 	
+	/* add relative path_info and query string to infos struct, withdraw query string from uri */
+	infos.queryString = this->_extractQueryString(infos);
+
+	/* Add the suffix to the uri if it's a directory */
+	if (infos.uri.substr(0, 1) != "/")
+		infos.uri = "/" + infos.uri;
+	
+	/* if POST request, add the prefix if location different from / */
+	if (infos.reqType == "POST")
+		infos.uri = this->_assembleURI(infos);
+	
+	Location 	*loc = _getPathLocation(infos.reqType == "POST" ? infos.locPath : infos.uri);
 	
 	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
-	
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
 	{
@@ -245,20 +249,6 @@ void	CustomSocket::read(int fd)
 		}
 	}
 	infos.body = final_data;
-
-	/* Add the suffix to the uri if it's a directory */
-	if (infos.uri.substr(0, 1) != "/")
-		infos.uri = "/" + infos.uri;
-
-	/* if POST request, add the prefix if location different form / */
-	if (infos.reqType == "POST")
-		infos.uri = this->_assembleURI(infos);
-	else
-		infos.locPath = infos.uri;
-
-	/* add relative path_info and query string to infos struct, withdraw query string from uri */
-	if (code == 200)
-		infos.queryString = this->_extractQueryString(infos);
 	
 	if (code == 200)
 		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
@@ -286,7 +276,7 @@ void	CustomSocket::read(int fd)
 	else
 		output = _generateError(code, loc);
 
-	std::cout << output << std::endl;
+	//std::cout << output << std::endl;
 
 	output_500 = this->_generateError(500, loc);
 	this->_outputs[fd] = make_pair(output, output_500);
@@ -298,6 +288,10 @@ std::string	CustomSocket::_assembleURI(SocketInfos &infos)
 
 	if (prefix.length() == 0)
 		return (infos.uri);
+	/* case there is a query string to kill */
+	if (prefix.find("?") != std::string::npos)
+		prefix = prefix.substr(0, prefix.find("?") - 1);
+	/* removing everything but the url */	
 	prefix = prefix.substr(prefix.find("//") + 2);
 	prefix = prefix.substr(prefix.find("/"));
 	infos.locPath = prefix;
@@ -468,6 +462,8 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 {
 	Location		*location = NULL;
 	std::string		uriPath = uri;
+	
+	//std::cout << "uri for getPathLocation = |" << uri << "|" << std::endl;  //debug
 	
 	for (size_t i = 0; i < _servconf._locs.size(); i++)
 	{
