@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 14:42:44 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 15:11:14 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -589,6 +589,12 @@ std::string CustomSocket::_generateError(size_t code, Location *location)
 			break ;
 		case 403:
 			ss << "HTTP/1.1 403 Forbidden\nContent-Type: text/html\nContent-Length: ";
+			break ;
+		case 500:
+			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
+			break ;
+		case 502:
+			ss << "HTTP/1.1 502 Bad Gateway\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		default:
 			ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
