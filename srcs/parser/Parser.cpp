@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:18:20 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 19:38:29 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Parser::Parser(char *config_file)
 		this->_processBlock(this->_server_blocks[i], i);
 	}
 	if (!this->_isThereEnoughInfo())
-		throw std::runtime_error("conf file does not provides enough information to be used correctly");
+		throw std::runtime_error("please provide conf file with a cgi, at least one location and one default_server maximum");
 	// debug
 	//this->displayParsing();
 }
@@ -41,6 +41,9 @@ Parser::Parser(void)
 	this->_servers.push_back(ServConf());
 	// populate this server with a port (8080), which is the default server, an index and a root
 	this->_servers[0]._port = 8080;
+	// add cgi 
+	this->_servers[0]._cgi.push_back(".php");
+	this->_servers[0]._cgi.push_back("srcs/cgi/php-cgi");
 	// add a location block with value /
 	this->_servers[0]._locs.push_back(loc);
 	// population location with URL, and allow GET method
@@ -48,8 +51,6 @@ Parser::Parser(void)
 	this->_servers[0]._locs[0]._url = "/";
 	this->_servers[0]._locs[0]._root = "www/html";
 	this->_servers[0]._locs[0]._index.push_back("index.html");
-	this->_servers[0]._cgi[0] = "php";
-	this->_servers[0]._cgi[0] = "srcs/cgi/php-cgi";
 	// debug
 	//this->displayDefaultParsing();
 }
