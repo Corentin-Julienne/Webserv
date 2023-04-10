@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:02:31 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:52:53 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 #include <stdexcept>
 #include <limits>
 #include <climits>
-#include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h>
 
 #define BAD_INSTR			0

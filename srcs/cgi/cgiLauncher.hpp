@@ -6,9 +6,10 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:18 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:30:14 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 14:23:57 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef CGI_LAUNCHER_HPP
 # define CGI_LAUNCHER_HPP
@@ -34,7 +35,9 @@ class cgiLauncher
 		
 		cgiLauncher& operator=(const cgiLauncher& original);
 
-		std::string		exec(void);
+		int					exec(void);
+		const int&			getCode(void) const;
+		const std::string&	getOutput(void) const;
 
 	private:
 
@@ -60,14 +63,13 @@ class cgiLauncher
 		cgiLauncher(void);
 	
 		SocketInfos									_infos;
-		Location									*_loc;
 		ServConf									_serv;
 		std::string									_scriptPath;
 		std::map<std::string, std::string>			_env; // env variables
 		char										**_char_env;
 		std::string									_output;
 		std::string									_cwd;
-		
+		int											_code;
 		/* output */
 		std::string									_contentType;
 		std::string									_output_headers;

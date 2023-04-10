@@ -71,10 +71,10 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 // private helper functions
 void	CustomSocket::_bindSocket(void)
 {
-	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr)); // make sure struct is empty
+	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr));
 	
 	this->_sockaddr.sin_family = this->_domain;
-	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
+	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
@@ -128,23 +128,6 @@ int	CustomSocket::getPort()
 	return (this->_servconf._port);
 }
 
-/*
-std::string	CustomSocket::getOutput(int fd)
-{
-	return this->_outputs[fd];
-}
-
-void CustomSocket::removeOutput(int fd)
-{
-	this->_outputs.erase(fd);
-}
-
-void	CustomSocket::setOutput(int fd, std::string output)
-{
-	this->_outputs[fd] = output;
-}
-*/
-
 /* extract query string and store it in SocketInfos struct, then cut query string from the uri */
 std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 {
@@ -165,6 +148,7 @@ std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 
 void	CustomSocket::read(int fd)
 {
+	std::string		output;
 	std::string		output_500;
 	std::string		headers_str;
 	ssize_t			valret;
@@ -176,31 +160,39 @@ void	CustomSocket::read(int fd)
 			break;
 
 		valret = recv(fd, &c, 1, 0);
-		if (valret < 0)
+		if (valret <= 0)
 		{
-			std::cerr << "gere cette erreur stp" << std::endl; // todo
-			break;
-		}
-		if (valret == 0)
-		{
-			std::cerr << "celle la aussi stp" << std::endl; // todo
-			break;
+			call_error("recv", false);
+			output_500 = "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
+			this->_outputs.insert(std::make_pair(fd, std::make_pair(output_500, output_500)));
+			return ;
 		}
 
 		headers_str += c;
 	}
 
 	SocketInfos			infos;
-	std::string			output;
 	size_t				len_to_read;
 	char				buffer[MAX_READ];
 	std::vector<char> 	final_data;
 	size_t				code = 200;
 
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
-	Location 	*loc = _getPathLocation(infos.locPath);
-	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
 	
+	/* add relative path_info and query string to infos struct, withdraw query string from uri */
+	infos.queryString = this->_extractQueryString(infos);
+
+	/* Add the suffix to the uri if it's a directory */
+	if (infos.uri.substr(0, 1) != "/")
+		infos.uri = "/" + infos.uri;
+	
+	/* if POST request, add the prefix if location different from / */
+	if (infos.reqType == "POST")
+		infos.uri = this->_assembleURI(infos);
+	
+	Location 	*loc = _getPathLocation(infos.reqType == "POST" ? infos.locPath : infos.uri);
+
+	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
 	{
@@ -224,41 +216,29 @@ void	CustomSocket::read(int fd)
 	{
 		memset(buffer, 0, sizeof(buffer));
 		valret = recv(fd, buffer, sizeof(buffer), 0);
-		if (valret > 0)
+		if (valret <= 0)
 		{
-			final_data.insert(final_data.end(), buffer, buffer + valret);
-			len_to_read -= valret;
-		}
-		else
-		{
-			std::cout << "recv returning error" << std::endl;
+			call_error("recv", false);
 			code = 500;
-			break;
+			break ;
 		}
+
+		final_data.insert(final_data.end(), buffer, buffer + valret);
+		len_to_read -= valret;
+
 	}
 	infos.body = final_data;
-
-	/* Add the suffix to the uri if it's a directory */
-	if (infos.uri.substr(0, 1) != "/")
-		infos.uri = "/" + infos.uri;
-
-	/* if POST request, add the prefix if location different form / */
-	if (infos.reqType == "POST")
-		infos.uri = this->_assembleURI(infos);
-	else
-		infos.locPath = infos.uri;
-
-	/* add relative path_info and query string to infos struct, withdraw query string from uri */
-	if (code == 200)
-		infos.queryString = this->_extractQueryString(infos);
 	
 	if (code == 200)
-		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
-	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
+	if (code == 200 && !this->_servconf._server_name.empty() && infos.headers.find("Host") != infos.headers.end())
 	{
 		std::vector<std::string>	hosts = this->_servconf._server_name;
-		code = std::find(hosts.begin(), hosts.end(), infos.headers.find("Host")->second) != hosts.end() ? 200 : 404;
+		std::string					req_host = infos.headers.find("Host")->second;
+		size_t						colon_idx = req_host.find(':');
+		req_host = req_host.substr(0, colon_idx);
+		code = std::find(hosts.begin(), hosts.end(), req_host) != hosts.end() ? 200 : 404;
 	}
 
 	if (code == 200)
@@ -332,6 +312,10 @@ std::string	CustomSocket::_assembleURI(SocketInfos &infos)
 
 	if (prefix.length() == 0)
 		return (infos.uri);
+	/* case there is a query string to kill */
+	if (prefix.find("?") != std::string::npos)
+		prefix = prefix.substr(0, prefix.find("?") - 1);
+	/* removing everything but the url */	
 	prefix = prefix.substr(prefix.find("//") + 2);
 	prefix = prefix.substr(prefix.find("/"));
 	infos.locPath = prefix;
@@ -375,8 +359,13 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		infos.absoluteURIPath = realFilePath;
 		
 		cgiLauncher		cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+
+		int code = cgi.exec();
 		
-		content << cgi.exec();
+		if (code == 200)
+			content << cgi.getOutput();
+		else
+			content << _generateError(code, loc);
 	}
 	else
 		content << _generateFileContent(realFilePath, loc);
@@ -384,7 +373,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(SocketInfos &infos)
+std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 {
 	std::stringstream		ss;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
@@ -394,7 +383,12 @@ std::string	CustomSocket::_POST(SocketInfos &infos)
 
 	cgiLauncher	cgi(infos, this->_servconf, this->_servconf._cgi[1]);
 
-	ss << cgi.exec();
+	int		code = cgi.exec();
+
+	if (code == 200)
+		ss << cgi.getOutput();
+	else
+		ss << _generateError(code, loc);
 
 	return (ss.str());
 }
@@ -492,6 +486,8 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 {
 	Location		*location = NULL;
 	std::string		uriPath = uri;
+	
+	//std::cout << "uri for getPathLocation = |" << uri << "|" << std::endl;  //debug
 	
 	for (size_t i = 0; i < _servconf._locs.size(); i++)
 	{
@@ -614,8 +610,14 @@ std::string CustomSocket::_generateError(size_t code, Location *location)
 		case 403:
 			ss << "HTTP/1.1 403 Forbidden\nContent-Type: text/html\nContent-Length: ";
 			break ;
+		case 500:
+			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
+			break ;
+		case 502:
+			ss << "HTTP/1.1 502 Bad Gateway\nContent-Type: text/html\nContent-Length: ";
+			break ;
 		default:
-			ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
+			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
 			break ;
 	}
 
