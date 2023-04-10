@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:39 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 16:45:39 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:55:33 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 Location::Location(void) : _error_pages(std::vector< std::vector<std::string> >()),
 _allowed_http_methods(std::vector<std::string>()), _root(std::string()),
-_index(std::vector<std::string>()), _return(std::vector<std::string>()), _cgi(std::vector<std::string>()),
+_index(std::vector<std::string>()), _return(std::pair<int, std::string>()), _cgi(std::vector<std::string>()),
 _url(std::string())
 {
 	this->_client_max_body_size = 1000000;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 18:48:58 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/10 19:25:29 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,20 +246,64 @@ void	CustomSocket::read(int fd)
 
 	if (code == 200)
 	{
-		if (infos.reqType == "GET")
-			output = _GET(infos, loc);
-		else if (infos.reqType == "POST")
-			output = _POST(infos, loc);
-		else if (infos.reqType == "DELETE")
-			output = _DELETE(infos, loc);
+		std::string output_redirect = _detectRedirections(loc);
+		if (output_redirect.length() > 0)
+		{
+			output = output_redirect;
+		}
 		else
-			output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 9\n\nUNDEFINED";
+		{
+			if (infos.reqType == "GET")
+				output = _GET(infos, loc);
+			else if (infos.reqType == "POST")
+				output = _POST(infos);
+			else if (infos.reqType == "DELETE")
+				output = _DELETE(infos, loc);
+			else
+				output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 0\n\n";
+		}
 	}
 	else
 		output = _generateError(code, loc);
 
 	output_500 = this->_generateError(500, loc);
 	this->_outputs[fd] = make_pair(output, output_500);
+}
+
+std::string CustomSocket::_detectRedirections(Location *loc)
+{
+	std::pair<int, std::string> redirect = (loc ? loc->_return : _servconf._return);
+	if (redirect.first == 0)
+		return ("");
+
+	// Get the code name
+	std::string code_name;
+	switch (redirect.first)
+	{
+		case 301:
+			code_name = "Moved Permanently";
+			break;
+		case 302:
+			code_name = "Found";
+			break;
+		case 303:
+			code_name = "See Other";
+			break;
+		case 307:
+			code_name = "Temporary Redirect";
+			break;
+		default:
+			code_name = "Unknown Redirect";
+	}
+
+	// Put everything
+	std::stringstream ss;
+	ss << "HTTP/1.1 " << redirect.first << " " << code_name << "\n";
+	ss << "Location: " << redirect.second << "\n";
+	ss << "Content-Type: text/html\n";
+	ss << "Content-Length: 0\n\n";
+
+	return (ss.str());
 }
 
 std::string	CustomSocket::_assembleURI(SocketInfos &infos)

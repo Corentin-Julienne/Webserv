@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CustomSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 18:49:01 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/10 19:17:37 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ class CustomSocket
 		std::string	_generateFileContent(const std::string realFilePath, Location *loc);
 
 		std::string	_assembleURI(SocketInfos &infos);
+		std::string _detectRedirections(Location *loc);
 
 	private:
 	

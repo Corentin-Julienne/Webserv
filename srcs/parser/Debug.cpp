@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Debug.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/03 13:24:05 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:27:46 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:55:26 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,11 +94,7 @@ void	Parser::displayParsing(void)
 		std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 		
 		std::cout << RED << "displaying return directive : " << RESET << std::endl;
-		if (!this->_servers[i]._return.empty())
-		{
-			std::cout << "return code = " << this->_servers[i]._return[0] << " and url = " << this->_servers[i]._return[1] 
-			<< std::endl;
-		}
+		std::cout << "return code = " << this->_servers[i]._return.first << " and url = " << this->_servers[i]._return.second << std::endl;
 		std::cout << RED << "dislaying cgi info..." << RESET << std::endl;
 		std::cout << "cgi extension == " << this->_servers[i]._cgi[0] << " and cgi_script = " 
 		<< this->_servers[i]._cgi[1]  << std::endl;
@@ -147,8 +143,7 @@ void	Parser::displayLocation(Location& loc, int loc_index)
 	
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 	std::cout << RED << "displaying return directive : " << RESET << std::endl;
-	if (!loc._return.empty())
-		std::cout << "return code == " << loc._return[0] << " and url = |" << loc._return[1] << "|" << std::endl;
+	std::cout << "return code == " << loc._return.first << " and url = |" << loc._return.second << "|" << std::endl;
 	std::cout << "---------------------------------------------------------" << std::endl << std::endl;
 	
 	std::cout << "dislaying cgi info..." << std::endl;

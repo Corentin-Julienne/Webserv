@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParseDirectives.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 17:55:27 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 19:08:03 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,10 +229,11 @@ void	Parser::_processIndexDirective(std::string directive, int serv_idx, int arg
 void	Parser::_processReturnDirective(std::string directive, int serv_idx, int arg_num, bool is_loc)
 {
 	std::vector<std::string>	args;
-	std::vector<std::string>	rtn_dir;
+	std::pair<int, std::string>	rtn_dir;
 	std::string					code;
 	std::string					url;
-	
+	int							code_int;
+
 	if (arg_num != 3)
 		throw std::runtime_error("return directive takes two arguments : a return code and a full url");
 	args = this->_cutArgs(directive, ';');
@@ -245,9 +246,17 @@ void	Parser::_processReturnDirective(std::string directive, int serv_idx, int ar
 	if (url.size() > 2048)
 		throw std::runtime_error("url should be one of a location");
 	/* store the code */
-	rtn_dir.push_back(code);
-	rtn_dir.push_back(url);
+	for (std::size_t i = 0; i < code.size(); i++)
+	{
+		if (!std::isdigit(code[i]))
+			throw std::runtime_error("return code number is invalid");
+	}
+	code_int = atoi(code.c_str());
+	if (code_int < 300 || code_int > 399)
+		throw std::runtime_error("return code number must be a 3XX code");
 	/* store into servconf or location */
+	rtn_dir.first = code_int;
+	rtn_dir.second = url;
 	if (is_loc)
 		this->_servers[serv_idx]._locs[this->_servers[serv_idx]._locs.size() - 1]._return = rtn_dir;
 	else
