@@ -71,10 +71,10 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 // private helper functions
 void	CustomSocket::_bindSocket(void)
 {
-	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr)); // make sure struct is empty
+	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr));
 	
 	this->_sockaddr.sin_family = this->_domain;
-	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
+	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
@@ -128,23 +128,6 @@ int	CustomSocket::getPort()
 	return (this->_servconf._port);
 }
 
-/*
-std::string	CustomSocket::getOutput(int fd)
-{
-	return this->_outputs[fd];
-}
-
-void CustomSocket::removeOutput(int fd)
-{
-	this->_outputs.erase(fd);
-}
-
-void	CustomSocket::setOutput(int fd, std::string output)
-{
-	this->_outputs[fd] = output;
-}
-*/
-
 /* extract query string and store it in SocketInfos struct, then cut query string from the uri */
 std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 {
@@ -176,14 +159,11 @@ void	CustomSocket::read(int fd)
 			break;
 
 		valret = recv(fd, &c, 1, 0);
-		if (valret < 0)
+
+		if (valret <= 0)
 		{
-			std::cerr << "gere cette erreur stp" << std::endl; // todo
-			break;
-		}
-		if (valret == 0)
-		{
-			std::cerr << "celle la aussi stp" << std::endl; // todo
+			call_error("recv", false);
+			this->closeSocket(fd);
 			break;
 		}
 
@@ -253,10 +233,13 @@ void	CustomSocket::read(int fd)
 	if (code == 200)
 		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
-	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
+	if (code == 200 && !this->_servconf._server_name.empty() && infos.headers.find("Host") != infos.headers.end())
 	{
 		std::vector<std::string>	hosts = this->_servconf._server_name;
-		code = std::find(hosts.begin(), hosts.end(), infos.headers.find("Host")->second) != hosts.end() ? 200 : 404;
+		std::string					req_host = infos.headers.find("Host")->second;
+		size_t						colon_idx = req_host.find(':');
+		req_host = req_host.substr(0, colon_idx);
+		code = std::find(hosts.begin(), hosts.end(), req_host) != hosts.end() ? 200 : 404;
 	}
 
 	if (code == 200)
@@ -275,8 +258,6 @@ void	CustomSocket::read(int fd)
 	}
 	else
 		output = _generateError(code, loc);
-
-	//std::cout << output << std::endl;
 
 	output_500 = this->_generateError(500, loc);
 	this->_outputs[fd] = make_pair(output, output_500);
