@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 19:35:43 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/10 21:57:20 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,9 +240,6 @@ void	CustomSocket::read(int fd)
 		req_host = req_host.substr(0, colon_idx);
 		code = std::find(hosts.begin(), hosts.end(), req_host) != hosts.end() ? 200 : 404;
 	}
-
-	if (code == 200)
-		code = _isContentLengthValid(infos.reqType, infos.headers, (loc ? loc->_client_max_body_size : _servconf._client_max_body_size));
 
 	if (code == 200)
 	{
@@ -549,32 +546,6 @@ size_t CustomSocket::_isMethodAllowed(const std::string reqType, std::vector<std
 				code = 200;
 				break ;
 			}
-		}
-	}
-	return (code);
-}
-
-size_t CustomSocket::_isContentLengthValid(std::string reqType, std::map<std::string, std::string> headers, long long int maxBodySize)
-{
-	size_t	code = 200;
-
-	if (headers.find("Content-Length") == headers.end())
-	{
-		if (reqType == "GET")
-			code = 200;
-		else
-			code = 411;
-	}
-	else
-	{
-		try
-		{
-			if (std::stoi(headers["Content-Length"]) > maxBodySize)
-				code = 413;
-		}
-		catch (const std::exception& e)
-		{
-			code = 400;
 		}
 	}
 	return (code);

@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 19:17:37 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/10 21:57:22 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,6 @@ class CustomSocket
 		std::string	_DELETE(SocketInfos &infos, Location *loc);
 		
 		std::string	_generateError(size_t code, Location *location);
-		size_t 		_isContentLengthValid(std::string reqType, std::map<std::string, std::string> headers, long long int maxBodySize);
 		size_t		_isMethodAllowed(const std::string reqType, std::vector<std::string> allowedMethods);
 		std::string _generateAutoIndex(const std::string path, const std::string relativePath, Location *loc);
 		std::string	_generateFileContent(const std::string realFilePath, Location *loc);

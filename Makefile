@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+         #
+#    By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/16 12:16:41 by cjulienn          #+#    #+#              #
-#    Updated: 2023/04/04 10:34:37 by cjulienn         ###   ########.fr        #
+#    Updated: 2023/04/10 21:45:41 by mpeharpr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ END			= \e[0m
 NAME := webserv
 
 CC := c++
-CFLAGS := -Wall -Wextra -Werror -std=c++98 -g
+CPPFLAGS := -Wall -Wextra -Werror -std=c++98 -g
 
 SRC_DIR := srcs
 OBJ_DIR := objs
@@ -44,14 +44,14 @@ all: $(NAME)
 
 $(NAME): $(OBJ_FILES)
 	@printf "$(YELLOW)Linking Webserv...\n\n$(END)"
-	$(CC) $(CFLAGS) $(OBJ_FILES) -o $(NAME)
+	$(CC) $(CPPFLAGS) $(OBJ_FILES) -o $(NAME)
 	@printf "\n$(GREEN)Webserv compiled.\n$(END)$(GREEN)Simply type$(END) $(WHITE)./webserv $(END)"
 	@printf "$(GREEN)with a configuration file as argument to execute the program. \n\n$(END)"
 
 $(OBJ_DIR)/%.o : %.cpp
 	@$(MKDIR) $(OBJ_DIR)
 	@printf "$(YELLOW)Compiling object files :\n$(END)"
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CPPFLAGS) -c -o $@ $<
 	@printf "$(GREEN)Object $(UNDERLINE)$(WHITE)$(notdir $@)$(END)$(GREEN) successfully compiled\n\n$(END)"
 
 clean:
