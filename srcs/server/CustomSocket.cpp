@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 16:17:23 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/10 16:36:16 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,10 @@ void	CustomSocket::_parseRequest(std::string req, std::string &reqType, std::str
 // private helper functions
 void	CustomSocket::_bindSocket(void)
 {
-	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr)); // make sure struct is empty
+	memset((char *)&this->_sockaddr, 0, sizeof(this->_sockaddr));
 	
 	this->_sockaddr.sin_family = this->_domain;
-	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); // equal to 0.0.0.0
+	this->_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->_sockaddr.sin_port = htons(this->_servconf._port);
 	
 	if (bind(this->_socket_fd, (struct sockaddr *)&this->_sockaddr, sizeof(this->_sockaddr)) < 0)
@@ -128,23 +128,6 @@ int	CustomSocket::getPort()
 	return (this->_servconf._port);
 }
 
-/*
-std::string	CustomSocket::getOutput(int fd)
-{
-	return this->_outputs[fd];
-}
-
-void CustomSocket::removeOutput(int fd)
-{
-	this->_outputs.erase(fd);
-}
-
-void	CustomSocket::setOutput(int fd, std::string output)
-{
-	this->_outputs[fd] = output;
-}
-*/
-
 /* extract query string and store it in SocketInfos struct, then cut query string from the uri */
 std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 {
@@ -176,14 +159,11 @@ void	CustomSocket::read(int fd)
 			break;
 
 		valret = recv(fd, &c, 1, 0);
-		if (valret < 0)
+
+		if (valret <= 0)
 		{
-			std::cerr << "gere cette erreur stp" << std::endl; // todo
-			break;
-		}
-		if (valret == 0)
-		{
-			std::cerr << "celle la aussi stp" << std::endl; // todo
+			call_error("recv", false);
+			this->closeSocket(fd);
 			break;
 		}
 
