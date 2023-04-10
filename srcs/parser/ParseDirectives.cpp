@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 15:23:49 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:55:27 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,6 @@ void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int
 	if (code.size() != 3 || !std::isdigit(code[0]) || !std::isdigit(code[1]) || !std::isdigit(code[2]))
 		throw std::runtime_error("error_page : not a valid http error code");
 	
-	int		code_int = atoi(code.c_str());
-
-	if ((code_int < 500 || code_int > 511) && code_int != 404)
-		throw std::runtime_error("error_page : not a valid http error code");
 	/* check that last argument is an html page */
 	html_page = args[2];
 	if (html_page.size() > 5 && html_page.substr(html_page.size() - 5).compare(".html"))

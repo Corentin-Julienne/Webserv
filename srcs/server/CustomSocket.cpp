@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 17:26:11 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:58:14 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,7 @@ void	CustomSocket::read(int fd)
 		infos.uri = this->_assembleURI(infos);
 	
 	Location 	*loc = _getPathLocation(infos.reqType == "POST" ? infos.locPath : infos.uri);
-	
+
 	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
@@ -251,7 +251,7 @@ void	CustomSocket::read(int fd)
 	infos.body = final_data;
 	
 	if (code == 200)
-		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
 	{
