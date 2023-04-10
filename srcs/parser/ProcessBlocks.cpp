@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:17:07 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 19:27:34 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,8 @@ bool	Parser::_isDirectiveValid(std::string directive)
 there is enough info provided. Returns true if it is the case, false otherwise */
 bool	Parser::_isThereEnoughInfo(void)
 {
+	std::size_t		default_serv = 0;
+	
 	for (std::size_t serv_idx = 0; serv_idx < this->_servers.size(); serv_idx++)
 	{
 		/* check every location block */
@@ -118,6 +120,11 @@ bool	Parser::_isThereEnoughInfo(void)
 		/* check if there is a CGI */
 		if (this->_servers[serv_idx]._cgi.empty())
 			return (false);
+		/* check if there are several default_server directives */
+		if (this->_servers[serv_idx]._default_server == true)
+			default_serv++;
 	}
+	if (default_serv > 1)
+		return (false);
 	return (true);
 }
