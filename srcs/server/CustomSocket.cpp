@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:35:22 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 14:42:44 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,6 +199,14 @@ void	CustomSocket::read(int fd)
 
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
 	Location 	*loc = _getPathLocation(infos.locPath);
+
+	/* debug */
+	if (loc)
+		std::cerr << "loc present with request = " << infos.reqType << "and url =" << loc->_url << std::endl;
+	else
+		std::cerr << "no loc and request = " << infos.reqType << std::endl;
+	
+	
 	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
 	
 
@@ -269,7 +277,7 @@ void	CustomSocket::read(int fd)
 		if (infos.reqType == "GET")
 			output = _GET(infos, loc);
 		else if (infos.reqType == "POST")
-			output = _POST(infos);
+			output = _POST(infos, loc);
 		else if (infos.reqType == "DELETE")
 			output = _DELETE(infos, loc);
 		else
@@ -333,8 +341,13 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		infos.absoluteURIPath = realFilePath;
 		
 		cgiLauncher		cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+
+		int code = cgi.exec();
 		
-		content << cgi.exec();
+		if (code == 200)
+			content << cgi.getOutput();
+		else
+			content << _generateError(code, loc);
 	}
 	else
 		content << _generateFileContent(realFilePath, loc);
@@ -342,7 +355,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(SocketInfos &infos)
+std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 {
 	std::stringstream		ss;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
@@ -352,7 +365,12 @@ std::string	CustomSocket::_POST(SocketInfos &infos)
 
 	cgiLauncher	cgi(infos, this->_servconf, this->_servconf._cgi[1]);
 
-	ss << cgi.exec();
+	int		code = cgi.exec();
+
+	if (code == 200)
+		ss << cgi.getOutput();
+	else
+		ss << _generateError(code, loc);
 
 	return (ss.str());
 }

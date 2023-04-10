@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:09:07 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/10 14:16:13 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	main(int argc, char **argv)
 			{
 				if (sockets[si]->getPort() == it->_port)
 				{
-					std::cout << "-> Server on http://" << it->_ip_address << ":" << it->_port << " will be skipped since another server is using the same port" << std::endl;
+					std::cout << "-> Server on http://" << "0.0.0.0" << ":" << it->_port << " will be skipped since another server is using the same port" << std::endl;
 					shouldStart = false;
 					break;
 				}
