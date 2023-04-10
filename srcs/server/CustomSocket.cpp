@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 16:36:16 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/10 18:48:58 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,7 @@ std::string	CustomSocket::_extractQueryString(SocketInfos &infos)
 
 void	CustomSocket::read(int fd)
 {
+	std::string		output;
 	std::string		output_500;
 	std::string		headers_str;
 	ssize_t			valret;
@@ -159,19 +160,18 @@ void	CustomSocket::read(int fd)
 			break;
 
 		valret = recv(fd, &c, 1, 0);
-
 		if (valret <= 0)
 		{
 			call_error("recv", false);
-			this->closeSocket(fd);
-			break;
+			output_500 = "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
+			this->_outputs.insert(std::make_pair(fd, std::make_pair(output_500, output_500)));
+			return ;
 		}
 
 		headers_str += c;
 	}
 
 	SocketInfos			infos;
-	std::string			output;
 	size_t				len_to_read;
 	char				buffer[MAX_READ];
 	std::vector<char> 	final_data;
@@ -204,17 +204,16 @@ void	CustomSocket::read(int fd)
 	{
 		memset(buffer, 0, sizeof(buffer));
 		valret = recv(fd, buffer, sizeof(buffer), 0);
-		if (valret > 0)
+		if (valret <= 0)
 		{
-			final_data.insert(final_data.end(), buffer, buffer + valret);
-			len_to_read -= valret;
-		}
-		else
-		{
-			std::cout << "recv returning error" << std::endl;
+			call_error("recv", false);
 			code = 500;
-			break;
+			break ;
 		}
+
+		final_data.insert(final_data.end(), buffer, buffer + valret);
+		len_to_read -= valret;
+
 	}
 	infos.body = final_data;
 
@@ -553,8 +552,11 @@ std::string CustomSocket::_generateError(size_t code, Location *location)
 		case 403:
 			ss << "HTTP/1.1 403 Forbidden\nContent-Type: text/html\nContent-Length: ";
 			break ;
+		case 500:
+			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
+			break ;
 		default:
-			ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
+			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
 			break ;
 	}
 

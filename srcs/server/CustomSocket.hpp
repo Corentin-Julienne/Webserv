@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/08 12:21:14 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:49:01 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,6 @@ class CustomSocket
 
 		int			getSocketFd();
 		int			getPort();
-
-//		std::string	getOutput(int fd);
-//		void		setOutput(int fd, std::string output);
-//		void 		removeOutput(int fd);
 
 	private:
 	
