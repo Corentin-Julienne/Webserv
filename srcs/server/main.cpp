@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
 /*   Updated: 2023/04/09 17:09:07 by mpeharpr         ###   ########.fr       */
@@ -30,18 +30,19 @@ void	call_error(std::string failing_call, bool exit_process)
 
 int	main(int argc, char **argv)
 {
-	if (argc != 2)
+	if (argc > 2)
 	{
-		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
+		std::cerr << "Usage: ./webserv <config_file> or ./webserv (with default params)" << std::endl;
 		return (1);
 	}
-
 	try
 	{
 		std::cout << "=== Starting server... ===" << std::endl;
 
 		std::vector<CustomSocket *>	sockets;
-		Parser						configParser(argv[1]);
+
+		Parser		configParser = (argc == 2) ? Parser(argv[1]) : Parser();
+		
 		int							kq = kqueue();
 		if (kq == -1)
 			call_error("kqueue", true);
@@ -68,7 +69,7 @@ int	main(int argc, char **argv)
 			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
 
-			std::cout << "-> Server started: http://" << it->_ip_address << ":" << it->_port << std::endl;
+			std::cout << "-> Server started: http://" << "0.0.0.0:" << it->_port << std::endl;
 		}
 
 		std::cout << "=== Server successfully initialized ===" << std::endl;
