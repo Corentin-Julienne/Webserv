@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:10:30 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 18:04:52 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:55:27 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,6 @@ void	Parser::_processErrorPageDirective(std::string directive, int serv_idx, int
 	if (code.size() != 3 || !std::isdigit(code[0]) || !std::isdigit(code[1]) || !std::isdigit(code[2]))
 		throw std::runtime_error("error_page : not a valid http error code");
 	
-	int		code_int = atoi(code.c_str());
-
-	if ((code_int < 500 || code_int > 511) && code_int != 404)
-		throw std::runtime_error("error_page : not a valid http error code");
 	/* check that last argument is an html page */
 	html_page = args[2];
 	if (html_page.size() > 5 && html_page.substr(html_page.size() - 5).compare(".html"))
@@ -242,12 +238,12 @@ void	Parser::_processReturnDirective(std::string directive, int serv_idx, int ar
 	args = this->_cutArgs(directive, ';');
 	/* assess validity of redirection code */
 	code = args[1];
-	if (code.size() != 3 && (!code.compare("301") || !code.compare("302")))
-		throw std::runtime_error("error code must be either 301 or 302");
+	if (code.size() != 3 && code.compare("301"))
+		throw std::runtime_error("error code must be 301");
 	/* assess length of the scheme of the url */
 	url = args[2];
-	if (url.size() <= 7 || url.substr(0, 7).compare("http://") || url.size() > 2048)
-		throw std::runtime_error("url is not on the good format");
+	if (url.size() > 2048)
+		throw std::runtime_error("url should be one of a location");
 	/* store the code */
 	rtn_dir.push_back(code);
 	rtn_dir.push_back(url);

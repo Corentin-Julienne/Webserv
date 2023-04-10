@@ -64,7 +64,7 @@ class CustomSocket
 		void		_enableSocketListening(void);
 		void		_parseRequest(std::string req, std::string &reqType, std::string &uri, std::map<std::string, std::string> &headers);
 		std::string	_GET(SocketInfos &infos, Location *loc);
-		std::string	_POST(SocketInfos &infos);
+		std::string	_POST(SocketInfos &infos, Location *loc);
 		std::string	_DELETE(SocketInfos &infos, Location *loc);
 		
 		std::string	_generateError(size_t code, Location *location);

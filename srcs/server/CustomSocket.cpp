@@ -178,9 +178,21 @@ void	CustomSocket::read(int fd)
 	size_t				code = 200;
 
 	this->_parseRequest(headers_str, infos.reqType, infos.uri, infos.headers);
-	Location 	*loc = _getPathLocation(infos.locPath);
-	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
 	
+	/* add relative path_info and query string to infos struct, withdraw query string from uri */
+	infos.queryString = this->_extractQueryString(infos);
+
+	/* Add the suffix to the uri if it's a directory */
+	if (infos.uri.substr(0, 1) != "/")
+		infos.uri = "/" + infos.uri;
+	
+	/* if POST request, add the prefix if location different from / */
+	if (infos.reqType == "POST")
+		infos.uri = this->_assembleURI(infos);
+	
+	Location 	*loc = _getPathLocation(infos.reqType == "POST" ? infos.locPath : infos.uri);
+
+	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);
 
 	if (infos.headers.find("Content-Length") != infos.headers.end())
 	{
@@ -216,23 +228,9 @@ void	CustomSocket::read(int fd)
 
 	}
 	infos.body = final_data;
-
-	/* Add the suffix to the uri if it's a directory */
-	if (infos.uri.substr(0, 1) != "/")
-		infos.uri = "/" + infos.uri;
-
-	/* if POST request, add the prefix if location different form / */
-	if (infos.reqType == "POST")
-		infos.uri = this->_assembleURI(infos);
-	else
-		infos.locPath = infos.uri;
-
-	/* add relative path_info and query string to infos struct, withdraw query string from uri */
-	if (code == 200)
-		infos.queryString = this->_extractQueryString(infos);
 	
 	if (code == 200)
-		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
+		code = _isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
 	if (code == 200 && !this->_servconf._server_name.empty() && infos.headers.find("Host") != infos.headers.end())
 	{
@@ -251,7 +249,7 @@ void	CustomSocket::read(int fd)
 		if (infos.reqType == "GET")
 			output = _GET(infos, loc);
 		else if (infos.reqType == "POST")
-			output = _POST(infos);
+			output = _POST(infos, loc);
 		else if (infos.reqType == "DELETE")
 			output = _DELETE(infos, loc);
 		else
@@ -270,6 +268,10 @@ std::string	CustomSocket::_assembleURI(SocketInfos &infos)
 
 	if (prefix.length() == 0)
 		return (infos.uri);
+	/* case there is a query string to kill */
+	if (prefix.find("?") != std::string::npos)
+		prefix = prefix.substr(0, prefix.find("?") - 1);
+	/* removing everything but the url */	
 	prefix = prefix.substr(prefix.find("//") + 2);
 	prefix = prefix.substr(prefix.find("/"));
 	infos.locPath = prefix;
@@ -313,8 +315,13 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 		infos.absoluteURIPath = realFilePath;
 		
 		cgiLauncher		cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+
+		int code = cgi.exec();
 		
-		content << cgi.exec();
+		if (code == 200)
+			content << cgi.getOutput();
+		else
+			content << _generateError(code, loc);
 	}
 	else
 		content << _generateFileContent(realFilePath, loc);
@@ -322,7 +329,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	return (content.str());
 }
 
-std::string	CustomSocket::_POST(SocketInfos &infos)
+std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 {
 	std::stringstream		ss;
 	std::string				realFilePath = _getAbsoluteURIPath(infos.uri);
@@ -332,7 +339,12 @@ std::string	CustomSocket::_POST(SocketInfos &infos)
 
 	cgiLauncher	cgi(infos, this->_servconf, this->_servconf._cgi[1]);
 
-	ss << cgi.exec();
+	int		code = cgi.exec();
+
+	if (code == 200)
+		ss << cgi.getOutput();
+	else
+		ss << _generateError(code, loc);
 
 	return (ss.str());
 }
@@ -430,6 +442,8 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 {
 	Location		*location = NULL;
 	std::string		uriPath = uri;
+	
+	//std::cout << "uri for getPathLocation = |" << uri << "|" << std::endl;  //debug
 	
 	for (size_t i = 0; i < _servconf._locs.size(); i++)
 	{
@@ -554,6 +568,9 @@ std::string CustomSocket::_generateError(size_t code, Location *location)
 			break ;
 		case 500:
 			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";
+			break ;
+		case 502:
+			ss << "HTTP/1.1 502 Bad Gateway\nContent-Type: text/html\nContent-Length: ";
 			break ;
 		default:
 			ss << "HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Length: ";

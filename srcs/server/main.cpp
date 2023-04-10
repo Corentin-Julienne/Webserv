@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
 /*   Updated: 2023/04/10 18:50:08 by spider-ma        ###   ########.fr       */
@@ -48,7 +48,22 @@ int	main(int argc, char **argv)
 			call_error("kqueue", true);
 
 		Parser::servers_array servers = configParser.getServers();
+		Parser::servers_array default_servers;
 
+		// Sort server without editing the current order
+		for (Parser::servers_array::iterator it = servers.begin(); it != servers.end();)
+		{
+			if (it->_default_server)
+			{
+				default_servers.push_back(*it);
+				it = servers.erase(it);
+			} 
+			else
+				++it;
+		}
+		servers.insert(servers.begin(), default_servers.begin(), default_servers.end());
+
+		// Create the servers
 		for (Parser::servers_array::iterator it = servers.begin(); it != servers.end(); ++it)
 		{
 			bool shouldStart = true;
@@ -57,7 +72,7 @@ int	main(int argc, char **argv)
 			{
 				if (sockets[si]->getPort() == it->_port)
 				{
-//					std::cout << "-> Server on http://" << it->_ip_address << ":" << it->_port << " will be skipped since another server is using the same port" << std::endl;
+					std::cout << "-> Server on http://localhost:" << it->_port << "/ skipped since another server is using the same port" << std::endl;
 					shouldStart = false;
 					break;
 				}
@@ -69,7 +84,7 @@ int	main(int argc, char **argv)
 			CustomSocket	*serverSocket = new CustomSocket(*it, kq);
 			sockets.push_back(serverSocket);
 
-			std::cout << "-> Server started: http://" << "0.0.0.0:" << it->_port << std::endl;
+			std::cout << "-> Server started: http://localhost:" << it->_port << "/" << std::endl;
 		}
 
 		std::cout << "=== Server successfully initialized ===" << std::endl;
