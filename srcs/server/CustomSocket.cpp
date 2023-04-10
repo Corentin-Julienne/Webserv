@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 19:25:29 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/10 19:35:43 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ void	CustomSocket::read(int fd)
 			if (infos.reqType == "GET")
 				output = _GET(infos, loc);
 			else if (infos.reqType == "POST")
-				output = _POST(infos);
+				output = _POST(infos, loc);
 			else if (infos.reqType == "DELETE")
 				output = _DELETE(infos, loc);
 			else
