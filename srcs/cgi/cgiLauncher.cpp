@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 17:31:51 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 14:44:03 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,7 @@ _scriptPath(cgi_path)
 	char			buffer[FILENAME_MAX];
 	char			*success = getcwd(buffer, FILENAME_MAX);
 
-	if (success)
-		this->_cwd = success;
-	else
-		; // raise exception there
-
+	this->_cwd = success;
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
 	// this->_printInfos(); // debug
@@ -50,6 +46,16 @@ cgiLauncher&	cgiLauncher::operator=(const cgiLauncher& original)
 		this->_output = original._output;
 	}
 	return *this;
+}
+
+const int&	cgiLauncher::getCode(void) const
+{
+	return this->_code;
+}
+
+const std::string&	cgiLauncher::getOutput(void) const
+{
+	return this->_output;
 }
 
 /* init a map storing all the env values, in alphabetical order */
@@ -118,18 +124,23 @@ char	**cgiLauncher::_getArgs(std::string path)
 
 /* serve a std::string called this->_output. Is the result of calling the CGI that will serve the content to 
 the webserv, that needs to serve it to the client (i.e web browser) */
-std::string	cgiLauncher::exec(void)
+int	cgiLauncher::exec(void)
 {		
 	std::string		output;
 	/* saving original fds for later */
-	int		originalStdout = dup(STDIN_FILENO);
-	int		originalStdin = dup(STDOUT_FILENO);	
+	int		originalStdin;
 	int		fds[2];
+
+	if ((originalStdin = dup(STDIN_FILENO)) == -1)
+	{
+		std::cerr << "problem with syscall dup" << std::endl;
+		return (500);
+	}
 
 	if (pipe(fds) == -1)
 	{
 		std::cerr << "pipe syscall failure" << std::endl;
-		exit(EXIT_FAILURE);
+		return (500);
 	}
 	
 	pid_t pid = fork();
@@ -137,14 +148,18 @@ std::string	cgiLauncher::exec(void)
 	if (pid < 0)
 	{
 		std::cerr << "failure of the fork syscall" << std::endl;
-		exit(EXIT_FAILURE);
+		return 500;
 	}
 	else if (pid == 0) // child process
 	{		
 		if (_infos.reqType == "POST")
-			dup2(fds[0], STDIN_FILENO);
+		{
+			if (dup2(fds[0], STDIN_FILENO) == -1)
+				return (500);
+		}
 		close(fds[0]);
-		dup2(fds[1], STDOUT_FILENO);
+		if (dup2(fds[1], STDOUT_FILENO) == -1)
+			return (500);
 		close(fds[1]);
 
 		char	**argv = this->_getArgs(this->_cwd + "/" + this->_scriptPath);
@@ -155,7 +170,7 @@ std::string	cgiLauncher::exec(void)
 		if (access(argv[0], X_OK) == -1)
 			std::cerr << "cgi not executable" << std::endl;
 		
-		if (execve(argv[0], argv, this->_char_env) == -1) // segfault there with POST
+		if (execve(argv[0], argv, this->_char_env) == -1)
 			std::cerr << "execve failed and returned -1" << std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -163,15 +178,25 @@ std::string	cgiLauncher::exec(void)
 	{
 		/* write body to fds[1] */
 		if (_infos.reqType == "POST")
-			write(fds[1], _infos.body.data(), _infos.body.size());
+		{
+			if (write(fds[1], _infos.body.data(), _infos.body.size()) == -1)
+				return (500);
+		}
 		close(fds[1]);
-		dup2(fds[0], STDIN_FILENO);
+		if (dup2(fds[0], STDIN_FILENO) == -1)
+			return (500);		
 		close(fds[0]);
-		if (waitpid(pid, NULL, 0) == -1) // wait for child process to finish
+
+		int status;
+		
+		if (waitpid(pid, &status, 0) == -1)
 		{
 			std::cerr << "waitpid syscall failure" << std::endl;
-			exit(EXIT_FAILURE);	
+			return (500);
 		}
+		if (WIFEXITED(status) && WEXITSTATUS(status))
+			return (502);
+
 		/* read the output using read */
 		ssize_t		reader = 1;
 		char		buffer[BUFFER_SIZE + 1];
@@ -183,24 +208,22 @@ std::string	cgiLauncher::exec(void)
 			if (reader < 0)
 			{
 				std::cerr << "read syscall failure" << std::endl;
-				exit(EXIT_FAILURE);
+				return (500);
 			}
 			output += buffer;
 		}
 	}
 
-	std::cout << "|" << output << "|" << std::endl; // debug
-
 	/* reset STDIN and STDOUT */
-	dup2(originalStdin, STDIN_FILENO);
+	if (dup2(originalStdin, STDIN_FILENO) == -1)
+		return (500);
 	close(originalStdin);
-	dup2(originalStdout, STDOUT_FILENO);
-	close(originalStdout);
 
 	/* post treatment of the output */
-	output = this->_extractCGIHeader(output);	
+	output = this->_extractCGIHeader(output);
 	output = this->_formatOutput(output);
-	return (output);
+	this->_output = output;
+	return (200);
 }
 
 std::string	cgiLauncher::_formatOutput(std::string output)
