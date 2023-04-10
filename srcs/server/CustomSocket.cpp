@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 15:21:21 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/10 16:17:23 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,10 +255,13 @@ void	CustomSocket::read(int fd)
 	if (code == 200)
 		_isMethodAllowed(infos.reqType, (loc ? loc->_allowed_http_methods : _servconf._allowed_http_methods));
 
-	if (code == 200 && infos.headers.find("Host") != infos.headers.end())
+	if (code == 200 && !this->_servconf._server_name.empty() && infos.headers.find("Host") != infos.headers.end())
 	{
 		std::vector<std::string>	hosts = this->_servconf._server_name;
-		code = std::find(hosts.begin(), hosts.end(), infos.headers.find("Host")->second) != hosts.end() ? 200 : 404;
+		std::string					req_host = infos.headers.find("Host")->second;
+		size_t						colon_idx = req_host.find(':');
+		req_host = req_host.substr(0, colon_idx);
+		code = std::find(hosts.begin(), hosts.end(), req_host) != hosts.end() ? 200 : 404;
 	}
 
 	if (code == 200)
@@ -277,8 +280,6 @@ void	CustomSocket::read(int fd)
 	}
 	else
 		output = _generateError(code, loc);
-
-	std::cout << output << std::endl;
 
 	output_500 = this->_generateError(500, loc);
 	this->_outputs[fd] = make_pair(output, output_500);
