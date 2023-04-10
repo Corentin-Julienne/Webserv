@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServConf.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 15:54:52 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 16:44:38 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:56:32 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 ServConf::ServConf(void) : _server_name(std::vector<std::string>()),
 _error_pages(std::vector< std::vector<std::string> >()), _allowed_http_methods(std::vector<std::string>()),
-_root(std::string()), _index(std::vector<std::string>()), _return(std::vector<std::string>()),
+_root(std::string()), _index(std::vector<std::string>()), _return(std::pair<int, std::string>()),
 _cgi(std::vector<std::string>()), _locs(std::vector<Location>())
 {
 	this->_port = 80;

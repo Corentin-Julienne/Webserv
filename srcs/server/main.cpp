@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 18:35:06 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:50:08 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,15 +96,15 @@ int	main(int argc, char **argv)
 			int				nevents = kevent(kq, NULL, 0, events, 1000, NULL);
 
 			if (nevents < 0)
+			{
+				call_error("kevent", false);
 				continue;
+			}
 
 			for (int i = 0; i < nevents; ++i)
 			{
 				if (!events[i].udata)
-				{
-					std::cout << "!!! ERROR !!!" << std::endl;
 					continue ;
-				}
 				CustomSocket	*socket = reinterpret_cast<CustomSocket *>(events[i].udata);
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
 				{

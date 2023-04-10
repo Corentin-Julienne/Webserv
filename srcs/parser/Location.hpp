@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/19 16:20:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/09 16:43:06 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/10 18:49:54 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ struct Location
 		std::string									_root;
 		bool										_autoindex;
 		std::vector<std::string> 					_index;
-		std::vector<std::string>					_return;
+		std::pair<int, std::string>					_return;
 		std::vector<std::string>					_cgi;
 		// specific to Location
 		std::string									_url;
