@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 14:44:03 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/11 11:24:10 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,8 @@ void	cgiLauncher::_initEnv()
 	else
 		_env["SERVER_NAME"] = "0.0.0.0";
 	/* script infos */
-	_env["SCRIPT_NAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
-	_env["SCRIPT_FILENAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
+	//_env["SCRIPT_NAME"] = this->_cwd + "/" + _infos.absoluteURIPath;
+	_env["SCRIPT_FILENAME"] = this->_cwd + "/" + _infos.absoluteURIPath;
 	/* client related variables */
 	this->_addHeadersToEnv();
 }
@@ -194,8 +194,6 @@ int	cgiLauncher::exec(void)
 			std::cerr << "waitpid syscall failure" << std::endl;
 			return (500);
 		}
-		if (WIFEXITED(status) && WEXITSTATUS(status))
-			return (502);
 
 		/* read the output using read */
 		ssize_t		reader = 1;
