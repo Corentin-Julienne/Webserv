@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 18:50:08 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:14:14 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ bool	isDirectory(const std::string &path)
 
 void	call_error(std::string failing_call, bool exit_process)
 {
-	std::cerr << failing_call << ": " << strerror(errno) << std::endl;
+	(void)failing_call;
 	if (exit_process)
 		exit(EXIT_FAILURE);
 }
@@ -107,15 +107,9 @@ int	main(int argc, char **argv)
 					continue ;
 				CustomSocket	*socket = reinterpret_cast<CustomSocket *>(events[i].udata);
 				if (events[i].filter == EVFILT_READ && events[i].ident == (uintptr_t)socket->getSocketFd())
-				{
-					socket->acceptConnection(); // handle error
-					// std::cout << "[" << socket->getPort() << "]\t" \
-						// << "Connection accepted\n";
-				}
+					socket->acceptConnection();
 				else if (events[i].filter == EVFILT_READ)
 				{
-					// std::cout << "[" << socket->getPort() << "]\t" \
-						// << "New read event\n";
 					socket->read(events[i].ident);
 					EV_SET(&new_event[0], events[i].ident, EVFILT_READ, EV_DELETE, 0, 0, socket);
 					EV_SET(&new_event[1], events[i].ident, EVFILT_WRITE, EV_ADD, 0, 0, socket);
@@ -127,17 +121,11 @@ int	main(int argc, char **argv)
 				}
 				else if (events[i].filter == EVFILT_WRITE)
 				{
-					// std::cout << "[" << socket->getPort() << "]\t" \
-						// << "Writing response\n";
-						
 					socket->write(events[i].ident);
 					EV_SET(&new_event[0], events[i].ident, EVFILT_WRITE, EV_DELETE, 0, 0, socket);
 					if (kevent(kq, new_event, 1, NULL, 0, NULL) == -1)
 						call_error("kevent", false);
 					socket->closeSocket(events[i].ident);
-
-					// std::cout << "[" << socket->getPort() << "]\t"
-						// << "Connection closed\n";
 				}
 			}
 		}
