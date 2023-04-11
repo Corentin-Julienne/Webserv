@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 11:16:13 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:36:23 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 /* create a Parser object that will extract relevant inforamtion from the conf file 
 and store it in a ServConf struct */
-Parser::Parser(char *config_file)
+Parser::Parser(const char *config_file)
 {
 	this->_conf_file.open(config_file, std::ios_base::in);
 	if (!this->_conf_file.is_open())

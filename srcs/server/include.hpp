@@ -7,5 +7,7 @@
 
 bool	isDirectory(const std::string &path);
 void	call_error(std::string failing_call, bool exit_process);
+size_t	fileExists(const std::string realFilePath);
+
 
 #endif
