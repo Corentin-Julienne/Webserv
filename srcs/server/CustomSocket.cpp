@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 12:11:43 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:30:44 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,7 +352,7 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 	else if (realFilePath.size() > 4 && !realFilePath.substr(realFilePath.size() - 4).compare(this->_servconf._cgi[0]))
 	{
 		infos.absoluteURIPath = realFilePath;
-		size_t code = _filesExists(realFilePath);
+		size_t code = fileExists(realFilePath);
 
 		if (code != 200)
 			content << _generateError(code, loc);
@@ -384,7 +384,7 @@ std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 	_tryToIndex(realFilePath);
 	infos.absoluteURIPath = realFilePath;
 
-	size_t code = _filesExists(realFilePath);
+	size_t code = fileExists(realFilePath);
 
 	if (code != 200)
 		ss << _generateError(code, loc);
@@ -453,21 +453,6 @@ std::string CustomSocket::_generateAutoIndex(const std::string path, const std::
 	content << "HTTP/1.1 200 OK" << "\nContent-Type: text/html" << "\nContent-Length: " << ss.str().length() << "\n\n" << ss.str();
 
 	return (content.str());
-}
-
-size_t CustomSocket::_filesExists(const std::string realFilePath)
-{
-	std::ifstream	ifs;
-	
-	ifs.open(realFilePath.c_str());
-	if (!ifs.is_open())
-	{
-		if (access(realFilePath.c_str(), F_OK) != 0)
-			return (404);
-		else if (access(realFilePath.c_str(), R_OK) != 0)
-			return (403);
-	}
-	return (200);
 }
 
 std::string	CustomSocket::_generateFileContent(const std::string realFilePath, Location *loc)

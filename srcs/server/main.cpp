@@ -6,12 +6,27 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 12:30:32 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:37:08 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "include.hpp"
 #include "CustomSocket.hpp"
+
+size_t fileExists(const std::string realFilePath)
+{
+	std::ifstream	ifs;
+	
+	ifs.open(realFilePath.c_str());
+	if (!ifs.is_open())
+	{
+		if (access(realFilePath.c_str(), F_OK) != 0)
+			return (404);
+		else if (access(realFilePath.c_str(), R_OK) != 0)
+			return (403);
+	}
+	return (200);
+}
 
 bool	isDirectory(const std::string &path)
 {
@@ -30,18 +45,40 @@ void	call_error(std::string failing_call, bool exit_process)
 
 int	main(int argc, char **argv)
 {
-	if (argc > 2)
+	if (argc < 1 || argc > 2)
 	{
 		std::cerr << "Usage: ./webserv [config_file]" << std::endl;
 		return (1);
 	}
+
+	std::string configPath;
+	std::string defaultPath = "config/default.conf";
+
+	if (argc == 1)
+	{
+		size_t code = fileExists(defaultPath);
+		if (code == 404)
+		{
+			std::cerr << "Default file does not exists anymore: please specify a config_file!" << std::endl;
+			return (1);
+		}
+		else if (code == 403)
+		{
+			std::cerr << "Default file is unreadable: please specify a config_file!" << std::endl;
+			return (1);
+		}
+
+		configPath = defaultPath;
+	}
+	else
+		configPath = argv[1];
+
 	try
 	{
 		std::cout << "=== Starting server... ===" << std::endl;
 
 		std::vector<CustomSocket *>	sockets;
-
-		Parser		configParser = Parser(argv[1]);
+		Parser		configParser = Parser(configPath.c_str());
 		
 		int							kq = kqueue();
 		if (kq == -1)
