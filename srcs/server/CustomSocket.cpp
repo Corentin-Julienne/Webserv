@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 12:30:44 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 13:36:33 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,7 @@ void	CustomSocket::read(int fd)
 	/* if POST request, add the prefix if location different from / */
 	if (infos.reqType == "POST")
 		infos.uri = this->_assembleURI(infos);
-	
+
 	Location 	*loc = _getPathLocation(infos.reqType == "POST" ? infos.locPath : infos.uri);
 
 	size_t		max_body_size = (loc ? loc->_client_max_body_size : _servconf._client_max_body_size);

@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 12:36:23 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 13:32:53 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,7 +233,7 @@ std::vector<std::string>	Parser::_cutArgs(std::string directive, char delim)
 			i++;
 		while (!std::isspace(directive[i + size_arg]) && directive[i + size_arg] != delim)
 			size_arg++;
-		if (size_arg > 1 || (size_arg == 1 && directive[i + size_arg] != delim))
+		if (size_arg > 1 || (size_arg == 1 && directive[i + size_arg - 1] != delim))
 			args.push_back(directive.substr(i, size_arg));
 		else
 			break ;
