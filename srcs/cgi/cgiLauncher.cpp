@@ -82,8 +82,8 @@ void	cgiLauncher::_initEnv()
 	else
 		_env["SERVER_NAME"] = "0.0.0.0";
 	/* script infos */
-	_env["SCRIPT_NAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
-	_env["SCRIPT_FILENAME"] = this->_cwd + "/" + _infos.absoluteURIPath; // placeholder
+	//_env["SCRIPT_NAME"] = this->_cwd + "/" + _infos.absoluteURIPath;
+	_env["SCRIPT_FILENAME"] = this->_cwd + "/" + _infos.absoluteURIPath;
 	/* client related variables */
 	this->_addHeadersToEnv();
 }
@@ -192,8 +192,6 @@ int	cgiLauncher::exec(void)
 			std::cerr << "waitpid syscall failure" << std::endl;
 			return (500);
 		}
-		if (WIFEXITED(status) && WEXITSTATUS(status))
-			return (502);
 
 		/* read the output using read */
 		ssize_t		reader = 1;
