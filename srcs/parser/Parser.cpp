@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 11:12:59 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 11:16:13 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,6 @@ Parser::Parser(char *config_file)
 	}
 	if (!this->_isThereEnoughInfo())
 		throw std::runtime_error("please provide conf file with a cgi, at least one location and one default_server maximum");
-	// debug
-	//this->displayParsing();
 }
 
 /* case no conf file is provided */
@@ -51,8 +49,6 @@ Parser::Parser(void)
 	this->_servers[0]._locs[0]._url = "/";
 	this->_servers[0]._locs[0]._root = "www/html";
 	this->_servers[0]._locs[0]._index.push_back("index.html");
-	// debug
-	//this->displayDefaultParsing();
 }
 
 Parser::~Parser() {}
