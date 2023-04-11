@@ -47,7 +47,7 @@ int	main(int argc, char **argv)
 {
 	if (argc < 1 || argc > 2)
 	{
-		std::cerr << "Usage: ./webserv <config_file> or ./webserv (with default params)" << std::endl;
+		std::cerr << "Usage: ./webserv [config_file]" << std::endl;
 		return (1);
 	}
 

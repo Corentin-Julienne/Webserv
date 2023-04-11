@@ -50,7 +50,6 @@ class Parser
 	
 		typedef std::vector<ServConf>		servers_array;
 
-		Parser(void);
 		Parser(const char *config_file);
 		~Parser();
 		Parser(const Parser& original);
