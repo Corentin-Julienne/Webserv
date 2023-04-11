@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 13:36:33 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 13:58:28 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,7 +255,7 @@ void	CustomSocket::read(int fd)
 			else if (infos.reqType == "DELETE")
 				output = _DELETE(infos, loc);
 			else
-				output = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 0\n\n";
+				output = _generateError(405, loc);
 		}
 	}
 	else
@@ -407,7 +407,6 @@ std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
 {
 	std::stringstream 	ss;
 	std::ifstream		ifs;
-	std::string 		s = "DELETE\tat " + infos.uri + "\nbody:\n" + infos.body.data();
 
 	std::string			realFilePath = _getAbsoluteURIPath(infos.uri);
 	_tryToIndex(realFilePath);
@@ -417,7 +416,7 @@ std::string	CustomSocket::_DELETE(SocketInfos &infos, Location *loc)
 	{
 		ifs.close();
 		std::remove(realFilePath.c_str());
-		ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: " << s.length() << "\n\n" << s;
+		ss << "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 0\n\n";
 	}
 	else
 	{

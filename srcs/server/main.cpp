@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 12:37:08 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 14:06:52 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int	main(int argc, char **argv)
 		std::vector<CustomSocket *>	sockets;
 		Parser		configParser = Parser(configPath.c_str());
 		
-		int							kq = kqueue();
+		int	kq = kqueue();
 		if (kq == -1)
 			call_error("kqueue", true);
 
