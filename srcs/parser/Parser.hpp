@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:40 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 18:52:53 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:22:44 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ class Parser
 	
 		typedef std::vector<ServConf>		servers_array;
 
-		Parser(void);
 		Parser(char *config_file);
 		~Parser();
 		Parser(const Parser& original);

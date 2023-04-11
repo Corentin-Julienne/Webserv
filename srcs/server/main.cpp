@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:17:08 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 12:14:14 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:30:32 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	main(int argc, char **argv)
 {
 	if (argc > 2)
 	{
-		std::cerr << "Usage: ./webserv <config_file> or ./webserv (with default params)" << std::endl;
+		std::cerr << "Usage: ./webserv [config_file]" << std::endl;
 		return (1);
 	}
 	try
@@ -41,7 +41,7 @@ int	main(int argc, char **argv)
 
 		std::vector<CustomSocket *>	sockets;
 
-		Parser		configParser = (argc == 2) ? Parser(argv[1]) : Parser();
+		Parser		configParser = Parser(argv[1]);
 		
 		int							kq = kqueue();
 		if (kq == -1)

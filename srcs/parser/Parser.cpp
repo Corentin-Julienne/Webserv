@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/17 08:10:37 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 11:16:13 by spider-ma        ###   ########.fr       */
+/*   Updated: 2023/04/11 12:22:35 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,26 +31,6 @@ Parser::Parser(char *config_file)
 }
 
 /* case no conf file is provided */
-Parser::Parser(void)
-{
-	Location	loc;
-	
-	// add only one sever block
-	this->_servers.push_back(ServConf());
-	// populate this server with a port (8080), which is the default server, an index and a root
-	this->_servers[0]._port = 8080;
-	// add cgi 
-	this->_servers[0]._cgi.push_back(".php");
-	this->_servers[0]._cgi.push_back("srcs/cgi/php-cgi");
-	// add a location block with value /
-	this->_servers[0]._locs.push_back(loc);
-	// population location with URL, and allow GET method
-	this->_servers[0]._locs[0]._allowed_http_methods.push_back("GET");
-	this->_servers[0]._locs[0]._url = "/";
-	this->_servers[0]._locs[0]._root = "www/html";
-	this->_servers[0]._locs[0]._index.push_back("index.html");
-}
-
 Parser::~Parser() {}
 
 Parser::Parser(const Parser& original) : _conf_str(original._conf_str), _server_blocks(original._server_blocks),
