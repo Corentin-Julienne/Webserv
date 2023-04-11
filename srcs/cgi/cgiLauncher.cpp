@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 20:48:16 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 11:24:10 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/11 11:25:29 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ _scriptPath(cgi_path)
 	this->_cwd = success;
 	/* setup env and convert it to char** format to fit execve requirements */
 	this->_initEnv();
-	// this->_printInfos(); // debug
-	// this->_printEnv(); // debug
 	this->_StrEnvToCStrArray();
 }
 
