@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 11:59:36 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 12:11:43 by spider-ma        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _
 		call_error("fcntl", true);
 	_bindSocket();
 	_enableSocketListening();
-	// std::cout << "Socket created on port " << _servconf._port << " (http://localhost:" << _servconf._port << "/)" << std::endl;
 }
 
 CustomSocket::~CustomSocket() 
@@ -109,7 +108,6 @@ void	CustomSocket::acceptConnection(void)
 void	CustomSocket::closeSocket(int socket_fd)
 {
 	this->_outputs.erase(socket_fd);
-	// std::cout << "Closing socket" << std::endl;
 	if (close(socket_fd) < 0)
 	{
 		call_error("close", false);
