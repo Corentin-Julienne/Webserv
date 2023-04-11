@@ -6,13 +6,13 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 21:57:20 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 11:14:35 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CustomSocket.hpp"
 
-CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _backlog(10), _kq(kq), _new_socket_fd(-1), _servconf(server_config)
+CustomSocket::CustomSocket(ServConf server_config, int kq) : _domain(AF_INET), _type(SOCK_STREAM), _protocol(0), _backlog(SOMAXCONN), _kq(kq), _new_socket_fd(-1), _servconf(server_config)
 {
 	int	so_reuseaddr = 1;
 	_socket_fd = socket(_domain, _type, _protocol);
