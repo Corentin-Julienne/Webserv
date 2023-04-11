@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ProcessBlocks.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
+/*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 12:15:36 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 19:27:34 by cjulienn         ###   ########.fr       */
+/*   Updated: 2023/04/11 13:36:04 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 {
 	std::size_t		i = 0;
 	int				dir_type;
-	
+
 	while (i < block.size())
 	{
 		if (std::isalnum(block[i])) // if beginning of an instruction
@@ -31,6 +31,10 @@ void	Parser::_processBlock(std::string block, int server_index, bool is_loc)
 				throw std::runtime_error("nested location feature not supported !!!");
 			else
 				i += this->_dispatchInstructionProcessing(dir_type, block.substr(i), server_index, is_loc);
+		}
+		else if (block[i] == ';')
+		{
+			throw std::runtime_error("invalid instruction provided in the server block");
 		}
 		i++;
 	}
