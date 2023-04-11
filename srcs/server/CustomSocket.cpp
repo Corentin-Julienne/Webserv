@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:56 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/11 11:14:35 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 11:59:36 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,20 +352,28 @@ std::string	CustomSocket::_GET(SocketInfos &infos, Location *loc)
 			content << _generateError(404, loc);
 	}
 	else if (realFilePath.size() > 4 && !realFilePath.substr(realFilePath.size() - 4).compare(this->_servconf._cgi[0]))
-	{		
+	{
 		infos.absoluteURIPath = realFilePath;
-		
-		cgiLauncher		cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+		size_t code = _filesExists(realFilePath);
 
-		int code = cgi.exec();
-		
-		if (code == 200)
-			content << cgi.getOutput();
-		else
+		if (code != 200)
 			content << _generateError(code, loc);
+		else
+		{
+			cgiLauncher		cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+
+			int code = cgi.exec();
+			
+			if (code == 200)
+				content << cgi.getOutput();
+			else
+				content << _generateError(code, loc);
+		}
 	}
 	else
+	{
 		content << _generateFileContent(realFilePath, loc);
+	}
 
 	return (content.str());
 }
@@ -378,14 +386,21 @@ std::string	CustomSocket::_POST(SocketInfos &infos, Location *loc)
 	_tryToIndex(realFilePath);
 	infos.absoluteURIPath = realFilePath;
 
-	cgiLauncher	cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+	size_t code = _filesExists(realFilePath);
 
-	int		code = cgi.exec();
-
-	if (code == 200)
-		ss << cgi.getOutput();
-	else
+	if (code != 200)
 		ss << _generateError(code, loc);
+	else
+	{
+		cgiLauncher	cgi(infos, this->_servconf, this->_servconf._cgi[1]);
+
+		int		code = cgi.exec();
+
+		if (code == 200)
+			ss << cgi.getOutput();
+		else
+			ss << _generateError(code, loc);
+	}
 
 	return (ss.str());
 }
@@ -442,10 +457,25 @@ std::string CustomSocket::_generateAutoIndex(const std::string path, const std::
 	return (content.str());
 }
 
+size_t CustomSocket::_filesExists(const std::string realFilePath)
+{
+	std::ifstream	ifs;
+	
+	ifs.open(realFilePath.c_str());
+	if (!ifs.is_open())
+	{
+		if (access(realFilePath.c_str(), F_OK) != 0)
+			return (404);
+		else if (access(realFilePath.c_str(), R_OK) != 0)
+			return (403);
+	}
+	return (200);
+}
+
 std::string	CustomSocket::_generateFileContent(const std::string realFilePath, Location *loc)
 {
-	std::ifstream		ifs;
 	std::stringstream	content;
+	std::ifstream		ifs;
 
 	ifs.open(realFilePath.c_str());
 	if (!ifs.is_open())
@@ -483,8 +513,6 @@ Location* CustomSocket::_getPathLocation(const std::string uri)
 {
 	Location		*location = NULL;
 	std::string		uriPath = uri;
-	
-	//std::cout << "uri for getPathLocation = |" << uri << "|" << std::endl;  //debug
 	
 	for (size_t i = 0; i < _servconf._locs.size(); i++)
 	{

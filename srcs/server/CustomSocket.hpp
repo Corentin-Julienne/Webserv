@@ -6,7 +6,7 @@
 /*   By: mpeharpr <mpeharpr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 12:27:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2023/04/10 21:57:22 by mpeharpr         ###   ########.fr       */
+/*   Updated: 2023/04/11 11:52:39 by mpeharpr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ class CustomSocket
 
 		std::string	_assembleURI(SocketInfos &infos);
 		std::string _detectRedirections(Location *loc);
+		
+		size_t		_filesExists(const std::string realFilePath);
 
 	private:
 	
