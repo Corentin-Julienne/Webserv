@@ -1,20 +1,37 @@
-# Scope of the project
+# Webserv
 
-The goal of this project is to create a Web Server using the HTTPS protocol (see the subject PDF file for more information about the features).
+## 🗣️ Scope of the project
 
-## Usage
+The goal of this project is to create a Web Server using the HTTP protocol.
+
+It's main features include :
+
+-> treatment of GET, POST and DELETE http requests <br>
+-> kernel queue for requests <br>
+-> HTTP compliant response status codes (404, 503, etc...) <br>
+-> compatibility with Google Chrome and other mainstream Web Browsers <br>
+-> CGI for dymanic websites written in PHP. <br>
+-> NGINX-like configuration file that handles features such as multiple servers and maximum body size <br>
+-> upload of files <br>
+
+Please refers to the subject PDF for more information.
+
+## 💿 Compilation and Usage
+
 Compile everything with the ``make`` command - compatible with Linux & MacOS.  
+
 You can run the program by using the command ``./webserv <path_to_your_config_file>`` and see that it's working by going to ``http://CONFIG_HOST:CONFIG_PORT/`` in your browser.
 
-## Testing
-In the test folder, a stresser.sh bash script is available. You can use it this way:  
-> **./stresser.sh URL number_of_requests [number_of_simultaneous_connections]**
+Note that the ```www``` folder contains some test websites you can use.
 
-It will send requests to your web server as fast as possible.
-> 1st argument is the URL (http://localhost:8080/)  
+## 🗑️ Deletion
 
-> 2nd argument is the amount of requests that will be sent 
+Use the Makefile rules. Write ```make fclean``` to delete the executable and the object files and ```make clean``` to remove only the object files.
 
-> 3rd argument is the amount of simultaneous connections we will use to send theses requests 
+## 💻 Testing
 
-You'll see a resume with the amount of successfull requests, the amount of unsuccessfull requests (there should be none but we never know), and the time it took.
+One requirement for this project is that Webserv needs to handle with success many requests in the same time. We tested it with ```siege```, and ended up with a rate of avaliability superior to ```99,5%``` when flooding the server with GET requests. 
+
+## ✅ Validation
+
+This project has been validated with a mark of 100/100.
